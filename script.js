@@ -14,7 +14,6 @@ let gameStarted = true; // وضعیت بازی
 let wheelResult = null; // ذخیره نتیجه گردونه
 let additionalGames = 0; // تعداد بازی‌های اضافه از گردونه
 let cooldownTimer = null; // تایمر برای 10 دقیقه غیرفعال بودن بازی
-let tempHealth = 5; // متغیر موقت برای ذخیره وضعیت سلامت
 let isWheelActive = false; // وضعیت گردونه
 
 // تابع تولید عدد تصادفی
@@ -106,10 +105,9 @@ function decreaseHealth() {
 function reset() {
   generateRandomNumber();
   health = 5; // بازگرداندن تعداد جان‌ها به مقدار اولیه
-  tempHealth = 5; // بازگرداندن مقدار موقت جان‌ها
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 5; i++) {
     const healthEle = document.getElementById("heart" + i);
-    healthEle.src = i <= 5 ? "src/heart.png" : "src/heart-off.png";
+    healthEle.src = "src/heart.png";
   }
   mainNumber.textContent = "?"; // بازگشت علامت سوال
   document.getElementById("guess-number").value = "";
@@ -117,15 +115,11 @@ function reset() {
   startTimer();
 
   // بررسی تعداد بازی‌ها
-  if (roundsPlayed < 10 || additionalGames > 0) {
-    roundsPlayed++; // افزایش تعداد دفعات بازی
-    if (additionalGames > 0) {
-      additionalGames--; // کاهش تعداد بازی‌های اضافه
-    }
-  } else {
+  roundsPlayed++;
+  if (roundsPlayed >= 10 && additionalGames <= 0) {
     gameStarted = false; // توقف بازی
+    enableWheel(); // فعال‌سازی گردونه
   }
-  enableWheel(); // فعال‌سازی گردونه
 }
 
 // فعال‌سازی گردونه بعد از 10 دور بازی
@@ -183,12 +177,18 @@ function handleWheelResult(resultText) {
     }, 600000); // 10 دقیقه = 600000 میلی‌ثانیه
   } else if (resultText === "10 بازی اضافه!") {
     additionalGames += 10;
+    gameStarted = true;
+    reset();
   } else if (resultText === "4 بازی اضافه!") {
     additionalGames += 4;
+    gameStarted = true;
+    reset();
   } else if (resultText === "4 بازی + 2 جان!") {
     additionalGames += 4;
-    health = Math.min(health + 2, 7); // حداکثر تعداد قلب‌ها 7
+    health = Math.min(health + 2, 5); // حداکثر تعداد قلب‌ها 5
     updateHealthDisplay(health);
+    gameStarted = true;
+    reset();
 
     // بازگرداندن تعداد جان‌ها به حالت نرمال پس از مدت زمان مشخص
     setTimeout(() => {
@@ -200,7 +200,7 @@ function handleWheelResult(resultText) {
 
 // به‌روزرسانی نمایش جان‌ها
 function updateHealthDisplay(heartCount) {
-  for (let i = 1; i <= 7; i++) {
+  for (let i = 1; i <= 5; i++) {
     const healthEle = document.getElementById("heart" + i);
     healthEle.src = i <= heartCount ? "src/heart.png" : "src/heart-off.png";
   }
