@@ -59,6 +59,7 @@ body {
   background-image: url("src/btn.png");
   background-size: 100% 100%;
   cursor: pointer;
+  display: block;
 }
 
 #guess-button:hover {
@@ -69,6 +70,7 @@ body {
   font-size: 20px;
   color: white;
   margin-top: 15px;
+  text-align: center;
 }
 
 #difficulty-holder {
@@ -83,6 +85,8 @@ body {
 
 .heart {
   width: 50px;
+  display: inline-block;
+  margin-right: 5px;
 }
 
 /* ریسپانسیو برای موبایل */
