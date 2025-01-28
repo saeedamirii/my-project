@@ -8,6 +8,8 @@ let history = [];
 // تنظیم سطح بازی
 document.getElementById("difficulty-select").addEventListener("change", function () {
     difficulty = this.value;
+    generateRandomNumber();
+    showRange(); // نمایش بازه عددی بر اساس سطح
     reset();
 });
 
@@ -25,15 +27,31 @@ function generateRandomNumber() {
     }
 }
 
+function showRange() {
+    const rangeDisplay = document.getElementById("range-display");
+    switch (difficulty) {
+        case 'easy':
+            rangeDisplay.textContent = "حدس بزن عدد بین 0 و 100 است.";
+            break;
+        case 'medium':
+            rangeDisplay.textContent = "حدس بزن عدد بین 0 و 500 است.";
+            break;
+        case 'hard':
+            rangeDisplay.textContent = "حدس بزن عدد بین 0 و 1000 است.";
+            break;
+    }
+}
+
 window.onload = function () {
     generateRandomNumber();
+    showRange(); // نمایش بازه از ابتدای بارگذاری
 }
 
 function showMessage(message) {
     result.innerHTML = message;
     setTimeout(() => {
-        result.innerHTML = ''; 
-    }, 3000);  // نمایش پیام برای 3 ثانیه
+        result.innerHTML = '';
+    }, 3000); // نمایش پیام برای 3 ثانیه
 }
 
 function guessNumber() {
@@ -43,10 +61,11 @@ function guessNumber() {
         return;
     }
 
-    history.push(guessed);  // افزودن حدس جدید به تاریخچه
-    updateHistory();  // به‌روزرسانی تاریخچه
+    history.push(guessed); // افزودن حدس جدید به تاریخچه
+    updateHistory(); // به‌روزرسانی تاریخچه
 
     if (guessed == number && health > 0) {
+        document.getElementById("main-number").textContent = number; // نمایش عدد درست
         if (confirm("به به دمت گرم. خود خودشه! خیلی حال داد. یه بار دیگه بازی میکنی؟")) {
             reset();
         }
@@ -82,13 +101,3 @@ function updateHistory() {
 
 function reset() {
     generateRandomNumber();
-    health = 5;
-    history = [];  // پاک کردن تاریخچه حدس‌ها
-    for (let index = 1; index <= 5; index++) {
-        const healthEle = document.getElementById("heart" + index);
-        healthEle.src = "src/heart.png";
-    }
-    document.getElementById("guess-number").value = "";
-    showMessage("");
-    updateHistory();  // به‌روزرسانی تاریخچه پس از ریست بازی
-}
