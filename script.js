@@ -29,14 +29,14 @@ function setDifficulty() {
 function startTimer() {
   clearInterval(timer);
   let timeLeft = timeLimit;
-  timerDisplay.textContent = `زمان باقی‌مانده: ${timeLeft} ثانیه`;
+  timerDisplay.textContent = `⏳ زمان باقی‌مانده: ${timeLeft} ثانیه`;
 
   timer = setInterval(() => {
     timeLeft--;
-    timerDisplay.textContent = `زمان باقی‌مانده: ${timeLeft} ثانیه`;
+    timerDisplay.textContent = `⏳ زمان باقی‌مانده: ${timeLeft} ثانیه`;
     if (timeLeft <= 0) {
       clearInterval(timer);
-      alert("زمان تمام شد! بازی را از نو شروع کنید.");
+      alert("⏰ وایسادی، زمان تموم شد! بازی رو از نو شروع کن! 😅");
       reset();
     }
   }, 1000);
@@ -49,26 +49,26 @@ function showMessage(message) {
 function guessNumber() {
   const guessed = document.getElementById("guess-number").value;
   if (guessed === "") {
-    showMessage("لطفاً یک عدد وارد کنید!");
+    showMessage("لطفاً یک عدد وارد کن عزیزم! 😅");
     return;
   }
   if (parseInt(guessed) === number && health > 0) {
-    showMessage("دمت گرم! خود خودشه!");
+    showMessage("🎉 دمت گرم! خود خودشه! 🔥");
     mainNumber.textContent = number; // نمایش عدد صحیح
     clearInterval(timer);
     setTimeout(() => reset(), 3000);
   } else if (parseInt(guessed) < number) {
-    showMessage("داداش برو بالاتر!");
+    showMessage("📉 داداش برو بالاتر! 😆");
     decreaseHealth();
   } else if (parseInt(guessed) > number) {
-    showMessage("چه خبره؟ بیا پایین‌تر!");
+    showMessage("📈 چه خبره؟ بیا پایین‌تر! 😜");
     decreaseHealth();
   }
 }
 
 function decreaseHealth() {
   if (health <= 0) {
-    alert("متاسفم! شما شکست خوردید!");
+    alert("💔 متاسفم! بازی رو باختی! 😢");
     reset();
     return;
   }
