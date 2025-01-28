@@ -164,6 +164,8 @@ function handleWheelResult(resultText) {
     setTimeout(() => {
       alert("10 دقیقه گذشته! حالا می‌توانید بازی کنید.");
       gameStarted = true; // فعال شدن دوباره بازی بعد از 10 دقیقه
+      roundsPlayed = 0; // بازنشانی تعداد دورها
+      enableWheel(); // فعال کردن دوباره گردونه پس از 10 دقیقه
     }, 600000); // 10 دقیقه = 600000 میلی‌ثانیه
   } else if (resultText === "10 بازی اضافه!") {
     maxRange = 1000; // اجازه 10 بازی دیگر
