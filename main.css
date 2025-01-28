@@ -1,16 +1,14 @@
-/* تعریف فونت یکان */
 @font-face {
   font-family: yekan;
-  src: url('src/Yekan.ttf') format('truetype'); /* مسیر صحیح به فایل فونت */
+  src: url(src/Yekan.ttf);
 }
 
 * {
   margin: 0;
   padding: 0;
-  font-family: yekan; /* استفاده از فونت یکان */
+  font-family: yekan;
 }
 
-/* استایل‌های دیگر */
 body {
   background-color: #2c3e50;
   direction: rtl;
@@ -118,51 +116,4 @@ body {
   .heart {
     width: 30px;
   }
-}
-
-/* طراحی گردونه شانس */
-#wheel {
-    position: absolute;
-    top: 150px; /* فاصله از بالا */
-    right: 150px; /* فاصله از راست صفحه */
-    background-color: #2c3e50;
-    padding: 20px;
-    border-radius: 15px;
-    display: block; /* گردونه همیشه قابل دیدن است */
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.5);
-}
-
-.wheel-container {
-    text-align: center;
-}
-
-.wheel-content h3 {
-    color: white;
-    margin-bottom: 20px;
-}
-
-#wheel-result {
-    margin-top: 15px;
-    color: white;
-    font-size: 18px;
-}
-
-#spin-wheel {
-    padding: 10px 20px;
-    font-size: 18px;
-    background-color: #9b59b6;
-    color: white;
-    border: none;
-    border-radius: 10px;
-    cursor: not-allowed; /* غیرفعال بودن */
-    transition: background-color 0.3s;
-}
-
-#spin-wheel.active {
-    cursor: pointer; /* فعال بودن دکمه */
-    background-color: #8e44ad;
-}
-
-#spin-wheel:hover.active {
-    background-color: #7d3c91;
 }
