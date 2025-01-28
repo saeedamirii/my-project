@@ -10,6 +10,7 @@ let timer;
 let timeLimit = 30;
 let maxRange = 100;
 let roundsPlayed = 0; // تعداد دفعات بازی
+let gameStarted = true; // برای بررسی وضعیت بازی
 
 // تابع تولید عدد تصادفی
 function generateRandomNumber() {
@@ -56,6 +57,11 @@ function showMessage(message) {
 
 // تابع حدس زدن عدد
 function guessNumber() {
+  if (!gameStarted) {
+    alert("برای بازی کردن ابتدا باید نتیجه گردونه مشخص شود.");
+    return;
+  }
+
   const guessed = document.getElementById("guess-number").value;
   if (guessed === "") {
     showMessage("لطفاً یک عدد وارد کن عزیزم! 😅");
@@ -99,14 +105,19 @@ function reset() {
   document.getElementById("guess-number").value = "";
   showMessage("");
   startTimer();
+  roundsPlayed++; // هر بار که بازی مجدداً شروع می‌شود، تعداد دورها افزایش می‌یابد.
+  gameStarted = true; // بازی فعال است
+  enableWheel(); // فعال‌سازی گردونه بعد از هر دور
 }
 
-// فعال سازی گردونه از دور 10 به بعد
+// فعال سازی گردونه بعد از 10 دور بازی
 function enableWheel() {
   if (roundsPlayed >= 10) {
     wheelContainer.classList.remove("inactive");
+    spinButton.disabled = false; // فعال‌سازی دکمه چرخش گردونه
   } else {
     wheelContainer.classList.add("inactive");
+    spinButton.disabled = true; // غیرفعال کردن دکمه چرخش گردونه
   }
 }
 
@@ -126,6 +137,7 @@ function spinWheel() {
   setTimeout(() => {
     const resultText = getWheelResult(randomDegree);
     alert(resultText); // نمایش نتیجه گردونه
+    handleWheelResult(resultText); // انجام اقدامات بر اساس نتیجه گردونه
   }, 3000); // زمان انتظار تا چرخش گردونه تمام شود
 }
 
@@ -142,9 +154,30 @@ function getWheelResult(degree) {
   }
 }
 
+// مدیریت نتیجه گردونه
+function handleWheelResult(resultText) {
+  if (resultText === "پوچ!") {
+    gameStarted = false; // توقف بازی
+    alert("شما 10 دقیقه نمی‌توانید بازی کنید.");
+    setTimeout(() => {
+      alert("10 دقیقه گذشته! حالا می‌توانید بازی کنید.");
+      gameStarted = true; // فعال شدن دوباره بازی بعد از 10 دقیقه
+    }, 600000); // 10 دقیقه = 600000 میلی‌ثانیه
+  } else if (resultText === "10 بازی اضافه!") {
+    maxRange = 1000; // اجازه 10 بازی دیگر
+    alert("شما 10 بازی اضافه دریافت کردید!");
+  } else if (resultText === "4 بازی اضافه!") {
+    maxRange = 1000; // اجازه 4 بازی دیگر
+    alert("شما 4 بازی اضافه دریافت کردید!");
+  } else {
+    health += 2; // اضافه کردن دو جان
+    alert("شما 4 بازی اضافه به همراه 2 جان اضافی دریافت کردید!");
+  }
+}
+
 // شروع بازی در بارگذاری صفحه
 window.onload = function () {
   setDifficulty(); // تنظیم سطح پیش‌فرض
   startTimer(); // شروع تایمر
-  enableWheel(); // فعال سازی گردونه بعد از دور دهم
+  enableWheel(); // فعال‌سازی گردونه
 };
