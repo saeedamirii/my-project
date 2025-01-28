@@ -49,12 +49,12 @@ function startTimer() {
   }, 1000);
 }
 
-// نمایش پیام‌ها
+// نمایش پیام
 function showMessage(message) {
   result.textContent = message;
 }
 
-// حدس عدد
+// تابع حدس زدن عدد
 function guessNumber() {
   const guessed = document.getElementById("guess-number").value;
   if (guessed === "") {
@@ -75,7 +75,7 @@ function guessNumber() {
   }
 }
 
-// کاهش سلامت
+// کاهش جان
 function decreaseHealth() {
   if (health <= 0) {
     alert("💔 متاسفم! بازی رو باختی! 😢");
@@ -87,7 +87,7 @@ function decreaseHealth() {
   health--;
 }
 
-// تنظیم مجدد بازی
+// بازنشانی بازی
 function reset() {
   generateRandomNumber();
   health = 5;
@@ -99,53 +99,52 @@ function reset() {
   document.getElementById("guess-number").value = "";
   showMessage("");
   startTimer();
-  roundsPlayed++; // افزایش تعداد دورهای بازی
+}
+
+// فعال سازی گردونه از دور 10 به بعد
+function enableWheel() {
   if (roundsPlayed >= 10) {
-    // بعد از ۱۰ دور بازی گردونه غیر قابل استفاده می‌شود
-    wheelContainer.classList.remove("active");
-    spinButton.disabled = true;
-    alert("🎉 بازی تمام شد! شما ۱۰ دور بازی کردید.");
+    wheelContainer.classList.remove("inactive");
   } else {
-    // گردونه قابل استفاده است تا دور دهم
-    if (roundsPlayed >= 1) {
-      wheelContainer.classList.add("active");
-      spinButton.disabled = false;
-    }
+    wheelContainer.classList.add("inactive");
   }
 }
 
 // چرخاندن گردونه
 function spinWheel() {
-  if (roundsPlayed >= 10) {
-    alert("😞 شما ۱۰ دور بازی کرده‌اید و نمی‌توانید بیشتر بازی کنید.");
+  if (roundsPlayed < 10) {
+    alert("گردونه فقط بعد از 10 دور بازی قابل استفاده است.");
     return;
   }
-  const randomAngle = Math.floor(Math.random() * 360);
+
+  // چرخاندن گردونه با چرخش تصادفی
+  let randomDegree = Math.floor(Math.random() * 360);
   wheel.style.transition = "transform 3s ease-out";
-  wheel.style.transform = `rotate(${randomAngle}deg)`;
+  wheel.style.transform = `rotate(${randomDegree}deg)`;
 
+  // محتوای گردونه
   setTimeout(() => {
-    const segments = ["پوچ!", "10 بازی اضافه!", "4 بازی اضافه!", "4 بازی + 2 جان!"];
-    const randomSegment = segments[Math.floor(Math.random() * segments.length)];
-    alert(`نتیجه گردونه: ${randomSegment}`);
+    const resultText = getWheelResult(randomDegree);
+    alert(resultText); // نمایش نتیجه گردونه
+  }, 3000); // زمان انتظار تا چرخش گردونه تمام شود
+}
 
-    if (randomSegment === "پوچ!") {
-      alert("😞 شما نمی‌توانید بازی کنید تا ۱۰ دقیقه دیگر.");
-      setTimeout(() => {
-        alert("⏱️ ۱۰ دقیقه تمام شد! می‌توانید دوباره بازی کنید.");
-      }, 600000); // ۱۰ دقیقه تاخیر
-    } else if (randomSegment === "10 بازی اضافه!") {
-      alert("🎉 10 بازی اضافه دارید!");
-    } else if (randomSegment === "4 بازی اضافه!") {
-      alert("🎉 4 بازی اضافه دارید!");
-    } else if (randomSegment === "4 بازی + 2 جان!") {
-      alert("🎉 4 بازی اضافه دارید و 2 جان اضافه شد!");
-    }
-  }, 3000); // مدت زمان چرخش
+// انتخاب نتیجه از گردونه
+function getWheelResult(degree) {
+  if (degree >= 0 && degree < 90) {
+    return "پوچ!";
+  } else if (degree >= 90 && degree < 180) {
+    return "10 بازی اضافه!";
+  } else if (degree >= 180 && degree < 270) {
+    return "4 بازی اضافه!";
+  } else {
+    return "4 بازی + 2 جان!";
+  }
 }
 
 // شروع بازی در بارگذاری صفحه
 window.onload = function () {
   setDifficulty(); // تنظیم سطح پیش‌فرض
   startTimer(); // شروع تایمر
+  enableWheel(); // فعال سازی گردونه بعد از دور دهم
 };
