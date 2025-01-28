@@ -11,6 +11,7 @@ let timeLimit = 30;
 let maxRange = 100;
 let roundsPlayed = 0; // تعداد دفعات بازی
 let gameStarted = true; // برای بررسی وضعیت بازی
+let wheelResult = null; // ذخیره نتیجه گردونه
 
 // تابع تولید عدد تصادفی
 function generateRandomNumber() {
@@ -112,7 +113,7 @@ function reset() {
 
 // فعال سازی گردونه بعد از 10 دور بازی
 function enableWheel() {
-  if (roundsPlayed >= 10) {
+  if (roundsPlayed >= 10 && wheelResult !== "پوچ!") {
     wheelContainer.classList.remove("inactive");
     spinButton.disabled = false; // فعال‌سازی دکمه چرخش گردونه
   } else {
@@ -136,6 +137,7 @@ function spinWheel() {
   // محتوای گردونه
   setTimeout(() => {
     const resultText = getWheelResult(randomDegree);
+    wheelResult = resultText; // ذخیره نتیجه گردونه
     alert(resultText); // نمایش نتیجه گردونه
     handleWheelResult(resultText); // انجام اقدامات بر اساس نتیجه گردونه
   }, 3000); // زمان انتظار تا چرخش گردونه تمام شود
