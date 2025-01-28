@@ -1,12 +1,11 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="fa">
 <head>
-  <link href="main.css" rel="stylesheet" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>بازی حدس عدد</title>
+  <link rel="stylesheet" href="main.css" />
 </head>
-
 <body>
   <main id="main-box">
     <header id="top-header">
@@ -24,20 +23,20 @@
         <input onclick="guessNumber()" id="guess-button" type="button" />
       </div>
       <br />
-      <div id="difficulty-container">
+      <h1 id="result"></h1>
+      <div id="difficulty-holder">
+        <label for="difficulty">سطح بازی:</label>
         <select id="difficulty" onchange="setDifficulty()">
-          <option value="easy">آسان (0-10)</option>
-          <option value="medium" selected>متوسط (0-100)</option>
-          <option value="hard">سخت (0-500)</option>
+          <option value="easy">آسان (0 تا 10)</option>
+          <option value="medium" selected>متوسط (0 تا 100)</option>
+          <option value="hard">سخت (0 تا 500)</option>
         </select>
       </div>
-      <br />
-      <div id="timer-box">زمان باقی‌مانده: <span id="timer">30</span> ثانیه</div>
-      <h1 id="result"></h1>
-      <ul id="history-list"></ul>
+      <div id="timer-holder">
+        <h3 id="timer"></h3>
+      </div>
     </section>
   </main>
   <script src="script.js"></script>
 </body>
-
 </html>
