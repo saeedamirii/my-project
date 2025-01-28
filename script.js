@@ -145,7 +145,7 @@ function spinWheel() {
   if (isWheelActive) return; // جلوگیری از چرخاندن همزمان
   isWheelActive = true;
 
-  if (roundsPlayed < 10) {
+  if (roundsPlayed < 10 && additionalGames <= 0) {
     alert("گردونه فقط بعد از 10 دور بازی قابل استفاده است.");
     isWheelActive = false;
     return;
@@ -190,6 +190,12 @@ function handleWheelResult(resultText) {
     additionalGames += 4;
     health = Math.min(health + 2, 7); // حداکثر تعداد قلب‌ها 7
     updateHealthDisplay(health);
+
+    // بازگرداندن تعداد جان‌ها به حالت نرمال پس از مدت زمان مشخص
+    setTimeout(() => {
+      health = Math.max(health - 2, 0);
+      updateHealthDisplay(health);
+    }, 10000); // مدت زمان در اینجا 10 ثانیه تعیین شده است.
   }
 }
 
@@ -199,4 +205,4 @@ function updateHealthDisplay(heartCount) {
     const healthEle = document.getElementById("heart" + i);
     healthEle.src = i <= heartCount ? "src/heart.png" : "src/heart-off.png";
   }
-      }
+}
