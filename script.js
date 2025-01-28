@@ -5,7 +5,7 @@ const wheelContainer = document.getElementById("wheel-container");
 const spinButton = document.getElementById("spin-button");
 const wheel = document.getElementById("wheel");
 let number = 0;
-let health = 5; // تعداد جان‌های اولیه 5 است
+let health = 5; // تعداد جان‌های اولیه 5
 let timer;
 let timeLimit = 30;
 let maxRange = 100;
@@ -15,6 +15,7 @@ let wheelResult = null; // ذخیره نتیجه گردونه
 let additionalGames = 0; // تعداد بازی‌های اضافه از گردونه
 let cooldownTimer = null; // تایمر برای 10 دقیقه غیرفعال بودن بازی
 let tempHealth = 5; // متغیر موقت برای ذخیره وضعیت سلامت
+let isWheelActive = false; // بررسی وضعیت گردونه
 
 // تابع تولید عدد تصادفی
 function generateRandomNumber() {
@@ -61,6 +62,10 @@ function showMessage(message) {
 
 // تابع حدس زدن عدد
 function guessNumber() {
+  if (!gameStarted) {
+    alert("بازی غیرفعال است. لطفاً منتظر بمانید یا گردونه را بچرخانید.");
+    return;
+  }
   if (roundsPlayed >= 10 && additionalGames <= 0) {
     alert("شما نمی‌توانید بازی کنید. ابتدا گردونه را بچرخانید!");
     return;
@@ -100,10 +105,11 @@ function decreaseHealth() {
 // بازنشانی بازی
 function reset() {
   generateRandomNumber();
-  health = tempHealth; // بازگرداندن تعداد جان‌ها به وضعیت قبل
-  for (let i = 1; i <= 5; i++) {
+  health = 5; // بازگرداندن تعداد جان‌ها به مقدار اولیه
+  tempHealth = 5; // بازگرداندن مقدار موقت جان‌ها
+  for (let i = 1; i <= 7; i++) {
     const healthEle = document.getElementById("heart" + i);
-    healthEle.src = "src/heart.png";
+    healthEle.src = i <= 5 ? "src/heart.png" : "src/heart-off.png";
   }
   mainNumber.textContent = "?"; // بازگشت علامت سوال
   document.getElementById("guess-number").value = "";
@@ -123,7 +129,7 @@ function reset() {
   }
 }
 
-// فعال سازی گردونه بعد از 10 دور بازی
+// فعال‌سازی گردونه بعد از 10 دور بازی
 function enableWheel() {
   if (roundsPlayed >= 10 && additionalGames <= 0) {
     wheelContainer.classList.remove("inactive");
@@ -136,86 +142,61 @@ function enableWheel() {
 
 // چرخاندن گردونه
 function spinWheel() {
+  if (isWheelActive) return; // جلوگیری از چرخاندن همزمان
+  isWheelActive = true;
+
   if (roundsPlayed < 10) {
     alert("گردونه فقط بعد از 10 دور بازی قابل استفاده است.");
+    isWheelActive = false;
     return;
   }
 
-  // چرخاندن گردونه با چرخش تصادفی
   let randomDegree = Math.floor(Math.random() * 360);
   wheel.style.transition = "transform 3s ease-out";
   wheel.style.transform = `rotate(${randomDegree}deg)`;
 
-  // محتوای گردونه
   setTimeout(() => {
     const resultText = getWheelResult(randomDegree);
-    wheelResult = resultText; // ذخیره نتیجه گردونه
-    alert(resultText); // نمایش نتیجه گردونه
-    handleWheelResult(resultText); // انجام اقدامات بر اساس نتیجه گردونه
-  }, 3000); // زمان انتظار تا چرخش گردونه تمام شود
-
-  spinButton.disabled = true; // غیرفعال کردن دکمه چرخش گردونه پس از چرخش
+    wheelResult = resultText;
+    alert(resultText);
+    handleWheelResult(resultText);
+    isWheelActive = false;
+  }, 3000);
 }
 
 // انتخاب نتیجه از گردونه
 function getWheelResult(degree) {
-  if (degree >= 0 && degree < 90) {
-    return "پوچ!";
-  } else if (degree >= 90 && degree < 180) {
-    return "10 بازی اضافه!";
-  } else if (degree >= 180 && degree < 270) {
-    return "4 بازی اضافه!";
-  } else {
-    return "4 بازی + 2 جان!";
-  }
+  if (degree >= 0 && degree < 90) return "پوچ!";
+  if (degree >= 90 && degree < 180) return "10 بازی اضافه!";
+  if (degree >= 180 && degree < 270) return "4 بازی اضافه!";
+  return "4 بازی + 2 جان!";
 }
 
 // مدیریت نتیجه گردونه
 function handleWheelResult(resultText) {
   if (resultText === "پوچ!") {
-    alert("متاسفیم، شما پوچ شدید! ⏳");
-
-    // غیرفعال کردن بازی برای 10 دقیقه
-    cooldownTimer = setTimeout(() => {
-      alert("10 دقیقه گذشت، می‌توانید بازی را دوباره شروع کنید!");
-      reset(); // بازنشانی بازی
-    }, 600000); // 10 دقیقه برابر با 600000 میلی‌ثانیه
-
+    gameStarted = false;
+    alert("متاسفیم، بازی به مدت 10 دقیقه غیرفعال خواهد بود!");
+    setTimeout(() => {
+      alert("10 دقیقه تمام شد، بازی دوباره فعال شد!");
+      gameStarted = true;
+      reset();
+    }, 600000); // 10 دقیقه = 600000 میلی‌ثانیه
   } else if (resultText === "10 بازی اضافه!") {
     additionalGames += 10;
-    alert("شما 10 بازی اضافه دریافت کردید!");
   } else if (resultText === "4 بازی اضافه!") {
     additionalGames += 4;
-    alert("شما 4 بازی اضافه دریافت کردید!");
   } else if (resultText === "4 بازی + 2 جان!") {
     additionalGames += 4;
-    tempHealth = health; // ذخیره موقت وضعیت جان
-    health += 2; // اضافه کردن دو جان
-    alert("شما 4 بازی اضافه به همراه 2 جان اضافی دریافت کردید!");
-
-    // افزایش تعداد قلب‌ها به 7
-    updateHealthDisplay(7);
+    health = Math.min(health + 2, 7); // حداکثر تعداد قلب‌ها 7
+    updateHealthDisplay(health);
   }
-  enableWheel(); // غیرفعال کردن دوباره گردونه
-
-  // بعد از یک دور، برگرداندن تعداد قلب‌ها به 5
-  setTimeout(() => {
-    health = 5;
-    updateHealthDisplay(5); // بازگرداندن به 5 قلب
-  }, 1000); // بازگرداندن بعد از 1 ثانیه
 }
 
 // به‌روزرسانی نمایش جان‌ها
 function updateHealthDisplay(heartCount) {
-  for (let i = 1; i <= 7; i++) { // تعداد قلب‌ها را 7 عدد به‌روزرسانی می‌کنیم
+  for (let i = 1; i <= 7; i++) {
     const healthEle = document.getElementById("heart" + i);
     healthEle.src = i <= heartCount ? "src/heart.png" : "src/heart-off.png";
   }
 }
-
-// شروع بازی در بارگذاری صفحه
-window.onload = function () {
-  setDifficulty(); // تنظیم سطح پیش‌فرض
-  startTimer(); // شروع تایمر
-  enableWheel(); // فعال‌سازی گردونه
-};
