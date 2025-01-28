@@ -60,15 +60,16 @@ body {
     margin: 20px 0;
     border-radius: 25px;
     font-size: 24px;
-    background: #8e44ad;
+    background: transparent;
     color: white;
     border: none;
+    background-image: url('src/btn.png');
+    background-size: 100%;
     cursor: pointer;
-    transition: background 0.3s ease, transform 0.3s ease;
+    transition: background-color 0.3s ease, transform 0.3s ease;
 }
 
 #guess-button:hover {
-    background-color: #9b59b6;
     transform: scale(1.1);
 }
 
@@ -88,7 +89,16 @@ body {
     transform: scale(1.1);
 }
 
-/* تعیین سطح بازی به پایین دکمه منتقل شده */
+#history-holder {
+    text-align: center;
+    margin-top: 20px;
+    color: white;
+}
+
+#history-holder ul {
+    list-style-type: none;
+}
+
 #difficulty-holder {
     text-align: center;
     margin-top: 20px;
@@ -109,7 +119,6 @@ body {
     background-color: #9b59b6;
 }
 
-/* تنظیمات ریسپانسیو برای موبایل */
 @media (max-width: 768px) {
     #main-box {
         margin: 10px;
@@ -143,32 +152,6 @@ body {
 
     #difficulty-select {
         width: 100%;
-        font-size: 18px;
-    }
-}
-
-/* تنظیمات ریسپانسیو برای صفحات بسیار کوچک */
-@media (max-width: 480px) {
-    #main-number {
-        font-size: 80px;
-    }
-
-    #guess-number {
-        font-size: 20px;
-        padding: 5px;
-    }
-
-    #guess-button {
-        width: 100px;
-        height: 50px;
-        font-size: 18px;
-    }
-
-    .heart {
-        width: 30px;
-    }
-
-    #result {
         font-size: 18px;
     }
 }
