@@ -14,41 +14,33 @@ body {
     direction: rtl;
 }
 
-#main-box{
+#main-box {
     border: 0px solid #8e44ad;
     min-height: 690px;
     padding: 10px;
     margin: 20px;
     border-radius: 50px;
-    box-shadow:
-    inset 0 0 30px #9b59b6,
-    inset 20px 0 30px #9b59b6,
-    inset -20px 0 30px #9b59b6,
-    inset 20px 0 30px #9b59b6,
-    inset -20px 0 30px #9b59b6,
-    0 0 30px #9b59b6,
-    -10px 0 30px #9b59b6,
-    10px 0 30px #9b59b6;
+    box-shadow: inset 0 0 30px #9b59b6, inset 20px 0 30px #9b59b6, inset -20px 0 30px #9b59b6, inset 20px 0 30px #9b59b6, inset -20px 0 30px #9b59b6, 0 0 30px #9b59b6, -10px 0 30px #9b59b6, 10px 0 30px #9b59b6;
 }
 
-#top-header{
+#top-header {
     text-align: left;
     padding: 25px;
     direction: ltr;
 }
 
-#main-number{
+#main-number {
     text-align: center;
     color: white;
     font-family: 'Courier New', Courier, monospace;
     font-size: 200px;
 }
 
-#guess-number-holder{
+#guess-number-holder {
     text-align: center;
 }
 
-#guess-number{
+#guess-number {
     padding: 10px 5px;
     font-size: 32px;
     width: 500px;
@@ -58,105 +50,110 @@ body {
     box-shadow: 1px 1px 10px 10px #8e44ad;
 }
 
-#guess-button{
-    width: 190px;
-    height: 175px;
+#guess-button {
+    width: 200px;  /* عرض دقیق */
+    height: 200px;  /* ارتفاع دقیق */
     margin: 25px 25px -20px;
-    border-radius: 50px;
+    border-radius: 50%;
     font-size: 32px;
     background: transparent;
     color: white;
     border: none;
     background-image: url('src/btn.png');
-    background-size: 100%;
+    background-size: cover;  /* تصویر به اندازه دکمه تنظیم می‌شود */
     transition: all 0.3s ease;
     cursor: pointer;
+    position: relative;
+    top: 10px; /* به صورت کمی پایین‌تر از تصویر */
 }
 
-#guess-button:hover{
+#guess-button:hover {
     transform: scale(0.8);
 }
 
-#result{
+#result {
     text-align: center;
     font-size: 28px;
     color: #fff;
+    transition: opacity 0.5s ease;  /* انیمیشن برای محو شدن */
 }
 
-#guess-history {
+#difficulty-holder {
+    text-align: center;
     margin-top: 20px;
-    color: white;
-    text-align: center;
 }
 
-#timer {
-    text-align: center;
-    color: white;
+#difficulty {
     font-size: 24px;
-    margin-top: 20px;
-}
-
-select {
-    font-size: 18px;
     padding: 5px;
-    margin-bottom: 20px;
+    border-radius: 10px;
+    background-color: #fff;
+    color: #333;
 }
 
 /* تنظیمات ریسپانسیو برای موبایل */
 @media (max-width: 768px) {
-  #main-box {
-    margin: 10px;
-    padding: 15px;
-    border-radius: 20px;
-  }
+    #main-box {
+        margin: 10px;
+        padding: 15px;
+        border-radius: 20px;
+    }
 
-  #main-number {
-    font-size: 120px;
-  }
+    #main-number {
+        font-size: 120px;
+    }
 
-  #guess-number {
-    width: 90%;
-    font-size: 24px;
-    padding: 8px;
-  }
+    #guess-number {
+        width: 90%;
+        font-size: 24px;
+        padding: 8px;
+    }
 
-  #guess-button {
-    width: 120px;
-    height: 120px;
-    font-size: 24px;
-  }
+    #guess-button {
+        width: 120px;
+        height: 120px;
+        font-size: 24px;
+    }
 
-  #result {
-    font-size: 20px;
-  }
+    #result {
+        font-size: 20px;
+    }
 
-  .heart {
-    width: 30px;
-  }
+    .heart {
+        width: 30px;
+    }
+
+    #difficulty {
+        font-size: 20px;
+    }
 }
 
 /* تنظیمات ریسپانسیو برای صفحات بسیار کوچک */
 @media (max-width: 480px) {
-  #main-number {
-    font-size: 80px;
-  }
+    #main-number {
+        font-size: 80px;
+    }
 
-  #guess-number {
-    font-size: 20px;
-    padding: 5px;
-  }
+    #guess-number {
+        font-size: 20px;
+        padding: 5px;
+    }
 
-  #guess-button {
-    width: 100px;
-    height: 100px;
-    font-size: 18px;
-  }
+    #guess-button {
+        width: 100px;
+        height: 100px;
+        font-size: 18px;
+    }
 
-  .heart {
-    width: 25px;
-  }
+    .heart {
+        width: 25px;
+    }
 
-  #result {
-    font-size: 18px;
-  }
+    #result {
+        font-size: 18px;
+    }
+
+    #difficulty {
+        font-size: 16px;
+    }
 }
