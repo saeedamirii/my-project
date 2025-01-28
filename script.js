@@ -122,11 +122,10 @@ function reset() {
     if (additionalGames > 0) {
       additionalGames--; // کاهش تعداد بازی‌های اضافه
     }
-    enableWheel(); // فعال‌سازی گردونه بعد از هر دور
   } else {
     gameStarted = false; // توقف بازی
-    enableWheel(); // فعال‌سازی گردونه
   }
+  enableWheel(); // فعال‌سازی گردونه
 }
 
 // فعال‌سازی گردونه بعد از 10 دور بازی
