@@ -17,16 +17,6 @@
         </header>
         
         <section id="main-section">
-            <!-- انتخاب سطح بازی -->
-            <div>
-                <label for="difficulty">سطح بازی: </label>
-                <select id="difficulty">
-                    <option value="easy">آسان (1-50)</option>
-                    <option value="medium" selected>متوسط (1-100)</option>
-                    <option value="hard">سخت (1-200)</option>
-                </select>
-            </div>
-            
             <h1 id="main-number">?</h1>
             <div id="guess-number-holder">
                 <input id="guess-number" type="number" min="0" max="1000">
@@ -35,17 +25,19 @@
             </div>
             <br/>
             <h1 id="result"></h1>
-
-            <!-- تاریخچه حدس‌ها -->
-            <div id="guess-history">
-                <h3>حدس‌های قبلی:</h3>
+            
+            <!-- انتخاب سطح بازی -->
+            <div id="difficulty-holder">
+                <label for="difficulty">سطح سختی بازی: </label>
+                <select id="difficulty">
+                    <option value="easy">آسان</option>
+                    <option value="medium">متوسط</option>
+                    <option value="hard">سخت</option>
+                </select>
             </div>
-
-            <!-- تایمر -->
-            <h2 id="timer"></h2>
         </section>
     </main>
 
     <script src="script.js"></script>
 </body>
-    </html>
+</html>
