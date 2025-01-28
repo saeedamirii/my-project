@@ -1,19 +1,23 @@
 const result = document.getElementById("result");
 const mainNumber = document.getElementById("main-number");
 const timerDisplay = document.getElementById("timer");
-const spinButton = document.getElementById("spin-button");
 const wheelContainer = document.getElementById("wheel-container");
-
+const spinButton = document.getElementById("spin-button");
+const wheel = document.getElementById("wheel");
 let number = 0;
 let health = 5;
 let timer;
-let maxRange = 100;
 let timeLimit = 30;
+let maxRange = 100;
+let roundsPlayed = 0; // تعداد دفعات بازی
+let gameStarted = true; // برای بررسی وضعیت بازی
+let wheelResult = null; // ذخیره نتیجه گردونه
+let additionalGames = 0; // تعداد بازی‌های اضافه از گردونه
 
-let roundsPlayed = 0; // تعداد دورهای انجام‌شده
-let allowedRounds = 10; // حداکثر دور مجاز
-let gameActive = true; // وضعیت فعال بودن بازی
-let wheelResult = null; // نتیجه گردونه
+// تابع تولید عدد تصادفی
+function generateRandomNumber() {
+  number = Math.floor(Math.random() * maxRange);
+}
 
 // تنظیم سطح دشواری
 function setDifficulty() {
@@ -31,11 +35,6 @@ function setDifficulty() {
   reset();
 }
 
-// تولید عدد تصادفی
-function generateRandomNumber() {
-  number = Math.floor(Math.random() * maxRange) + 1;
-}
-
 // شروع تایمر
 function startTimer() {
   clearInterval(timer);
@@ -47,87 +46,157 @@ function startTimer() {
     timerDisplay.textContent = `⏳ زمان باقی‌مانده: ${timeLeft} ثانیه`;
     if (timeLeft <= 0) {
       clearInterval(timer);
-      alert("⏰ وایسادی، زمان تموم شد! 😅");
+      alert("⏰ وایسادی، زمان تموم شد! بازی رو از نو شروع کن! 😅");
       reset();
     }
   }, 1000);
 }
 
-// حدس عدد
+// نمایش پیام
+function showMessage(message) {
+  result.textContent = message;
+}
+
+// تابع حدس زدن عدد
 function guessNumber() {
-  if (!gameActive) {
-    alert("🚫 داداش/خواهر! بازی فعلاً غیرفعاله! لطفاً گردونه رو بچرخون. 🎡");
+  if (roundsPlayed >= 10 && additionalGames <= 0) {
+    alert("شما نمی‌توانید بازی کنید. ابتدا گردونه را بچرخانید!");
     return;
   }
 
   const guessed = document.getElementById("guess-number").value;
   if (guessed === "") {
-    result.textContent = "✋ لطفاً یه عدد وارد کن عزیزم! 😅";
+    showMessage("لطفاً یک عدد وارد کن عزیزم! 😅");
     return;
   }
+  if (parseInt(guessed) === number && health > 0) {
+    showMessage("🎉 دمت گرم! خود خودشه! 🔥");
+    mainNumber.textContent = number; // نمایش عدد صحیح
+    clearInterval(timer);
+    setTimeout(() => reset(), 3000);
+  } else if (parseInt(guessed) < number) {
+    showMessage("📉 داداش برو بالاتر! 😆");
+    decreaseHealth();
+  } else if (parseInt(guessed) > number) {
+    showMessage("📈 چه خبره؟ بیا پایین‌تر! 😜");
+    decreaseHealth();
+  }
+}
 
-  if (parseInt(guessed) === number) {
-    result.textContent = "🎉 دم شما گرم! عددو درست حدس زدی! 🔥";
+// کاهش جان
+function decreaseHealth() {
+  if (health <= 0) {
+    alert("💔 متاسفم! بازی رو باختی! 😢");
     reset();
-  } else {
-    health--;
-    if (health === 0) {
-      alert("💔 متاسفم! بازی رو باختی! 😢");
-      reset();
-    } else {
-      result.textContent =
-        parseInt(guessed) < number
-          ? "📉 برو بالاتر عزیز! 😆"
-          : "📈 داداش بیا پایین‌تر! 😜";
-    }
+    return;
   }
-
-  roundsPlayed++;
-  if (roundsPlayed >= allowedRounds) {
-    gameActive = false; // بازی غیرفعال شود
-    spinButton.disabled = false; // دکمه گردونه فعال شود
-    wheelContainer.classList.remove("inactive");
-  }
+  const healthEle = document.getElementById("heart" + health);
+  healthEle.src = "src/heart-off.png";
+  health--;
 }
 
-// گردونه را بچرخانید
-function spinWheel() {
-  const outcomes = ["پوچ! 😢", "🎁 2 دور اضافه!", "🎁 5 دور اضافه!", "🎁 10 دور اضافه!"];
-  const randomIndex = Math.floor(Math.random() * outcomes.length);
-  wheelResult = outcomes[randomIndex];
-  alert(`🎡 نتیجه گردونه: ${wheelResult}`);
-
-  if (wheelResult.includes("پوچ")) {
-    alert("🚫 بازی متوقف شد! شانس بعدی! 🙃");
-    gameActive = false; // بازی متوقف شود
-  } else {
-    const extraRounds = parseInt(wheelResult.match(/\d+/)) || 0;
-    allowedRounds += extraRounds; // دورهای اضافی اضافه شود
-    gameActive = true; // بازی فعال شود
-    alert(`✅ تبریک! ${extraRounds} دور اضافه شد. 🎉`);
-  }
-
-  spinButton.disabled = true;
-  wheelContainer.classList.add("inactive");
-}
-
-// ریست کردن بازی
+// بازنشانی بازی
 function reset() {
   generateRandomNumber();
   health = 5;
-  roundsPlayed = 0;
-  allowedRounds = 10;
-  gameActive = true;
-  spinButton.disabled = true;
-  wheelContainer.classList.add("inactive");
-  result.textContent = "";
+  for (let i = 1; i <= 5; i++) {
+    const healthEle = document.getElementById("heart" + i);
+    healthEle.src = "src/heart.png";
+  }
+  mainNumber.textContent = "?"; // بازگشت علامت سوال
   document.getElementById("guess-number").value = "";
-  mainNumber.textContent = "?"; // بازگشت علامت سؤال
+  showMessage("");
   startTimer();
+
+  // بررسی تعداد بازی‌ها
+  if (roundsPlayed < 10 || additionalGames > 0) {
+    roundsPlayed++; // افزایش تعداد دفعات بازی
+    if (additionalGames > 0) {
+      additionalGames--; // کاهش تعداد بازی‌های اضافه
+    }
+    enableWheel(); // فعال‌سازی گردونه بعد از هر دور
+  } else {
+    gameStarted = false; // توقف بازی
+    enableWheel(); // فعال‌سازی گردونه
+  }
 }
 
-// شروع بازی
+// فعال سازی گردونه بعد از 10 دور بازی
+function enableWheel() {
+  if (roundsPlayed >= 10 && additionalGames <= 0) {
+    wheelContainer.classList.remove("inactive");
+    spinButton.disabled = false; // فعال‌سازی دکمه چرخش گردونه
+  } else {
+    wheelContainer.classList.add("inactive");
+    spinButton.disabled = true; // غیرفعال کردن دکمه چرخش گردونه
+  }
+}
+
+// چرخاندن گردونه
+function spinWheel() {
+  if (roundsPlayed < 10) {
+    alert("گردونه فقط بعد از 10 دور بازی قابل استفاده است.");
+    return;
+  }
+
+  // چرخاندن گردونه با چرخش تصادفی
+  let randomDegree = Math.floor(Math.random() * 360);
+  wheel.style.transition = "transform 3s ease-out";
+  wheel.style.transform = `rotate(${randomDegree}deg)`;
+
+  // محتوای گردونه
+  setTimeout(() => {
+    const resultText = getWheelResult(randomDegree);
+    wheelResult = resultText; // ذخیره نتیجه گردونه
+    alert(resultText); // نمایش نتیجه گردونه
+    handleWheelResult(resultText); // انجام اقدامات بر اساس نتیجه گردونه
+  }, 3000); // زمان انتظار تا چرخش گردونه تمام شود
+}
+
+// انتخاب نتیجه از گردونه
+function getWheelResult(degree) {
+  if (degree >= 0 && degree < 90) {
+    return "پوچ!";
+  } else if (degree >= 90 && degree < 180) {
+    return "10 بازی اضافه!";
+  } else if (degree >= 180 && degree < 270) {
+    return "4 بازی اضافه!";
+  } else {
+    return "4 بازی + 2 جان!";
+  }
+}
+
+// مدیریت نتیجه گردونه
+function handleWheelResult(resultText) {
+  if (resultText === "پوچ!") {
+    alert("متاسفیم، شما پوچ شدید! ⏳");
+  } else if (resultText === "10 بازی اضافه!") {
+    additionalGames += 10;
+    alert("شما 10 بازی اضافه دریافت کردید!");
+  } else if (resultText === "4 بازی اضافه!") {
+    additionalGames += 4;
+    alert("شما 4 بازی اضافه دریافت کردید!");
+  } else {
+    additionalGames += 4;
+    health += 2; // اضافه کردن دو جان
+    alert("شما 4 بازی اضافه به همراه 2 جان اضافی دریافت کردید!");
+    updateHealthDisplay(); // به‌روزرسانی نمایش جان‌ها
+  }
+  gameStarted = true;
+  enableWheel(); // غیرفعال کردن دوباره گردونه
+}
+
+// به‌روزرسانی نمایش جان‌ها
+function updateHealthDisplay() {
+  for (let i = 1; i <= 5; i++) {
+    const healthEle = document.getElementById("heart" + i);
+    healthEle.src = i <= health ? "src/heart.png" : "src/heart-off.png";
+  }
+}
+
+// شروع بازی در بارگذاری صفحه
 window.onload = function () {
-  setDifficulty();
-  reset();
+  setDifficulty(); // تنظیم سطح پیش‌فرض
+  startTimer(); // شروع تایمر
+  enableWheel(); // فعال‌سازی گردونه
 };
