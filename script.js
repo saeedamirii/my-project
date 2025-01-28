@@ -209,4 +209,13 @@ function handleWheelResult(resultText) {
 function updateHealthDisplay(heartCount) {
   for (let i = 1; i <= 7; i++) { // تعداد قلب‌ها را 7 عدد به‌روزرسانی می‌کنیم
     const healthEle = document.getElementById("heart" + i);
-    healthEle.src = i <= heartCount ? "src/heart.png" : "src/heart-off
+    healthEle.src = i <= heartCount ? "src/heart.png" : "src/heart-off.png";
+  }
+}
+
+// شروع بازی در بارگذاری صفحه
+window.onload = function () {
+  setDifficulty(); // تنظیم سطح پیش‌فرض
+  startTimer(); // شروع تایمر
+  enableWheel(); // فعال‌سازی گردونه
+};
