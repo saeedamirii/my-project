@@ -117,3 +117,46 @@ body {
     width: 30px;
   }
 }
+
+/* گردونه شانس */
+#wheel-container {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: conic-gradient(#FFDDC1 0% 25%, #C1E1FF 25% 50%, #FFCC99 50% 75%, #D1F1A9 75% 100%);
+  margin: 20px auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.5;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+
+#wheel-container.active {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.segment {
+  position: absolute;
+  text-align: center;
+  font-size: 16px;
+  color: white;
+}
+
+#spin-button {
+  position: absolute;
+  bottom: -40px;
+  background-color: #8e44ad;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+#spin-button:disabled {
+  background-color: #ccc;
+}
