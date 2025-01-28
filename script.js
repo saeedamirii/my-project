@@ -5,7 +5,7 @@ const wheelContainer = document.getElementById("wheel-container");
 const spinButton = document.getElementById("spin-button");
 const wheel = document.getElementById("wheel");
 let number = 0;
-let health = 5;
+let health = 5; // تعداد جان‌های اولیه 5 است
 let timer;
 let timeLimit = 30;
 let maxRange = 100;
@@ -13,6 +13,7 @@ let roundsPlayed = 0; // تعداد دفعات بازی
 let gameStarted = true; // برای بررسی وضعیت بازی
 let wheelResult = null; // ذخیره نتیجه گردونه
 let additionalGames = 0; // تعداد بازی‌های اضافه از گردونه
+let cooldownTimer = null; // تایمر برای 10 دقیقه غیرفعال بودن بازی
 
 // تابع تولید عدد تصادفی
 function generateRandomNumber() {
@@ -98,7 +99,7 @@ function decreaseHealth() {
 // بازنشانی بازی
 function reset() {
   generateRandomNumber();
-  health = 5;
+  health = 5; // تعداد جان‌ها به 5 تنظیم می‌شود
   for (let i = 1; i <= 5; i++) {
     const healthEle = document.getElementById("heart" + i);
     healthEle.src = "src/heart.png";
@@ -151,6 +152,8 @@ function spinWheel() {
     alert(resultText); // نمایش نتیجه گردونه
     handleWheelResult(resultText); // انجام اقدامات بر اساس نتیجه گردونه
   }, 3000); // زمان انتظار تا چرخش گردونه تمام شود
+
+  spinButton.disabled = true; // غیرفعال کردن دکمه چرخش گردونه پس از چرخش
 }
 
 // انتخاب نتیجه از گردونه
@@ -170,6 +173,13 @@ function getWheelResult(degree) {
 function handleWheelResult(resultText) {
   if (resultText === "پوچ!") {
     alert("متاسفیم، شما پوچ شدید! ⏳");
+    
+    // غیرفعال کردن بازی برای 10 دقیقه
+    cooldownTimer = setTimeout(() => {
+      alert("10 دقیقه گذشت، می‌توانید بازی را دوباره شروع کنید!");
+      reset(); // بازنشانی بازی
+    }, 600000); // 10 دقیقه برابر با 600000 میلی‌ثانیه
+
   } else if (resultText === "10 بازی اضافه!") {
     additionalGames += 10;
     alert("شما 10 بازی اضافه دریافت کردید!");
@@ -180,9 +190,9 @@ function handleWheelResult(resultText) {
     additionalGames += 4;
     health += 2; // اضافه کردن دو جان
     alert("شما 4 بازی اضافه به همراه 2 جان اضافی دریافت کردید!");
+    health = Math.min(health, 7); // تعداد جان‌ها را به حداکثر 7 محدود می‌کنیم
     updateHealthDisplay(); // به‌روزرسانی نمایش جان‌ها
   }
-  gameStarted = true;
   enableWheel(); // غیرفعال کردن دوباره گردونه
 }
 
