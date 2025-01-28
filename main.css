@@ -7,15 +7,14 @@
     margin: 0;
     padding: 0;
     font-family: yekan;
-    
-  }
-  body {
+}
+
+body {
     background-color: #2c3e50;
     direction: rtl;
-   
-    
-  }
-  #main-box{
+}
+
+#main-box{
     border: 0px solid #8e44ad;
     min-height: 690px;
     padding: 10px;
@@ -30,22 +29,26 @@
     0 0 30px #9b59b6,
     -10px 0 30px #9b59b6,
     10px 0 30px #9b59b6;
-  }
-  #top-header{
+}
+
+#top-header{
     text-align: left;
     padding: 25px;
     direction: ltr;
-  }
-  #main-number{
+}
+
+#main-number{
     text-align: center;
     color: white;
     font-family: 'Courier New', Courier, monospace;
     font-size: 200px;
-  }
-  #guess-number-holder{
+}
+
+#guess-number-holder{
     text-align: center;
-  }
-  #guess-number{
+}
+
+#guess-number{
     padding: 10px 5px;
     font-size: 32px;
     width: 500px;
@@ -53,12 +56,12 @@
     border-radius: 50px;
     border: 1px solid #fff;
     box-shadow: 1px 1px 10px 10px #8e44ad;
-  }
-  #guess-button{
+}
+
+#guess-button{
     width: 190px;
     height: 175px;
     margin: 25px 25px -20px;
-    
     border-radius: 50px;
     font-size: 32px;
     background: transparent;
@@ -68,49 +71,92 @@
     background-size: 100%;
     transition: all 0.3s ease;
     cursor: pointer;
-    background-size: cover; /* یا 100% 100% */
-background-repeat: no-repeat; /* اضافه کردن این خط */
-background-size: contain; /* تغییر به contain */
-background-repeat: no-repeat; /* اضافه کردن این خط */
+}
 
-
-  }
-  #guess-button:hover{
+#guess-button:hover{
     transform: scale(0.8);
-  }
-  #result{
+}
+
+#result{
     text-align: center;
     font-size: 28px;
     color: #fff;
-    
-  }
-  
-  /* Media Queries */
+}
+
+#guess-history {
+    margin-top: 20px;
+    color: white;
+    text-align: center;
+}
+
+#timer {
+    text-align: center;
+    color: white;
+    font-size: 24px;
+    margin-top: 20px;
+}
+
+select {
+    font-size: 18px;
+    padding: 5px;
+    margin-bottom: 20px;
+}
+
+/* تنظیمات ریسپانسیو برای موبایل */
 @media (max-width: 768px) {
+  #main-box {
+    margin: 10px;
+    padding: 15px;
+    border-radius: 20px;
+  }
+
   #main-number {
-      font-size: 150px;
+    font-size: 120px;
   }
+
   #guess-number {
-      font-size: 28px;
-      width: 90%;
+    width: 90%;
+    font-size: 24px;
+    padding: 8px;
   }
+
   #guess-button {
-      width: 150px;
-      font-size: 24px;
+    width: 120px;
+    height: 120px;
+    font-size: 24px;
+  }
+
+  #result {
+    font-size: 20px;
+  }
+
+  .heart {
+    width: 30px;
   }
 }
 
+/* تنظیمات ریسپانسیو برای صفحات بسیار کوچک */
 @media (max-width: 480px) {
   #main-number {
-      font-size: 100px;
+    font-size: 80px;
   }
+
   #guess-number {
-      font-size: 24px;
-      width: 80%;
+    font-size: 20px;
+    padding: 5px;
   }
+
   #guess-button {
-      width: 120px;
-      font-size: 20px;
+    width: 100px;
+    height: 100px;
+    font-size: 18px;
+  }
+
+  .heart {
+    width: 25px;
+  }
+
+  #result {
+    font-size: 18px;
   }
 }
-
