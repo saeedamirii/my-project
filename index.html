@@ -1,10 +1,11 @@
 <!DOCTYPE html>
-<html>
+<html lang="fa">
 
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="main.css" rel="stylesheet" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta charset="UTF-8" />
+    <title>بازی حدس عدد</title>
 </head>
 
 <body>
@@ -19,26 +20,22 @@
         <section id="main-section">
             <h1 id="main-number">?</h1>
             <div id="guess-number-holder">
-                <input id="guess-number" type="number" min="0" max="1000">
+                <input id="guess-number" type="number" min="0" max="1000" />
                 <br />
                 <input onclick="guessNumber()" id="guess-button" type="button" value="حدس بزن" />
             </div>
+            <div id="range-display"></div> <!-- نمایش بازه سطح بازی -->
             <br />
             <h1 id="result"></h1>
-
-            <div id="history-holder">
-                <h2>تاریخچه حدس‌ها:</h2>
-                <ul id="history"></ul>
-            </div>
-
-            <!-- انتخاب سطح بازی به پایین دکمه حدس منتقل شده -->
             <div id="difficulty-holder">
+                <label for="difficulty-select">سطح بازی:</label>
                 <select id="difficulty-select">
-                    <option value="easy">سطح آسان</option>
-                    <option value="medium">سطح متوسط</option>
-                    <option value="hard">سطح سخت</option>
+                    <option value="easy">آسان (0-100)</option>
+                    <option value="medium">متوسط (0-500)</option>
+                    <option value="hard">سخت (0-1000)</option>
                 </select>
             </div>
+            <ul id="history"></ul> <!-- تاریخچه حدس‌ها -->
         </section>
     </main>
     <script src="script.js"></script>
