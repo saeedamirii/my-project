@@ -85,73 +85,6 @@ body {
   width: 50px;
 }
 
-/* استایل گردونه */
-#wheel-container {
-  margin-top: 20px;
-  text-align: center;
-}
-
-#wheel {
-  width: 200px;
-  height: 200px;
-  border-radius: 50%;
-  background: conic-gradient(#e74c3c 0deg 90deg, #f39c12 90deg 180deg, #2ecc71 180deg 270deg, #3498db 270deg 360deg);
-  position: relative;
-  display: inline-block;
-}
-
-.wheel-section {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform-origin: 50% 50%;
-  text-align: center;
-  color: white;
-  font-size: 16px;
-  font-weight: bold;
-  padding: 20px;
-}
-
-.wheel-section:nth-child(1) {
-  transform: rotate(0deg);
-}
-
-.wheel-section:nth-child(2) {
-  transform: rotate(90deg);
-}
-
-.wheel-section:nth-child(3) {
-  transform: rotate(180deg);
-}
-
-.wheel-section:nth-child(4) {
-  transform: rotate(270deg);
-}
-
-.inactive {
-  opacity: 0.4;
-}
-
-#spin-button {
-  margin-top: 20px;
-  padding: 10px 20px;
-  font-size: 20px;
-  cursor: pointer;
-  background-color: #8e44ad;
-  border: none;
-  color: white;
-  border-radius: 5px;
-}
-
-#spin-button:disabled {
-  background-color: #bdc3c7;
-  cursor: not-allowed;
-}
-
-#spin-button:hover {
-  background-color: #9b59b6;
-}
-
 /* ریسپانسیو برای موبایل */
 @media (max-width: 768px) {
   #main-box {
@@ -182,10 +115,5 @@ body {
 
   .heart {
     width: 30px;
-  }
-
-  #wheel {
-    width: 150px;
-    height: 150px;
   }
 }
