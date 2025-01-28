@@ -1,7 +1,6 @@
 const result = document.getElementById("result");
 const mainNumber = document.getElementById("main-number");
 const timerDisplay = document.getElementById("timer");
-const historyList = document.getElementById("history-list");
 let number = 0;
 let health = 5;
 let timer;
@@ -30,11 +29,11 @@ function setDifficulty() {
 function startTimer() {
   clearInterval(timer);
   let timeLeft = timeLimit;
-  timerDisplay.textContent = timeLeft;
+  timerDisplay.textContent = `زمان باقی‌مانده: ${timeLeft} ثانیه`;
 
   timer = setInterval(() => {
     timeLeft--;
-    timerDisplay.textContent = timeLeft;
+    timerDisplay.textContent = `زمان باقی‌مانده: ${timeLeft} ثانیه`;
     if (timeLeft <= 0) {
       clearInterval(timer);
       alert("زمان تمام شد! بازی را از نو شروع کنید.");
@@ -50,7 +49,7 @@ function showMessage(message) {
 function guessNumber() {
   const guessed = document.getElementById("guess-number").value;
   if (guessed === "") {
-    showMessage("لطفا عددی وارد کنید!");
+    showMessage("لطفاً یک عدد وارد کنید!");
     return;
   }
   if (parseInt(guessed) === number && health > 0) {
@@ -65,7 +64,6 @@ function guessNumber() {
     showMessage("بیا پایین‌تر!");
     decreaseHealth();
   }
-  addHistory(guessed);
 }
 
 function decreaseHealth() {
@@ -79,12 +77,6 @@ function decreaseHealth() {
   health--;
 }
 
-function addHistory(guessed) {
-  const listItem = document.createElement("li");
-  listItem.textContent = `حدس شما: ${guessed}`;
-  historyList.appendChild(listItem);
-}
-
 function reset() {
   generateRandomNumber();
   health = 5;
@@ -94,7 +86,6 @@ function reset() {
   }
   mainNumber.textContent = "?"; // بازگشت علامت سوال
   document.getElementById("guess-number").value = "";
-  historyList.innerHTML = "";
   showMessage("");
   startTimer();
 }
