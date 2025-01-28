@@ -10,8 +10,8 @@ let timer;
 let timeLimit = 30;
 let maxRange = 100;
 let roundsPlayed = 0; // تعداد دفعات بازی
-let gameStarted = true; // برای بررسی وضعیت بازی
-let wheelResult = null; // ذخیره نتیجه گردونه
+let gameStarted = false; // وضعیت بازی
+let wheelResult = null; // نتیجه گردونه
 
 // تابع تولید عدد تصادفی
 function generateRandomNumber() {
