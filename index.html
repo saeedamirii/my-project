@@ -2,42 +2,41 @@
 <html>
 
 <head>
-    <link href="main.css" rel="stylesheet"/>
+    <link href="main.css" rel="stylesheet" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta charset="UTF-8" />
 </head>
+
 <body>
     <main id="main-box">
         <header id="top-header">
-            <img id="heart1" class="heart" src="src/heart.png" width="50px"/>
-            <img id="heart2" class="heart" src="src/heart.png" width="50px"/>
-            <img id="heart3" class="heart" src="src/heart.png" width="50px"/>
-            <img id="heart4" class="heart" src="src/heart.png" width="50px"/>
-            <img id="heart5" class="heart" src="src/heart.png" width="50px"/>
+            <img id="heart1" class="heart" src="src/heart.png" width="50px" />
+            <img id="heart2" class="heart" src="src/heart.png" width="50px" />
+            <img id="heart3" class="heart" src="src/heart.png" width="50px" />
+            <img id="heart4" class="heart" src="src/heart.png" width="50px" />
+            <img id="heart5" class="heart" src="src/heart.png" width="50px" />
         </header>
-        
         <section id="main-section">
             <h1 id="main-number">?</h1>
             <div id="guess-number-holder">
                 <input id="guess-number" type="number" min="0" max="1000">
-                <br/>
-                <input onclick="guessNumber()" id="guess-button" type="button" value="حدس بزن"/>
+                <br />
+                <input onclick="guessNumber()" id="guess-button" type="button" value="حدس بزن" />
             </div>
-            <br/>
+            <br />
             <h1 id="result"></h1>
-            
-            <!-- انتخاب سطح بازی -->
+
+            <!-- تغییر اینجا: تعیین سطح بازی به این قسمت منتقل می‌شود -->
             <div id="difficulty-holder">
-                <label for="difficulty">سطح سختی بازی: </label>
-                <select id="difficulty">
-                    <option value="easy">آسان</option>
-                    <option value="medium">متوسط</option>
-                    <option value="hard">سخت</option>
+                <select id="difficulty-select">
+                    <option value="easy">سطح آسان</option>
+                    <option value="medium">سطح متوسط</option>
+                    <option value="hard">سطح سخت</option>
                 </select>
             </div>
         </section>
     </main>
-
     <script src="script.js"></script>
 </body>
+
 </html>
