@@ -53,15 +53,15 @@ function guessNumber() {
     return;
   }
   if (parseInt(guessed) === number && health > 0) {
-    showMessage("آفرین! عدد درست را حدس زدی!");
+    showMessage("دمت گرم! خود خودشه!");
     mainNumber.textContent = number; // نمایش عدد صحیح
     clearInterval(timer);
     setTimeout(() => reset(), 3000);
   } else if (parseInt(guessed) < number) {
-    showMessage("برو بالاتر!");
+    showMessage("داداش برو بالاتر!");
     decreaseHealth();
   } else if (parseInt(guessed) > number) {
-    showMessage("بیا پایین‌تر!");
+    showMessage("چه خبره؟ بیا پایین‌تر!");
     decreaseHealth();
   }
 }
