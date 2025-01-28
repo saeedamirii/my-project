@@ -1,39 +1,43 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <link href="main.css" rel="stylesheet" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta charset="UTF-8" />
+  <link href="main.css" rel="stylesheet" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8" />
 </head>
+
 <body>
-    <main id="main-box">
-        <header id="top-header">
-            <img id="heart1" class="heart" src="src/heart.png" width="50px" />
-            <img id="heart2" class="heart" src="src/heart.png" width="50px" />
-            <img id="heart3" class="heart" src="src/heart.png" width="50px" />
-            <img id="heart4" class="heart" src="src/heart.png" width="50px" />
-            <img id="heart5" class="heart" src="src/heart.png" width="50px" />
-        </header>
-        <section id="main-section">
-            <h1 id="main-number">?</h1>
-            <div id="guess-number-holder">
-                <input id="guess-number" type="number" min="0" max="1000" />
-                <br />
-                <input onclick="guessNumber()" id="guess-button" type="button" />
-            </div>
-            <div>
-                <select id="difficulty">
-                    <option value="easy">ساده</option>
-                    <option value="medium">متوسط</option>
-                    <option value="hard">سخت</option>
-                </select>
-            </div>
-            <br />
-            <h1 id="result"></h1>
-            <h2 id="timer">زمان: 0 ثانیه</h2>
-            <ul id="history-list"></ul>
-        </section>
-    </main>
-    <script src="script.js"></script>
+  <main id="main-box">
+    <header id="top-header">
+      <img id="heart1" class="heart" src="src/heart.png" width="50px" />
+      <img id="heart2" class="heart" src="src/heart.png" width="50px" />
+      <img id="heart3" class="heart" src="src/heart.png" width="50px" />
+      <img id="heart4" class="heart" src="src/heart.png" width="50px" />
+      <img id="heart5" class="heart" src="src/heart.png" width="50px" />
+    </header>
+    <section id="main-section">
+      <h1 id="main-number">?</h1>
+      <div id="guess-number-holder">
+        <input id="guess-number" type="number" min="0" max="1000" />
+        <br />
+        <input onclick="guessNumber()" id="guess-button" type="button" />
+      </div>
+      <br />
+      <div id="difficulty-container">
+        <select id="difficulty" onchange="setDifficulty()">
+          <option value="easy">آسان (0-10)</option>
+          <option value="medium" selected>متوسط (0-100)</option>
+          <option value="hard">سخت (0-500)</option>
+        </select>
+      </div>
+      <br />
+      <div id="timer-box">زمان باقی‌مانده: <span id="timer">30</span> ثانیه</div>
+      <h1 id="result"></h1>
+      <ul id="history-list"></ul>
+    </section>
+  </main>
+  <script src="script.js"></script>
 </body>
+
 </html>
