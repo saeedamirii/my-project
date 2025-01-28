@@ -1,53 +1,45 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>بازی حدس عدد</title>
-  <link rel="stylesheet" href="main.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <main id="main-box">
-    <header id="top-header">
-      <img id="heart1" class="heart" src="src/heart.png" width="50px" />
-      <img id="heart2" class="heart" src="src/heart.png" width="50px" />
-      <img id="heart3" class="heart" src="src/heart.png" width="50px" />
-      <img id="heart4" class="heart" src="src/heart.png" width="50px" />
-      <img id="heart5" class="heart" src="src/heart.png" width="50px" />
-    </header>
-    <section id="main-section">
-      <h1 id="main-number">?</h1>
-      <div id="guess-number-holder">
-        <input id="guess-number" type="number" min="0" max="1000" />
-        <br />
-        <input onclick="guessNumber()" id="guess-button" type="button" />
-      </div>
-      <br />
-      <h1 id="result"></h1>
-      <div id="difficulty-holder">
-        <label for="difficulty">سطح بازی:</label>
-        <select id="difficulty" onchange="setDifficulty()">
-          <option value="easy">آسان (0 تا 10)</option>
-          <option value="medium" selected>متوسط (0 تا 100)</option>
-          <option value="hard">سخت (0 تا 500)</option>
-        </select>
-      </div>
-      <div id="timer-holder">
-        <h3 id="timer"></h3>
-      </div>
-
-      <!-- گردونه شانس -->
-      <div id="wheel-container" class="inactive">
-        <div id="wheel">
-          <div class="wheel-section" id="section1">پوچ!</div>
-          <div class="wheel-section" id="section2">10 بازی اضافه!</div>
-          <div class="wheel-section" id="section3">4 بازی اضافه!</div>
-          <div class="wheel-section" id="section4">4 بازی + 2 جان!</div>
-        </div>
-        <button id="spin-button" onclick="spinWheel()">چرخاندن گردونه</button>
-      </div>
-    </section>
-  </main>
+  <div id="main-box">
+    <div id="top-header">
+      <h2>بازی حدس عدد</h2>
+    </div>
+    <div id="main-number">?</div>
+    <div id="guess-number-holder">
+      <input id="guess-number" type="number" placeholder="یک عدد وارد کن">
+    </div>
+    <button onclick="guessNumber()" id="guess-button">حدس بزن</button>
+    <div id="result"></div>
+    <div id="difficulty-holder">
+      <select id="difficulty" onchange="setDifficulty()">
+        <option value="easy">آسان</option>
+        <option value="medium" selected>متوسط</option>
+        <option value="hard">سخت</option>
+      </select>
+    </div>
+    <div id="timer-holder">
+      <span id="timer"></span>
+    </div>
+    <div id="health-holder">
+      <img class="heart" id="heart1" src="src/heart.png" alt="heart">
+      <img class="heart" id="heart2" src="src/heart.png" alt="heart">
+      <img class="heart" id="heart3" src="src/heart.png" alt="heart">
+      <img class="heart" id="heart4" src="src/heart.png" alt="heart">
+      <img class="heart" id="heart5" src="src/heart.png" alt="heart">
+    </div>
+    <!-- گردونه -->
+    <div id="wheel-container" class="inactive">
+      <div id="wheel"></div>
+      <button id="spin-button" onclick="spinWheel()" disabled>گردونه را بچرخان</button>
+    </div>
+  </div>
   <script src="script.js"></script>
 </body>
 </html>
