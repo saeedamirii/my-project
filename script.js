@@ -14,6 +14,7 @@ let gameStarted = true; // برای بررسی وضعیت بازی
 let wheelResult = null; // ذخیره نتیجه گردونه
 let additionalGames = 0; // تعداد بازی‌های اضافه از گردونه
 let cooldownTimer = null; // تایمر برای 10 دقیقه غیرفعال بودن بازی
+let tempHealth = 5; // متغیر موقت برای ذخیره وضعیت سلامت
 
 // تابع تولید عدد تصادفی
 function generateRandomNumber() {
@@ -99,7 +100,7 @@ function decreaseHealth() {
 // بازنشانی بازی
 function reset() {
   generateRandomNumber();
-  health = 5; // تعداد جان‌ها به 5 تنظیم می‌شود
+  health = tempHealth; // بازگرداندن تعداد جان‌ها به وضعیت قبل
   for (let i = 1; i <= 5; i++) {
     const healthEle = document.getElementById("heart" + i);
     healthEle.src = "src/heart.png";
@@ -173,7 +174,7 @@ function getWheelResult(degree) {
 function handleWheelResult(resultText) {
   if (resultText === "پوچ!") {
     alert("متاسفیم، شما پوچ شدید! ⏳");
-    
+
     // غیرفعال کردن بازی برای 10 دقیقه
     cooldownTimer = setTimeout(() => {
       alert("10 دقیقه گذشت، می‌توانید بازی را دوباره شروع کنید!");
@@ -186,27 +187,26 @@ function handleWheelResult(resultText) {
   } else if (resultText === "4 بازی اضافه!") {
     additionalGames += 4;
     alert("شما 4 بازی اضافه دریافت کردید!");
-  } else {
+  } else if (resultText === "4 بازی + 2 جان!") {
     additionalGames += 4;
+    tempHealth = health; // ذخیره موقت وضعیت جان
     health += 2; // اضافه کردن دو جان
     alert("شما 4 بازی اضافه به همراه 2 جان اضافی دریافت کردید!");
-    health = Math.min(health, 7); // تعداد جان‌ها را به حداکثر 7 محدود می‌کنیم
-    updateHealthDisplay(); // به‌روزرسانی نمایش جان‌ها
+
+    // افزایش تعداد قلب‌ها به 7
+    updateHealthDisplay(7);
   }
   enableWheel(); // غیرفعال کردن دوباره گردونه
+
+  // بعد از یک دور، برگرداندن تعداد قلب‌ها به 5
+  setTimeout(() => {
+    health = 5;
+    updateHealthDisplay(5); // بازگرداندن به 5 قلب
+  }, 1000); // بازگرداندن بعد از 1 ثانیه
 }
 
 // به‌روزرسانی نمایش جان‌ها
-function updateHealthDisplay() {
-  for (let i = 1; i <= 5; i++) {
+function updateHealthDisplay(heartCount) {
+  for (let i = 1; i <= 7; i++) { // تعداد قلب‌ها را 7 عدد به‌روزرسانی می‌کنیم
     const healthEle = document.getElementById("heart" + i);
-    healthEle.src = i <= health ? "src/heart.png" : "src/heart-off.png";
-  }
-}
-
-// شروع بازی در بارگذاری صفحه
-window.onload = function () {
-  setDifficulty(); // تنظیم سطح پیش‌فرض
-  startTimer(); // شروع تایمر
-  enableWheel(); // فعال‌سازی گردونه
-};
+    healthEle.src = i <= heartCount ? "src/heart.png" : "src/heart-off
