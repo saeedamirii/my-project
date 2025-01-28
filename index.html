@@ -1,13 +1,10 @@
 <!DOCTYPE html>
-<html lang="fa">
-
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link href="main.css" rel="stylesheet" />
-    <title>بازی حدس عدد</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta charset="UTF-8" />
 </head>
-
 <body>
     <main id="main-box">
         <header id="top-header">
@@ -22,23 +19,21 @@
             <div id="guess-number-holder">
                 <input id="guess-number" type="number" min="0" max="1000" />
                 <br />
-                <input onclick="guessNumber()" id="guess-button" type="button" value="حدس بزن" />
+                <input onclick="guessNumber()" id="guess-button" type="button" />
             </div>
-            <div id="range-display"></div> <!-- نمایش بازه سطح بازی -->
-            <br />
-            <h1 id="result"></h1>
-            <div id="difficulty-holder">
-                <label for="difficulty-select">سطح بازی:</label>
-                <select id="difficulty-select">
-                    <option value="easy">آسان (0-100)</option>
-                    <option value="medium">متوسط (0-500)</option>
-                    <option value="hard">سخت (0-1000)</option>
+            <div>
+                <select id="difficulty">
+                    <option value="easy">ساده</option>
+                    <option value="medium">متوسط</option>
+                    <option value="hard">سخت</option>
                 </select>
             </div>
-            <ul id="history"></ul> <!-- تاریخچه حدس‌ها -->
+            <br />
+            <h1 id="result"></h1>
+            <h2 id="timer">زمان: 0 ثانیه</h2>
+            <ul id="history-list"></ul>
         </section>
     </main>
     <script src="script.js"></script>
 </body>
-
 </html>
