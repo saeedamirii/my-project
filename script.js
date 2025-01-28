@@ -1,11 +1,14 @@
 const result = document.getElementById("result");
+const historyElement = document.getElementById("history");
 let number = 0;
 let health = 5;
 let difficulty = 'easy';
+let history = [];
 
+// تنظیم سطح بازی
 document.getElementById("difficulty-select").addEventListener("change", function () {
     difficulty = this.value;
-    reset(); // وقتی سطح تغییر کرد، بازی از اول شروع بشه
+    reset();
 });
 
 function generateRandomNumber() {
@@ -29,8 +32,8 @@ window.onload = function () {
 function showMessage(message) {
     result.innerHTML = message;
     setTimeout(() => {
-        result.innerHTML = ''; // پاک کردن پیام بعد از 3 ثانیه
-    }, 3000);
+        result.innerHTML = ''; 
+    }, 3000);  // نمایش پیام برای 3 ثانیه
 }
 
 function guessNumber() {
@@ -40,8 +43,11 @@ function guessNumber() {
         return;
     }
 
+    history.push(guessed);  // افزودن حدس جدید به تاریخچه
+    updateHistory();  // به‌روزرسانی تاریخچه
+
     if (guessed == number && health > 0) {
-        if (confirm("به به دمت گرم. خود خودشه ! خیلی حال داد. یه بار دیگه بازی میکنی؟")) {
+        if (confirm("به به دمت گرم. خود خودشه! خیلی حال داد. یه بار دیگه بازی میکنی؟")) {
             reset();
         }
     } else if (guessed < number) {
@@ -65,7 +71,24 @@ function decreaseHealth() {
     health--;
 }
 
+function updateHistory() {
+    historyElement.innerHTML = ''; // حذف تمامی تاریخچه‌ها
+    history.forEach(guess => {
+        const li = document.createElement("li");
+        li.textContent = "حدس: " + guess;
+        historyElement.appendChild(li);
+    });
+}
+
 function reset() {
     generateRandomNumber();
     health = 5;
-    for
+    history = [];  // پاک کردن تاریخچه حدس‌ها
+    for (let index = 1; index <= 5; index++) {
+        const healthEle = document.getElementById("heart" + index);
+        healthEle.src = "src/heart.png";
+    }
+    document.getElementById("guess-number").value = "";
+    showMessage("");
+    updateHistory();  // به‌روزرسانی تاریخچه پس از ریست بازی
+}
