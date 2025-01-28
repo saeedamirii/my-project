@@ -1,108 +1,106 @@
 const result = document.getElementById("result");
-const guessNumberInput = document.getElementById("guess-number");
-const difficultySelect = document.getElementById("difficulty");
+const mainNumber = document.getElementById("main-number");
+const timerDisplay = document.getElementById("timer");
 const historyList = document.getElementById("history-list");
-const timerElement = document.getElementById("timer");
-
 let number = 0;
 let health = 5;
-let maxNumber = 10; // بازه پیش‌فرض برای سطح ساده
-let timer = 0;
-let timerInterval;
+let timer;
+let timeLimit = 30;
+let maxRange = 100;
 
-// ایجاد عدد تصادفی
 function generateRandomNumber() {
-    number = Math.floor(Math.random() * (maxNumber + 1)); // بازه بین 0 و maxNumber
-    console.log("Generated number:", number); // برای تست
+  number = Math.floor(Math.random() * maxRange);
 }
 
-// بازنشانی بازی
-function resetGame() {
-    generateRandomNumber();
-    health = 5;
-    clearInterval(timerInterval);
-    timer = 0;
-    timerElement.innerText = "زمان: 0 ثانیه";
-    historyList.innerHTML = ""; // پاک کردن تاریخچه حدس‌ها
-    guessNumberInput.value = ""; // پاک کردن فیلد ورودی
-    result.innerHTML = ""; // پاک کردن پیام‌ها
-    for (let i = 1; i <= 5; i++) {
-        document.getElementById("heart" + i).src = "src/heart.png"; // بازیابی قلب‌ها
-    }
+function setDifficulty() {
+  const difficulty = document.getElementById("difficulty").value;
+  if (difficulty === "easy") {
+    maxRange = 10;
+    timeLimit = 15;
+  } else if (difficulty === "medium") {
+    maxRange = 100;
+    timeLimit = 30;
+  } else if (difficulty === "hard") {
+    maxRange = 500;
+    timeLimit = 60;
+  }
+  reset();
 }
 
-// انتخاب سطح سختی
-difficultySelect.addEventListener("change", function () {
-    const difficulty = difficultySelect.value;
-    if (difficulty === "easy") maxNumber = 10;
-    else if (difficulty === "medium") maxNumber = 100;
-    else if (difficulty === "hard") maxNumber = 500;
-
-    resetGame(); // بازنشانی بازی پس از تغییر سطح
-    result.innerHTML = `اعداد بین 0 تا ${maxNumber} انتخاب می‌شوند.`;
-});
-
-// تایمر بازی
 function startTimer() {
-    clearInterval(timerInterval);
-    timerInterval = setInterval(() => {
-        timer++;
-        timerElement.innerText = `زمان: ${timer} ثانیه`;
-    }, 1000);
-}
+  clearInterval(timer);
+  let timeLeft = timeLimit;
+  timerDisplay.textContent = timeLeft;
 
-// پیام‌ها
-function showMessage(message, duration = 2000) {
-    result.innerHTML = message;
-    setTimeout(() => {
-        if (result.innerHTML === message) result.innerHTML = "";
-    }, duration);
-}
-
-// کم کردن قلب‌ها
-function decreaseHealth() {
-    if (health <= 1) {
-        if (confirm("شکست خوردی! آیا می‌خواهی دوباره بازی کنی؟")) {
-            resetGame();
-            startTimer();
-        }
-        return;
+  timer = setInterval(() => {
+    timeLeft--;
+    timerDisplay.textContent = timeLeft;
+    if (timeLeft <= 0) {
+      clearInterval(timer);
+      alert("زمان تمام شد! بازی را از نو شروع کنید.");
+      reset();
     }
-    document.getElementById("heart" + health).src = "src/heart-off.png";
-    health--;
+  }, 1000);
 }
 
-// بررسی حدس کاربر
+function showMessage(message) {
+  result.textContent = message;
+}
+
 function guessNumber() {
-    const guessed = parseInt(guessNumberInput.value, 10);
-    if (isNaN(guessed)) {
-        showMessage("لطفاً یک عدد وارد کن!", 3000);
-        return;
-    }
-
-    // ثبت در تاریخچه
-    const historyItem = document.createElement("li");
-    historyItem.innerText = guessed;
-    historyList.appendChild(historyItem);
-
-    if (guessed === number) {
-        clearInterval(timerInterval);
-        document.getElementById("main-number").innerText = number; // نمایش عدد درست
-        if (confirm("تبریک! درست حدس زدی! آیا می‌خواهی دوباره بازی کنی؟")) {
-            resetGame();
-            startTimer();
-        }
-    } else if (guessed < number) {
-        showMessage("برو بالاتر!", 3000);
-        decreaseHealth();
-    } else if (guessed > number) {
-        showMessage("بیا پایین‌تر!", 3000);
-        decreaseHealth();
-    }
+  const guessed = document.getElementById("guess-number").value;
+  if (guessed === "") {
+    showMessage("لطفا عددی وارد کنید!");
+    return;
+  }
+  if (parseInt(guessed) === number && health > 0) {
+    showMessage("آفرین! عدد درست را حدس زدی!");
+    mainNumber.textContent = number; // نمایش عدد صحیح
+    clearInterval(timer);
+    setTimeout(() => reset(), 3000);
+  } else if (parseInt(guessed) < number) {
+    showMessage("برو بالاتر!");
+    decreaseHealth();
+  } else if (parseInt(guessed) > number) {
+    showMessage("بیا پایین‌تر!");
+    decreaseHealth();
+  }
+  addHistory(guessed);
 }
 
-// شروع بازی
+function decreaseHealth() {
+  if (health <= 0) {
+    alert("متاسفم! شما شکست خوردید!");
+    reset();
+    return;
+  }
+  const healthEle = document.getElementById("heart" + health);
+  healthEle.src = "src/heart-off.png";
+  health--;
+}
+
+function addHistory(guessed) {
+  const listItem = document.createElement("li");
+  listItem.textContent = `حدس شما: ${guessed}`;
+  historyList.appendChild(listItem);
+}
+
+function reset() {
+  generateRandomNumber();
+  health = 5;
+  for (let i = 1; i <= 5; i++) {
+    const healthEle = document.getElementById("heart" + i);
+    healthEle.src = "src/heart.png";
+  }
+  mainNumber.textContent = "?"; // بازگشت علامت سوال
+  document.getElementById("guess-number").value = "";
+  historyList.innerHTML = "";
+  showMessage("");
+  startTimer();
+}
+
+// شروع بازی در بارگذاری صفحه
 window.onload = function () {
-    generateRandomNumber();
-    startTimer();
+  setDifficulty(); // تنظیم سطح پیش‌فرض
+  startTimer(); // شروع تایمر
 };
