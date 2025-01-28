@@ -5,17 +5,17 @@ const wheelContainer = document.getElementById("wheel-container");
 const spinButton = document.getElementById("spin-button");
 const wheel = document.getElementById("wheel");
 let number = 0;
-let health = 5; // تعداد جان‌های اولیه 5
+let health = 5; // تعداد جان‌های اولیه
 let timer;
 let timeLimit = 30;
 let maxRange = 100;
 let roundsPlayed = 0; // تعداد دفعات بازی
-let gameStarted = true; // برای بررسی وضعیت بازی
+let gameStarted = true; // وضعیت بازی
 let wheelResult = null; // ذخیره نتیجه گردونه
 let additionalGames = 0; // تعداد بازی‌های اضافه از گردونه
 let cooldownTimer = null; // تایمر برای 10 دقیقه غیرفعال بودن بازی
 let tempHealth = 5; // متغیر موقت برای ذخیره وضعیت سلامت
-let isWheelActive = false; // بررسی وضعیت گردونه
+let isWheelActive = false; // وضعیت گردونه
 
 // تابع تولید عدد تصادفی
 function generateRandomNumber() {
