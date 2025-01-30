@@ -2,23 +2,15 @@
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
-// رنگ‌ها و استایل جدید
-const backgroundColor = "#1E1E1E"; // پس‌زمینه تیره
-const paddleColor = "#00FFEA"; // رنگ نئونی برای پدل‌ها
-const ballColor = "#FF007F"; // رنگ توپ صورتی نئونی
-const netColor = "#FFFFFF"; // رنگ خط وسط سفید
-const textColor = "#FFD700"; // رنگ امتیازات طلایی
+// اضافه کردن تصویر پس‌زمینه
+const bgImage = new Image();
+bgImage.src = "background.jpg"; // تصویر پس‌زمینه رو در پوشه پروژه قرار بده
 
-// بارگذاری صداها
-let hit = new Audio();
-let wall = new Audio();
-let userScore = new Audio();
-let comScore = new Audio();
-
-hit.src = "sounds/hit.mp3";
-wall.src = "sounds/wall.mp3";
-comScore.src = "sounds/comScore.mp3";
-userScore.src = "sounds/userScore.mp3";
+// رنگ‌های نئونی و مدرن
+const paddleColor = "#00FFFF"; // آبی نئونی
+const ballColor = "#FF00FF"; // صورتی نئونی
+const netColor = "#FFFFFF"; // سفید
+const textColor = "#FFD700"; // طلایی
 
 // شیء توپ
 const ball = {
@@ -36,21 +28,30 @@ const user = { x: 0, y: (canvas.height - 100) / 2, width: 10, height: 100, score
 const com = { x: canvas.width - 10, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: paddleColor }
 const net = { x: (canvas.width - 2) / 2, y: 0, height: 10, width: 2, color: netColor }
 
-// تابع رسم مستطیل
-function drawRect(x, y, w, h, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, w, h);
+// تابع رسم پس‌زمینه
+function drawBackground() {
+    ctx.drawImage(bgImage, 0, 0, canvas.width, canvas.height);
 }
 
-// تابع رسم دایره (توپ)
+// تابع رسم مستطیل (با افکت Glow)
+function drawRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = color;
+    ctx.fillRect(x, y, w, h);
+    ctx.shadowBlur = 0; // بعد از رسم خاموشش می‌کنیم
+}
+
+// تابع رسم دایره (توپ با Glow)
 function drawArc(x, y, r, color) {
     ctx.fillStyle = color;
-    ctx.shadowBlur = 10; 
+    ctx.shadowBlur = 20;
     ctx.shadowColor = color;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2, true);
     ctx.closePath();
     ctx.fill();
+    ctx.shadowBlur = 0;
 }
 
 // کنترل بازیکن با ماوس
@@ -82,7 +83,7 @@ function drawNet() {
     }
 }
 
-// رسم امتیازات با فونت مدرن
+// رسم امتیازات (با افکت نئونی)
 function drawText(text, x, y) {
     ctx.fillStyle = textColor;
     ctx.font = "bold 50px Arial";
@@ -90,6 +91,7 @@ function drawText(text, x, y) {
     ctx.shadowBlur = 10;
     ctx.shadowColor = textColor;
     ctx.fillText(text, x, y);
+    ctx.shadowBlur = 0;
 }
 
 // تشخیص برخورد توپ با پدل
@@ -97,9 +99,9 @@ function collision(b, p) {
     return p.x < b.x + b.radius && p.x + p.width > b.x - b.radius && p.y < b.y + b.radius && p.y + p.height > b.y - b.radius;
 }
 
-// هوش مصنوعی
+// هوش مصنوعی (حریف با کمی خطا برای طبیعی‌تر شدن)
 function moveAI() {
-    let errorMargin = Math.random() * 40 - 20;
+    let errorMargin = Math.random() * 30 - 15;
     let targetY = ball.y - com.height / 2 + errorMargin;
     let aiSpeed = 3;
 
@@ -117,11 +119,9 @@ function update() {
 
     if (ball.x - ball.radius < 0) {
         com.score++;
-        comScore.play();
         resetBall();
     } else if (ball.x + ball.radius > canvas.width) {
         user.score++;
-        userScore.play();
         resetBall();
     }
 
@@ -131,13 +131,11 @@ function update() {
 
     if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
         ball.velocityY = -ball.velocityY;
-        wall.play();
     }
 
     let player = (ball.x + ball.radius < canvas.width / 2) ? user : com;
 
     if (collision(ball, player)) {
-        hit.play();
         let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
         let angleRad = (Math.PI / 4) * collidePoint;
         let direction = (ball.x + ball.radius < canvas.width / 2) ? 1 : -1;
@@ -149,7 +147,7 @@ function update() {
 
 // نمایش بازی
 function render() {
-    drawRect(0, 0, canvas.width, canvas.height, backgroundColor);
+    drawBackground(); // نمایش پس‌زمینه
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, 3 * canvas.width / 4, canvas.height / 5);
     drawNet();
