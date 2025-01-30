@@ -134,13 +134,13 @@ function update(){
     
     // computer plays for itself, and we must be able to beat it
     // modified AI with error probability
-    let errorProbability = 0.1; // 10% احتمال خطا
+    let errorProbability = 0.3; // 30% احتمال خطا
     
     if (Math.random() > errorProbability) {
         com.y += ((ball.y - (com.y + com.height / 2))) * 0.1;
     } else {
         // ایجاد خطا در موقعیت پدال
-        com.y += (Math.random() - 0.5) * 10; // مقدار تصادفی برای خطا
+        com.y += (Math.random() - 0.5) * 30; // مقدار تصادفی برای خطا بیشتر
     }
     
     // when the ball collides with bottom and top walls we inverse the y velocity.
