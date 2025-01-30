@@ -106,8 +106,11 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    com.y += (ball.y - (com.y + com.height / 2)) * 0.1;
+    // حرکت کامپیوتر با کمی خطا
+    let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
 
+    // جلوگیری از خارج شدن توپ از زمین
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
@@ -125,10 +128,24 @@ function update() {
         ball.speed += 0.1;
     }
 
+    // وقتی امتیاز یک نفر به 20 رسید
     if (user.score === 20 || com.score === 20) {
-        user.score = 0;
-        com.score = 0;
-        resetBall();
+        // بازی متوقف می‌شود
+        clearInterval(loop);
+        
+        // پیام به بازیکن
+        setTimeout(() => {
+            let winner = user.score === 20 ? "تو" : "کامپیوتر";
+            let message = user.score === 20 
+                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
+                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
+            alert(message); // پیام ساده
+            // ریست کردن امتیازات و شروع دوباره
+            user.score = 0;
+            com.score = 0;
+            resetBall();
+            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
+        }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
     }
 }
 
