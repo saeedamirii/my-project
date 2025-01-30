@@ -1,4 +1,4 @@
-// انتخاب عنصر canvas
+// انتخاب عنصر Canvas
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
@@ -7,11 +7,13 @@ let hit = new Audio();
 let wall = new Audio();
 let userScore = new Audio();
 let comScore = new Audio();
+let powerupSound = new Audio();
 
 hit.src = "sounds/hit.mp3";
 wall.src = "sounds/wall.mp3";
 comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
+powerupSound.src = "sounds/powerup.mp3";
 
 // شیء توپ
 const ball = {
@@ -22,7 +24,7 @@ const ball = {
     velocityY: 5,
     speed: 7,
     color: "#00FFFF" // آبی نئونی
-};
+}
 
 // پدل بازیکن
 const user = {
@@ -32,9 +34,9 @@ const user = {
     height: 100,
     score: 0,
     color: "#007BFF" // آبی الکتریکی
-};
+}
 
-// پدل حریف (کامپیوتر)
+// پدل کامپیوتر
 const com = {
     x: canvas.width - 60,
     y: (canvas.height - 100) / 2,
@@ -42,15 +44,25 @@ const com = {
     height: 100,
     score: 0,
     color: "#FF3B3B" // قرمز مات
+}
+
+// Power-ups
+let powerUp = {
+    x: Math.random() * (canvas.width - 50) + 25,
+    y: Math.random() * (canvas.height - 50) + 25,
+    size: 15,
+    active: false,
+    type: null,  // نوع power-up
+    color: "GREEN"
 };
 
-// رسم مستطیل (برای پدل‌ها و پس‌زمینه)
+// تابع رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
 }
 
-// رسم دایره (برای توپ)
+// تابع رسم دایره (برای توپ و power-ups)
 function drawArc(x, y, r, color) {
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -59,19 +71,25 @@ function drawArc(x, y, r, color) {
     ctx.fill();
 }
 
-// گوش دادن به حرکت ماوس برای کنترل پدل بازیکن
-canvas.addEventListener("mousemove", getMousePos);
-function getMousePos(evt) {
+// شنونده حرکت ماوس برای کنترل پدل کاربر
+canvas.addEventListener("mousemove", (evt) => {
     let rect = canvas.getBoundingClientRect();
     user.y = evt.clientY - rect.top - user.height / 2;
-}
+});
 
-// ریست کردن توپ هنگام امتیازگیری
+// تابع ریست کردن توپ
 function resetBall() {
     ball.x = canvas.width / 2;
     ball.y = canvas.height / 2;
     ball.velocityX = -ball.velocityX;
     ball.speed = 7;
+}
+
+// رسم خط وسط
+function drawNet() {
+    for (let i = 0; i <= canvas.height; i += 15) {
+        drawRect(net.x, net.y + i, net.width, net.height, net.color);
+    }
 }
 
 // رسم امتیازها
@@ -81,17 +99,15 @@ function drawText(text, x, y) {
     ctx.fillText(text, x, y);
 }
 
-// بررسی برخورد توپ با پدل
+// تابع بررسی برخورد توپ با پدل
 function collision(b, p) {
-    return (
-        b.x - b.radius < p.x + p.width &&
-        b.x + b.radius > p.x &&
-        b.y - b.radius < p.y + p.height &&
-        b.y + b.radius > p.y
-    );
+    return b.x - b.radius < p.x + p.width &&
+           b.x + b.radius > p.x &&
+           b.y - b.radius < p.y + p.height &&
+           b.y + b.radius > p.y;
 }
 
-// تابع بروزرسانی وضعیت بازی
+// بروزرسانی وضعیت بازی
 function update() {
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -106,50 +122,85 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // حرکت کامپیوتر با کمی خطا
-    let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
-    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.1;
 
-    // جلوگیری از خارج شدن توپ از زمین
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
 
-    let player = (ball.x < canvas.width / 2) ? user : com;
+    let player = (ball.x + ball.radius < canvas.width / 2) ? user : com;
 
     if (collision(ball, player)) {
         hit.play();
-        let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
+        let collidePoint = ball.y - (player.y + player.height / 2);
+        collidePoint = collidePoint / (player.height / 2);
         let angleRad = (Math.PI / 4) * collidePoint;
-        let direction = (ball.x < canvas.width / 2) ? 1 : -1;
+        let direction = (ball.x + ball.radius < canvas.width / 2) ? 1 : -1;
         ball.velocityX = direction * ball.speed * Math.cos(angleRad);
         ball.velocityY = ball.speed * Math.sin(angleRad);
         ball.speed += 0.1;
     }
 
-    // وقتی امتیاز یک نفر به 20 رسید
-    if (user.score === 20 || com.score === 20) {
-        // بازی متوقف می‌شود
-        clearInterval(loop);
-        
-        // پیام به بازیکن
-        setTimeout(() => {
-            let winner = user.score === 20 ? "تو" : "کامپیوتر";
-            let message = user.score === 20 
-                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
-                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
-            alert(message); // پیام ساده
-            // ریست کردن امتیازات و شروع دوباره
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
-        }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
+    // بررسی برخورد توپ با Power-up
+    if (powerUp.active && ball.x > powerUp.x - powerUp.size && ball.x < powerUp.x + powerUp.size &&
+        ball.y > powerUp.y - powerUp.size && ball.y < powerUp.y + powerUp.size) {
+        activatePowerUp(powerUp.type);
+        powerUp.active = false;
     }
 }
 
-// تابع رسم تمام عناصر بازی
+// فعال‌سازی Power-up
+function activatePowerUp(type) {
+    powerupSound.play();
+    switch (type) {
+        case "biggerPaddle":
+            user.height += 20;
+            setTimeout(() => user.height -= 20, 5000);
+            break;
+        case "extraPoint":
+            user.score++;
+            break;
+        case "doubleBall":
+            ball.speed -= 2;
+            setTimeout(() => ball.speed += 2, 5000);
+            break;
+        case "fasterBall":
+            ball.speed += 3;
+            setTimeout(() => ball.speed -= 3, 5000);
+            break;
+        case "reverseControls":
+            canvas.addEventListener("mousemove", (evt) => {
+                let rect = canvas.getBoundingClientRect();
+                user.y = canvas.height - (evt.clientY - rect.top) - user.height / 2;
+            });
+            setTimeout(() => {
+                canvas.addEventListener("mousemove", (evt) => {
+                    let rect = canvas.getBoundingClientRect();
+                    user.y = evt.clientY - rect.top - user.height / 2;
+                });
+            }, 5000);
+            break;
+    }
+}
+
+// رسم Power-up
+function drawPowerUp() {
+    if (powerUp.active) {
+        drawArc(powerUp.x, powerUp.y, powerUp.size, powerUp.color);
+    }
+}
+
+// ایجاد Power-up جدید
+setInterval(() => {
+    powerUp.x = Math.random() * (canvas.width - 50) + 25;
+    powerUp.y = Math.random() * (canvas.height - 50) + 25;
+    powerUp.type = ["biggerPaddle", "extraPoint", "doubleBall", "fasterBall", "reverseControls"][Math.floor(Math.random() * 5)];
+    powerUp.color = (["biggerPaddle", "extraPoint", "doubleBall"].includes(powerUp.type)) ? "GREEN" : "RED";
+    powerUp.active = true;
+}, 10000);
+
+// رندر کردن بازی
 function render() {
     // پس‌زمینه گرادینتی شیک
     let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
@@ -170,31 +221,24 @@ function render() {
     ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 50);
-    ctx.lineTo(canvas.width / 2, canvas.height - 50);
+    ctx.moveTo(canvas.width / 2, 0);
+    ctx.lineTo(canvas.width / 2, canvas.height);
     ctx.stroke();
-    ctx.setLineDash([]);
 
-    // افکت Glow برای توپ و پدل‌ها
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#00FFFF";
-    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
+    // رسم پدل‌ها و توپ
+    drawRect(user.x, user.y, user.width, user.height, user.color);
+    drawRect(com.x, com.y, com.width, com.height, com.color);
+    drawArc(ball.x, ball.y, ball.radius, ball.color);
 
-    ctx.shadowColor = "#007BFF";
-    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
-
-    ctx.shadowColor = "#FF3B3B";
-    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
-
-    ctx.shadowBlur = 0;
+    // رسم Power-up‌ها
+    drawPowerUp();
 }
 
-// تابع اجرای بازی
+// اجرای بازی
 function game() {
     update();
     render();
 }
 
-// تعداد فریم در ثانیه
-let framePerSecond = 50;
-let loop = setInterval(game, 1000 / framePerSecond);
+// شروع بازی
+setInterval(game, 1000 / 50);
