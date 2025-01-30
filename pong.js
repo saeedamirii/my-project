@@ -1,10 +1,8 @@
-// select canvas element
+// انتخاب عنصر canvas
 const canvas = document.getElementById("pong");
-
-// getContext of canvas = methods and properties to draw and do a lot of thing to the canvas
 const ctx = canvas.getContext('2d');
 
-// load sounds
+// بارگذاری صداها
 let hit = new Audio();
 let wall = new Audio();
 let userScore = new Audio();
@@ -15,195 +13,190 @@ wall.src = "sounds/wall.mp3";
 comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
 
-// Ball object
+// شیء توپ
 const ball = {
-    x : canvas.width/2,
-    y : canvas.height/2,
-    radius : 10,
-    velocityX : 5,
-    velocityY : 5,
-    speed : 7,
-    color : "WHITE"
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 10,
+    velocityX: 5,
+    velocityY: 5,
+    speed: 7,
+    color: "WHITE"
 }
 
-// User Paddle
+// بازیکن
 const user = {
-    x : 0, // left side of canvas
-    y : (canvas.height - 100)/2, // -100 the height of paddle
-    width : 10,
-    height : 100,
-    score : 0,
-    color : "WHITE"
+    x: 0,
+    y: (canvas.height - 100) / 2,
+    width: 10,
+    height: 100,
+    score: 0,
+    color: "WHITE"
 }
 
-// COM Paddle
+// حریف (کامپیوتر)
 const com = {
-    x : canvas.width - 10, // - width of paddle
-    y : (canvas.height - 100)/2, // -100 the height of paddle
-    width : 10,
-    height : 100,
-    score : 0,
-    color : "WHITE"
+    x: canvas.width - 10,
+    y: (canvas.height - 100) / 2,
+    width: 10,
+    height: 100,
+    score: 0,
+    color: "WHITE"
 }
 
-// NET
+// خط وسط
 const net = {
-    x : (canvas.width - 2)/2,
-    y : 0,
-    height : 10,
-    width : 2,
-    color : "WHITE"
+    x: (canvas.width - 2) / 2,
+    y: 0,
+    height: 10,
+    width: 2,
+    color: "WHITE"
 }
 
-// draw a rectangle, will be used to draw paddles
-function drawRect(x, y, w, h, color){
+// تابع رسم مستطیل (برای پدل‌ها و خط وسط)
+function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
 }
 
-// draw circle, will be used to draw the ball
-function drawArc(x, y, r, color){
+// تابع رسم دایره (برای توپ)
+function drawArc(x, y, r, color) {
     ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(x,y,r,0,Math.PI*2,true);
+    ctx.arc(x, y, r, 0, Math.PI * 2, true);
     ctx.closePath();
     ctx.fill();
 }
 
-// listening to the mouse
+// حرکت ماوس برای کنترل بازیکن
 canvas.addEventListener("mousemove", getMousePos);
-
-function getMousePos(evt){
+function getMousePos(evt) {
     let rect = canvas.getBoundingClientRect();
-    
-    user.y = evt.clientY - rect.top - user.height/2;
+    user.y = evt.clientY - rect.top - user.height / 2;
 }
 
-// when COM or USER scores, we reset the ball
-function resetBall(){
-    ball.x = canvas.width/2;
-    ball.y = canvas.height/2;
+// ریست کردن موقعیت توپ
+function resetBall() {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
     ball.velocityX = -ball.velocityX;
     ball.speed = 7;
 }
 
-// draw the net
-function drawNet(){
-    for(let i = 0; i <= canvas.height; i+=15){
+// رسم خط وسط
+function drawNet() {
+    for (let i = 0; i <= canvas.height; i += 15) {
         drawRect(net.x, net.y + i, net.width, net.height, net.color);
     }
 }
 
-// draw text
-function drawText(text,x,y){
+// رسم متن امتیازات
+function drawText(text, x, y) {
     ctx.fillStyle = "#FFF";
     ctx.font = "75px fantasy";
     ctx.fillText(text, x, y);
 }
 
-// collision detection
-function collision(b,p){
-    p.top = p.y;
-    p.bottom = p.y + p.height;
-    p.left = p.x;
-    p.right = p.x + p.width;
-    
-    b.top = b.y - b.radius;
-    b.bottom = b.y + b.radius;
-    b.left = b.x - b.radius;
-    b.right = b.x + b.radius;
-    
-    return p.left < b.right && p.top < b.bottom && p.right > b.left && p.bottom > b.top;
+// تشخیص برخورد توپ با پدل‌ها
+function collision(b, p) {
+    return p.x < b.x + b.radius && 
+           p.x + p.width > b.x - b.radius &&
+           p.y < b.y + b.radius && 
+           p.y + p.height > b.y - b.radius;
 }
 
-// update function, the function that does all calculations
-function update(){
-    
-    // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
-    if( ball.x - ball.radius < 0 ){
+// هوش مصنوعی حریف (اصلاح‌شده)
+function moveAI() {
+    let errorMargin = Math.random() * 40 - 20; // ایجاد خطای تصادفی بین -20 تا 20 پیکسل
+    let targetY = ball.y - com.height / 2 + errorMargin;
+
+    let aiSpeed = 3; // کاهش سرعت حرکت حریف
+
+    if (com.y < targetY) {
+        com.y += aiSpeed;
+    } else if (com.y > targetY) {
+        com.y -= aiSpeed;
+    }
+}
+
+// به‌روزرسانی وضعیت بازی
+function update() {
+    // بررسی امتیازها
+    if (ball.x - ball.radius < 0) {
         com.score++;
         comScore.play();
         resetBall();
-    }else if( ball.x + ball.radius > canvas.width){
+    } else if (ball.x + ball.radius > canvas.width) {
         user.score++;
         userScore.play();
         resetBall();
     }
-    
-    // the ball has a velocity
+
+    // حرکت توپ
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
-    
-    // computer plays for itself, and we must be able to beat it
-    // simple AI
-    com.y += ((ball.y - (com.y + com.height/2)))*0.1;
-    
-    // when the ball collides with bottom and top walls we inverse the y velocity.
-    if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
+
+    // حرکت حریف با تابع جدید
+    moveAI();
+
+    // برخورد توپ با دیوار بالا و پایین
+    if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
-    
-    // we check if the paddle hit the user or the com paddle
-    let player = (ball.x + ball.radius < canvas.width/2) ? user : com;
-    
-    // if the ball hits a paddle
-    if(collision(ball,player)){
-        // play sound
+
+    // تشخیص اینکه توپ با بازیکن برخورد می‌کند یا با حریف
+    let player = (ball.x + ball.radius < canvas.width / 2) ? user : com;
+
+    // برخورد توپ با پدل
+    if (collision(ball, player)) {
         hit.play();
-        // we check where the ball hits the paddle
-        let collidePoint = (ball.y - (player.y + player.height/2));
-        // normalize the value of collidePoint, we need to get numbers between -1 and 1.
-        // -player.height/2 < collide Point < player.height/2
-        collidePoint = collidePoint / (player.height/2);
-        
-        // when the ball hits the top of a paddle we want the ball, to take a -45degees angle
-        // when the ball hits the center of the paddle we want the ball to take a 0degrees angle
-        // when the ball hits the bottom of the paddle we want the ball to take a 45degrees
-        // Math.PI/4 = 45degrees
-        let angleRad = (Math.PI/4) * collidePoint;
-        
-        // change the X and Y velocity direction
-        let direction = (ball.x + ball.radius < canvas.width/2) ? 1 : -1;
+
+        // محاسبه نقطه برخورد
+        let collidePoint = (ball.y - (player.y + player.height / 2));
+        collidePoint = collidePoint / (player.height / 2);
+
+        // تعیین زاویه جدید توپ
+        let angleRad = (Math.PI / 4) * collidePoint;
+
+        // تعیین جهت حرکت توپ
+        let direction = (ball.x + ball.radius < canvas.width / 2) ? 1 : -1;
         ball.velocityX = direction * ball.speed * Math.cos(angleRad);
         ball.velocityY = ball.speed * Math.sin(angleRad);
-        
-        // speed up the ball everytime a paddle hits it.
+
+        // افزایش سرعت توپ در هر برخورد
         ball.speed += 0.1;
     }
 }
 
-// render function, the function that does al the drawing
-function render(){
-    
-    // clear the canvas
+// تابع رندر برای نمایش بازی
+function render() {
+    // پاک کردن صفحه
     drawRect(0, 0, canvas.width, canvas.height, "#000");
-    
-    // draw the user score to the left
-    drawText(user.score,canvas.width/4,canvas.height/5);
-    
-    // draw the COM score to the right
-    drawText(com.score,3*canvas.width/4,canvas.height/5);
-    
-    // draw the net
+
+    // نمایش امتیازات
+    drawText(user.score, canvas.width / 4, canvas.height / 5);
+    drawText(com.score, 3 * canvas.width / 4, canvas.height / 5);
+
+    // نمایش خط وسط
     drawNet();
-    
-    // draw the user's paddle
+
+    // نمایش پدل‌های بازیکن و حریف
     drawRect(user.x, user.y, user.width, user.height, user.color);
-    
-    // draw the COM's paddle
     drawRect(com.x, com.y, com.width, com.height, com.color);
-    
-    // draw the ball
+
+    // نمایش توپ
     drawArc(ball.x, ball.y, ball.radius, ball.color);
 }
-function game(){
+
+// حلقه اجرای بازی
+function game() {
     update();
     render();
 }
-// number of frames per second
+
+// تعیین نرخ فریم
 let framePerSecond = 50;
 
-//call the game function 50 times every 1 Sec
-let loop = setInterval(game,1000/framePerSecond);
-
+// اجرای بازی 50 بار در ثانیه
+let loop = setInterval(game, 1000 / framePerSecond);
