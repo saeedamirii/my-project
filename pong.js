@@ -75,7 +75,6 @@ canvas.addEventListener("mousemove", getMousePos);
 
 function getMousePos(evt){
     let rect = canvas.getBoundingClientRect();
-    
     user.y = evt.clientY - rect.top - user.height/2;
 }
 
@@ -118,7 +117,6 @@ function collision(b,p){
 
 // update function, the function that does all calculations
 function update(){
-    
     // change the score of players, if the ball goes to the left "ball.x<0" computer win, else if "ball.x > canvas.width" the user win
     if( ball.x - ball.radius < 0 ){
         com.score++;
@@ -135,8 +133,15 @@ function update(){
     ball.y += ball.velocityY;
     
     // computer plays for itself, and we must be able to beat it
-    // simple AI
-    com.y += ((ball.y - (com.y + com.height/2)))*0.1;
+    // modified AI with error probability
+    let errorProbability = 0.1; // 10% احتمال خطا
+    
+    if (Math.random() > errorProbability) {
+        com.y += ((ball.y - (com.y + com.height / 2))) * 0.1;
+    } else {
+        // ایجاد خطا در موقعیت پدال
+        com.y += (Math.random() - 0.5) * 10; // مقدار تصادفی برای خطا
+    }
     
     // when the ball collides with bottom and top walls we inverse the y velocity.
     if(ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height){
@@ -154,7 +159,6 @@ function update(){
         // we check where the ball hits the paddle
         let collidePoint = (ball.y - (player.y + player.height/2));
         // normalize the value of collidePoint, we need to get numbers between -1 and 1.
-        // -player.height/2 < collide Point < player.height/2
         collidePoint = collidePoint / (player.height/2);
         
         // when the ball hits the top of a paddle we want the ball, to take a -45degees angle
@@ -175,7 +179,6 @@ function update(){
 
 // render function, the function that does al the drawing
 function render(){
-    
     // clear the canvas
     drawRect(0, 0, canvas.width, canvas.height, "#000");
     
@@ -197,13 +200,15 @@ function render(){
     // draw the ball
     drawArc(ball.x, ball.y, ball.radius, ball.color);
 }
+
+// game function
 function game(){
     update();
     render();
 }
+
 // number of frames per second
 let framePerSecond = 50;
 
-//call the game function 50 times every 1 Sec
-let loop = setInterval(game,1000/framePerSecond);
-
+// call the game function 50 times every 1 Sec
+let loop = setInterval(game, 1000/framePerSecond);
