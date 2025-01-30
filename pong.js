@@ -2,6 +2,13 @@
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
+// رنگ‌ها و استایل جدید
+const backgroundColor = "#1E1E1E"; // پس‌زمینه تیره
+const paddleColor = "#00FFEA"; // رنگ نئونی برای پدل‌ها
+const ballColor = "#FF007F"; // رنگ توپ صورتی نئونی
+const netColor = "#FFFFFF"; // رنگ خط وسط سفید
+const textColor = "#FFD700"; // رنگ امتیازات طلایی
+
 // بارگذاری صداها
 let hit = new Audio();
 let wall = new Audio();
@@ -21,37 +28,13 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "WHITE"
+    color: ballColor
 }
 
-// بازیکن
-const user = {
-    x: 0,
-    y: (canvas.height - 100) / 2,
-    width: 10,
-    height: 100,
-    score: 0,
-    color: "WHITE"
-}
-
-// حریف (کامپیوتر)
-const com = {
-    x: canvas.width - 10,
-    y: (canvas.height - 100) / 2,
-    width: 10,
-    height: 100,
-    score: 0,
-    color: "WHITE"
-}
-
-// خط وسط
-const net = {
-    x: (canvas.width - 2) / 2,
-    y: 0,
-    height: 10,
-    width: 2,
-    color: "WHITE"
-}
+// بازیکن و حریف
+const user = { x: 0, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: paddleColor }
+const com = { x: canvas.width - 10, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: paddleColor }
+const net = { x: (canvas.width - 2) / 2, y: 0, height: 10, width: 2, color: netColor }
 
 // تابع رسم مستطیل
 function drawRect(x, y, w, h, color) {
@@ -62,6 +45,8 @@ function drawRect(x, y, w, h, color) {
 // تابع رسم دایره (توپ)
 function drawArc(x, y, r, color) {
     ctx.fillStyle = color;
+    ctx.shadowBlur = 10; 
+    ctx.shadowColor = color;
     ctx.beginPath();
     ctx.arc(x, y, r, 0, Math.PI * 2, true);
     ctx.closePath();
@@ -69,21 +54,16 @@ function drawArc(x, y, r, color) {
 }
 
 // کنترل بازیکن با ماوس
-canvas.addEventListener("mousemove", getMousePos);
-function getMousePos(evt) {
+canvas.addEventListener("mousemove", evt => {
     let rect = canvas.getBoundingClientRect();
     user.y = evt.clientY - rect.top - user.height / 2;
-}
+});
 
 // ریست کردن بازی
 function resetGame(winner) {
     alert(winner + " برنده شد! بازی دوباره شروع می‌شود.");
-    
-    // ریست امتیازات
     user.score = 0;
     com.score = 0;
-    
-    // ریست توپ و سرعت آن
     resetBall();
 }
 
@@ -102,27 +82,26 @@ function drawNet() {
     }
 }
 
-// رسم امتیازات
+// رسم امتیازات با فونت مدرن
 function drawText(text, x, y) {
-    ctx.fillStyle = "#FFF";
-    ctx.font = "75px fantasy";
+    ctx.fillStyle = textColor;
+    ctx.font = "bold 50px Arial";
+    ctx.textAlign = "center";
+    ctx.shadowBlur = 10;
+    ctx.shadowColor = textColor;
     ctx.fillText(text, x, y);
 }
 
 // تشخیص برخورد توپ با پدل
 function collision(b, p) {
-    return p.x < b.x + b.radius && 
-           p.x + p.width > b.x - b.radius &&
-           p.y < b.y + b.radius && 
-           p.y + p.height > b.y - b.radius;
+    return p.x < b.x + b.radius && p.x + p.width > b.x - b.radius && p.y < b.y + b.radius && p.y + p.height > b.y - b.radius;
 }
 
-// هوش مصنوعی حریف (اصلاح‌شده)
+// هوش مصنوعی
 function moveAI() {
-    let errorMargin = Math.random() * 40 - 20; // ایجاد خطای تصادفی بین -20 تا 20 پیکسل
+    let errorMargin = Math.random() * 40 - 20;
     let targetY = ball.y - com.height / 2 + errorMargin;
-
-    let aiSpeed = 3; // کاهش سرعت حرکت حریف
+    let aiSpeed = 3;
 
     if (com.y < targetY) {
         com.y += aiSpeed;
@@ -133,17 +112,9 @@ function moveAI() {
 
 // به‌روزرسانی بازی
 function update() {
-    // بررسی امتیاز و اعلام برنده
-    if (user.score >= 20) {
-        resetGame("بازیکن");
-        return;
-    }
-    if (com.score >= 20) {
-        resetGame("کامپیوتر");
-        return;
-    }
+    if (user.score >= 20) { resetGame("بازیکن"); return; }
+    if (com.score >= 20) { resetGame("کامپیوتر"); return; }
 
-    // بررسی امتیازات و ریست توپ
     if (ball.x - ball.radius < 0) {
         com.score++;
         comScore.play();
@@ -154,58 +125,36 @@ function update() {
         resetBall();
     }
 
-    // حرکت توپ
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
-
-    // حرکت هوش مصنوعی
     moveAI();
 
-    // برخورد توپ با دیوار بالا و پایین
     if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
 
-    // تشخیص برخورد با پدل بازیکن یا حریف
     let player = (ball.x + ball.radius < canvas.width / 2) ? user : com;
 
     if (collision(ball, player)) {
         hit.play();
-
-        // محاسبه نقطه برخورد
-        let collidePoint = (ball.y - (player.y + player.height / 2));
-        collidePoint = collidePoint / (player.height / 2);
-
-        // تعیین زاویه جدید توپ
+        let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
         let angleRad = (Math.PI / 4) * collidePoint;
-
-        // تعیین جهت حرکت توپ
         let direction = (ball.x + ball.radius < canvas.width / 2) ? 1 : -1;
         ball.velocityX = direction * ball.speed * Math.cos(angleRad);
         ball.velocityY = ball.speed * Math.sin(angleRad);
-
-        // افزایش سرعت توپ
         ball.speed += 0.1;
     }
 }
 
 // نمایش بازی
 function render() {
-    drawRect(0, 0, canvas.width, canvas.height, "#000");
-
-    // نمایش امتیازات
+    drawRect(0, 0, canvas.width, canvas.height, backgroundColor);
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, 3 * canvas.width / 4, canvas.height / 5);
-
-    // نمایش خط وسط
     drawNet();
-
-    // نمایش پدل بازیکن و حریف
     drawRect(user.x, user.y, user.width, user.height, user.color);
     drawRect(com.x, com.y, com.width, com.height, com.color);
-
-    // نمایش توپ
     drawArc(ball.x, ball.y, ball.radius, ball.color);
 }
 
@@ -215,6 +164,6 @@ function game() {
     render();
 }
 
-// تعیین نرخ فریم
+// تنظیم نرخ فریم
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
