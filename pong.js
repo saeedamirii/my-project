@@ -13,9 +13,6 @@ wall.src = "sounds/wall.mp3";
 comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
 
-// دریافت نام بازیکن از LocalStorage
-let playerName = localStorage.getItem("currentPlayer") || "بازیکن";
-
 // شیء توپ
 const ball = {
     x: canvas.width / 2,
@@ -24,7 +21,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "#00FFFF"
+    color: "#00FFFF" // آبی نئونی
 };
 
 // پدل بازیکن
@@ -34,7 +31,8 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#007BFF"
+    color: "#007BFF", // آبی الکتریکی
+    name: ""
 };
 
 // پدل حریف (کامپیوتر)
@@ -44,7 +42,18 @@ const com = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#FF3B3B"
+    color: "#FF3B3B" // قرمز مات
+};
+
+// متغیر برای قدرت‌ها
+let powerUpActive = false;
+let powerUp = {
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    color: "#4CAF50",  // رنگ سبز برای قدرت مثبت
+    isActive: false
 };
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
@@ -63,10 +72,11 @@ function drawArc(x, y, r, color) {
 }
 
 // گوش دادن به حرکت ماوس برای کنترل پدل بازیکن
-canvas.addEventListener("mousemove", function(evt) {
+canvas.addEventListener("mousemove", getMousePos);
+function getMousePos(evt) {
     let rect = canvas.getBoundingClientRect();
     user.y = evt.clientY - rect.top - user.height / 2;
-});
+}
 
 // ریست کردن توپ هنگام امتیازگیری
 function resetBall() {
@@ -93,8 +103,39 @@ function collision(b, p) {
     );
 }
 
+// تابع اسپاون (ظاهر شدن) قدرت
+function spawnPowerUp() {
+    if (!powerUp.isActive) {
+        powerUp.x = Math.random() * (canvas.width - 100) + 50; // موقعیت افقی تصادفی
+        powerUp.y = Math.random() * (canvas.height - 100) + 50; // موقعیت عمودی تصادفی
+        powerUp.isActive = true;
+    }
+}
+
+// تابع بررسی برخورد با آیتم قدرت
+function checkPowerUpCollision() {
+    if (powerUp.isActive && ball.x - ball.radius < powerUp.x + powerUp.width && 
+        ball.x + ball.radius > powerUp.x && 
+        ball.y - ball.radius < powerUp.y + powerUp.height &&
+        ball.y + ball.radius > powerUp.y) {
+        
+        // وقتی توپ به آیتم برخورد کرد
+        user.height += 20;  // بزرگ کردن راکت بازیکن
+        powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
+        setTimeout(() => {
+            user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
+        }, 5000);  // مدت زمان 5 ثانیه
+    }
+}
+
 // تابع بروزرسانی وضعیت بازی
 function update() {
+    // اسپاون آیتم قدرت
+    spawnPowerUp();
+    
+    // بررسی برخورد توپ با آیتم
+    checkPowerUpCollision();
+
     if (ball.x - ball.radius < 0) {
         com.score++;
         comScore.play();
@@ -108,8 +149,9 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // حرکت کامپیوتر
-    com.y += (ball.y - (com.y + com.height / 2)) * 0.05;
+    // حرکت کامپیوتر با کمی خطا
+    let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
 
     // جلوگیری از خارج شدن توپ از زمین
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
@@ -129,24 +171,30 @@ function update() {
         ball.speed += 0.1;
     }
 
-    // بررسی پایان بازی
-    if (user.score === 10 || com.score === 10) {
+    // وقتی امتیاز یک نفر به 20 رسید
+    if (user.score === 20 || com.score === 20) {
+        // بازی متوقف می‌شود
         clearInterval(loop);
+        
+        // پیام به بازیکن
         setTimeout(() => {
-            let winner = user.score === 10 ? playerName : "کامپیوتر";
-            alert(user.score === 10 ? `🎉 آفرین ${playerName}! تو برنده شدی! 🏆` : "😢 باختی! دوباره امتحان کن!");
-            updateLeaderboard(winner);
+            let winner = user.score === 20 ? "تو" : "کامپیوتر";
+            let message = user.score === 20 
+                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
+                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
+            alert(message); // پیام ساده
+            // ریست کردن امتیازات و شروع دوباره
             user.score = 0;
             com.score = 0;
             resetBall();
-            loop = setInterval(game, 1000 / 50);
-        }, 1000);
+            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
+        }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
     }
 }
 
 // تابع رسم تمام عناصر بازی
 function render() {
-    // پس‌زمینه گرادینتی
+    // پس‌زمینه گرادینتی شیک
     let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#0F2027");
     gradient.addColorStop(0.5, "#203A43");
@@ -170,10 +218,23 @@ function render() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // رسم توپ و پدل‌ها
+    // افکت Glow برای توپ و پدل‌ها
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00FFFF";
     drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
+
+    ctx.shadowColor = "#007BFF";
     drawRect(user.x, user.y, user.width, user.height, "#007BFF");
+
+    ctx.shadowColor = "#FF3B3B";
     drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
+
+    ctx.shadowBlur = 0;
+
+    // رندر کردن آیتم قدرت
+    if (powerUp.isActive) {
+        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
+    }
 }
 
 // تابع اجرای بازی
@@ -182,13 +243,33 @@ function game() {
     render();
 }
 
+// تعداد فریم در ثانیه
+let framePerSecond = 50;
+let loop;
+
+// تابع شروع بازی
+function startGame() {
+    let name = document.getElementById("playerName").value;
+    if (name) {
+        user.name = name;
+        document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم وارد کردن نام
+        loop = setInterval(game, 1000 / framePerSecond);
+    } else {
+        alert("لطفاً نام خود را وارد کنید!");
+    }
+}
+
 // ذخیره و نمایش جدول رتبه‌بندی
 function updateLeaderboard(winner) {
     let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || {};
-
+    
+    // افزایش برد بازیکن
     leaderboard[winner] = (leaderboard[winner] || 0) + 1;
+
+    // ذخیره در LocalStorage
     localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 
+    // مرتب‌سازی و نمایش رتبه‌بندی
     displayLeaderboard(leaderboard);
 }
 
@@ -207,8 +288,3 @@ function displayLeaderboard(leaderboard) {
 
 // نمایش رتبه‌بندی در شروع بازی
 displayLeaderboard(JSON.parse(localStorage.getItem("leaderboard")) || {});
-
-// شروع بازی
-function startPongGame() {
-    loop = setInterval(game, 1000 / 50);
-    }
