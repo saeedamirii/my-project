@@ -7,11 +7,13 @@ let hit = new Audio();
 let wall = new Audio();
 let userScore = new Audio();
 let comScore = new Audio();
+let powerupSound = new Audio();
 
 hit.src = "sounds/hit.mp3";
 wall.src = "sounds/wall.mp3";
 comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
+powerupSound.src = "sounds/powerup.mp3";
 
 // شیء توپ
 const ball = {
@@ -21,7 +23,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "#00FFFF" // آبی نئونی
+    color: "#00FFFF"
 };
 
 // پدل بازیکن
@@ -31,7 +33,8 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#007BFF" // آبی الکتریکی
+    color: "#007BFF",
+    speed: 10
 };
 
 // پدل حریف (کامپیوتر)
@@ -41,8 +44,85 @@ const com = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#FF3B3B" // قرمز مات
+    color: "#FF3B3B"
 };
+
+// Power-Ups
+const powerUps = [];
+const powerUpEffects = {
+    increasePaddleSize: "increasePaddleSize",
+    decreasePaddleSize: "decreasePaddleSize",
+    increaseBallSpeed: "increaseBallSpeed",
+    decreaseBallSpeed: "decreaseBallSpeed",
+    increasePaddleSpeed: "increasePaddleSpeed",
+    decreasePaddleSpeed: "decreasePaddleSpeed"
+};
+
+// ایجاد Power-Up در موقعیت تصادفی
+function spawnPowerUp() {
+    const effectTypes = [
+        powerUpEffects.increasePaddleSize,
+        powerUpEffects.decreasePaddleSize,
+        powerUpEffects.increaseBallSpeed,
+        powerUpEffects.decreaseBallSpeed,
+        powerUpEffects.increasePaddleSpeed,
+        powerUpEffects.decreasePaddleSpeed
+    ];
+    let effect = effectTypes[Math.floor(Math.random() * effectTypes.length)];
+    
+    let powerUp = {
+        x: Math.random() * (canvas.width - 200) + 100,
+        y: Math.random() * (canvas.height - 200) + 100,
+        radius: 15,
+        color: effect.includes("increase") ? "#00FF00" : "#FF0000", // سبز برای مثبت، قرمز برای منفی
+        effect: effect
+    };
+
+    powerUps.push(powerUp);
+
+    setTimeout(() => {
+        powerUps.splice(powerUps.indexOf(powerUp), 1);
+    }, 5000);
+}
+
+// رسم Power-Ups
+function drawPowerUps() {
+    powerUps.forEach((p) => {
+        drawArc(p.x, p.y, p.radius, p.color);
+    });
+}
+
+// برخورد توپ با Power-Up
+function checkPowerUpCollision() {
+    powerUps.forEach((p, index) => {
+        let dx = ball.x - p.x;
+        let dy = ball.y - p.y;
+        let distance = Math.sqrt(dx * dx + dy * dy);
+
+        if (distance < ball.radius + p.radius) {
+            powerupSound.play();
+            applyPowerUpEffect(p.effect);
+            powerUps.splice(index, 1);
+        }
+    });
+}
+
+// اعمال اثرات Power-Up
+function applyPowerUpEffect(effect) {
+    if (effect === powerUpEffects.increasePaddleSize) {
+        user.height = Math.min(user.height + 20, 150);
+    } else if (effect === powerUpEffects.decreasePaddleSize) {
+        user.height = Math.max(user.height - 20, 50);
+    } else if (effect === powerUpEffects.increaseBallSpeed) {
+        ball.speed = Math.min(ball.speed + 2, 12);
+    } else if (effect === powerUpEffects.decreaseBallSpeed) {
+        ball.speed = Math.max(ball.speed - 2, 5);
+    } else if (effect === powerUpEffects.increasePaddleSpeed) {
+        user.speed = Math.min(user.speed + 2, 15);
+    } else if (effect === powerUpEffects.decreasePaddleSpeed) {
+        user.speed = Math.max(user.speed - 2, 5);
+    }
+}
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
@@ -50,7 +130,7 @@ function drawRect(x, y, w, h, color) {
     ctx.fillRect(x, y, w, h);
 }
 
-// رسم دایره (برای توپ)
+// رسم دایره (برای توپ و Power-Ups)
 function drawArc(x, y, r, color) {
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -59,14 +139,14 @@ function drawArc(x, y, r, color) {
     ctx.fill();
 }
 
-// گوش دادن به حرکت ماوس برای کنترل پدل بازیکن
+// کنترل پدل بازیکن با ماوس
 canvas.addEventListener("mousemove", getMousePos);
 function getMousePos(evt) {
     let rect = canvas.getBoundingClientRect();
     user.y = evt.clientY - rect.top - user.height / 2;
 }
 
-// ریست کردن توپ هنگام امتیازگیری
+// ریست کردن توپ
 function resetBall() {
     ball.x = canvas.width / 2;
     ball.y = canvas.height / 2;
@@ -76,7 +156,7 @@ function resetBall() {
 
 // رسم امتیازها
 function drawText(text, x, y) {
-    ctx.fillStyle = "#FFD700"; // طلایی متالیک
+    ctx.fillStyle = "#FFD700"; 
     ctx.font = "50px fantasy";
     ctx.fillText(text, x, y);
 }
@@ -91,7 +171,7 @@ function collision(b, p) {
     );
 }
 
-// تابع بروزرسانی وضعیت بازی
+// بروزرسانی وضعیت بازی
 function update() {
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -106,11 +186,10 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // حرکت کامپیوتر با کمی خطا
-    let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
+    // حرکت کامپیوتر
+    let randomError = Math.random() * 0.5 - 0.25;
     com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
 
-    // جلوگیری از خارج شدن توپ از زمین
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
@@ -128,68 +207,39 @@ function update() {
         ball.speed += 0.1;
     }
 
+    // بررسی برخورد با Power-Up
+    checkPowerUpCollision();
+
     // وقتی امتیاز یک نفر به 20 رسید
     if (user.score === 20 || com.score === 20) {
-        // بازی متوقف می‌شود
         clearInterval(loop);
-        
-        // پیام به بازیکن
         setTimeout(() => {
             let winner = user.score === 20 ? "تو" : "کامپیوتر";
             let message = user.score === 20 
                 ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
                 : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
-            alert(message); // پیام ساده
-            // ریست کردن امتیازات و شروع دوباره
+            alert(message);
             user.score = 0;
             com.score = 0;
             resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
-        }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
+            loop = setInterval(game, 1000 / framePerSecond); 
+        }, 1000); 
     }
 }
 
 // تابع رسم تمام عناصر بازی
 function render() {
-    // پس‌زمینه گرادینتی شیک
-    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#0F2027");
-    gradient.addColorStop(0.5, "#203A43");
-    gradient.addColorStop(1, "#2C5364");
-    drawRect(0, 0, canvas.width, canvas.height, gradient);
-
-    // داخل میز (زمین بازی)
-    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
-
-    // امتیازدهی
+    drawRect(0, 0, canvas.width, canvas.height, "#1C1C1C");
+    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#0F2027");
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
-
-    // خط وسط زمین
-    ctx.setLineDash([5, 5]);
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 50);
-    ctx.lineTo(canvas.width / 2, canvas.height - 50);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // افکت Glow برای توپ و پدل‌ها
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#00FFFF";
     drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
-
-    ctx.shadowColor = "#007BFF";
-    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
-
-    ctx.shadowColor = "#FF3B3B";
-    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
-
-    ctx.shadowBlur = 0;
+    drawRect(user.x, user.y, user.width, user.height, user.color);
+    drawRect(com.x, com.y, com.width, com.height, com.color);
+    drawPowerUps();
 }
 
-// تابع اجرای بازی
+// اجرای بازی
 function game() {
     update();
     render();
@@ -198,3 +248,4 @@ function game() {
 // تعداد فریم در ثانیه
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
+setInterval(spawnPowerUp, 10000); // هر 10 ثانیه یک Power-Up ایجاد شود
