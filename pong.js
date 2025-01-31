@@ -55,6 +55,9 @@ let powerUp = {
     isActive: false
 };
 
+// متغیر برای کنترل معکوس
+let reverseControlsActive = false;
+
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -74,7 +77,11 @@ function drawArc(x, y, r, color) {
 canvas.addEventListener("mousemove", getMousePos);
 function getMousePos(evt) {
     let rect = canvas.getBoundingClientRect();
-    user.y = evt.clientY - rect.top - user.height / 2;
+    if (reverseControlsActive) {
+        user.y = canvas.height - (evt.clientY - rect.top) - user.height / 2; // معکوس شدن حرکت
+    } else {
+        user.y = evt.clientY - rect.top - user.height / 2;
+    }
 }
 
 // ریست کردن توپ هنگام امتیازگیری
@@ -119,10 +126,11 @@ function checkPowerUpCollision() {
         ball.y + ball.radius > powerUp.y) {
         
         // وقتی توپ به آیتم برخورد کرد
-        user.height += 20;  // بزرگ کردن راکت بازیکن
+        reverseControlsActive = true;  // فعال شدن معکوس شدن کنترل
         powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
+        
         setTimeout(() => {
-            user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
+            reverseControlsActive = false;  // غیر فعال شدن معکوس شدن کنترل بعد از 5 ثانیه
         }, 5000);  // مدت زمان 5 ثانیه
     }
 }
@@ -245,5 +253,3 @@ function game() {
 // تعداد فریم در ثانیه
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
-
-
