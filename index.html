@@ -1,23 +1,21 @@
 <!DOCTYPE html>
-<html lang="fa">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>saeed_game</title>
     <style>
         body {
             background-color: dimgray;
-            text-align: center;
         }
 
         #pong {
             border: 2px solid #FFF;
-            display: none; /* در ابتدا مخفی باشد تا نام بازیکن وارد شود */
-            margin: auto;
-            top: 50%;
-            transform: translateY(-50%);
             position: absolute;
-            left: 0;
+            margin: auto;
+            top: 0;
             right: 0;
+            left: 0;
+            bottom: 0;
         }
 
         #leaderboard {
@@ -46,71 +44,52 @@
             font-size: 18px;
         }
 
-        #start-screen {
+        #nameForm {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
-            border-radius: 10px;
             text-align: center;
             color: white;
+            font-family: Arial, sans-serif;
         }
 
-        #start-screen input {
+        #nameForm input {
+            font-size: 20px;
             padding: 10px;
-            font-size: 18px;
+            width: 200px;
             margin-bottom: 10px;
-            width: 80%;
         }
 
-        #start-screen button {
-            padding: 10px 20px;
-            font-size: 18px;
-            background: #007BFF;
-            border: none;
+        #nameForm button {
+            font-size: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
             color: white;
+            border: none;
             cursor: pointer;
         }
 
-        #start-screen button:hover {
-            background: #0056b3;
+        #nameForm button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <div id="start-screen">
-        <h2>👋 خوش آمدید! نام خود را وارد کنید:</h2>
-        <input type="text" id="player-name" placeholder="نام شما">
-        <button onclick="startGame()">شروع بازی</button>
-    </div>
+   <canvas id="pong" width="600" height="400"></canvas>
 
-    <canvas id="pong" width="600" height="400"></canvas>
+   <div id="nameForm">
+       <h2>لطفاً نام خود را وارد کنید:</h2>
+       <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
+       <br>
+       <button id="startButton" onclick="startGame()">شروع بازی</button>
+   </div>
 
-    <div id="leaderboard">
-        <h2>🏆 جدول رتبه‌بندی</h2>
-        <ul id="leaderboard-list"></ul>
-    </div>
+   <div id="leaderboard">
+       <h2>🏆 جدول رتبه‌بندی</h2>
+       <ul id="leaderboard-list"></ul>
+   </div>
 
-    <script>
-        let playerName = "";
-
-        function startGame() {
-            let inputName = document.getElementById("player-name").value.trim();
-            if (inputName === "") {
-                alert("لطفاً نام خود را وارد کنید!");
-                return;
-            }
-
-            playerName = inputName;
-            localStorage.setItem("currentPlayer", playerName);  // ذخیره نام بازیکن فعلی
-            document.getElementById("start-screen").style.display = "none";
-            document.getElementById("pong").style.display = "block";
-            startPongGame(); // تابعی که کد بازی را اجرا می‌کند
-        }
-    </script>
-
-    <script src="pong.js"></script>
+   <script src="pong.js"></script>
 </body>
 </html>
