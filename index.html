@@ -4,11 +4,10 @@
     <meta charset="UTF-8">
     <title>saeed_game</title>
     <style>
-        body {
+        body{
             background-color: dimgray;
         }
-
-        #pong {
+        #pong{
             border: 2px solid #FFF;
             position: absolute;
             margin: auto;
@@ -17,7 +16,6 @@
             left: 0;
             bottom: 0;
         }
-
         #leaderboard {
             position: absolute;
             top: 20px;
@@ -28,31 +26,54 @@
             color: white;
             font-family: Arial, sans-serif;
         }
-
         #leaderboard h2 {
             text-align: center;
             margin-bottom: 10px;
         }
-
         #leaderboard-list {
             list-style: none;
             padding: 0;
         }
-
         #leaderboard-list li {
             padding: 5px;
             font-size: 18px;
         }
+        #nameInput {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+        }
+        #nameInput input {
+            padding: 10px;
+            font-size: 18px;
+        }
+        #nameInput button {
+            padding: 10px;
+            font-size: 18px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-   <canvas id="pong" width="600" height="400"></canvas>
-   <script src="pong.js"></script>
+    <!-- Canvas برای بازی -->
+    <canvas id="pong" width="600" height="400"></canvas>
 
-   <div id="leaderboard">
-       <h2>🏆 جدول رتبه‌بندی</h2>
-       <ul id="leaderboard-list"></ul>
-   </div>
+    <!-- جدول رتبه‌بندی -->
+    <div id="leaderboard">
+        <h2>🏆 جدول رتبه‌بندی</h2>
+        <ul id="leaderboard-list"></ul>
+    </div>
 
+    <!-- فرم وارد کردن نام بازیکن -->
+    <div id="nameInput">
+        <h2>لطفاً نام خود را وارد کنید:</h2>
+        <input type="text" id="playerName" placeholder="نام شما"/>
+        <button onclick="startGame()">شروع بازی</button>
+    </div>
+
+    <script src="pong.js"></script>
 </body>
 </html>
