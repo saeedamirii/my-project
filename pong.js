@@ -247,6 +247,8 @@ let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
 
 
+
+
 // اضافه کردن قدرت منفی
 let negativePowerUp = {
     x: 0,
@@ -261,11 +263,13 @@ let invertedControls = false; // متغیر برای معکوس شدن کنتر�
 
 // تابع ظاهر شدن قدرت منفی
 function spawnNegativePowerUp() {
+    // فقط زمانی که قدرت منفی فعال نیست
     if (!negativePowerUp.isActive) {
         setTimeout(() => {
+            // موقعیت تصادفی آیتم
             negativePowerUp.x = Math.random() * (canvas.width - 100) + 50;
             negativePowerUp.y = Math.random() * (canvas.height - 100) + 50;
-            negativePowerUp.isActive = true;
+            negativePowerUp.isActive = true; // فعال کردن آیتم
         }, Math.random() * 7000 + 5000); // بین 5 تا 12 ثانیه تأخیر
     }
 }
@@ -299,11 +303,30 @@ function getMousePos(evt) {
 function update() {
     spawnNegativePowerUp(); // ظاهر شدن قدرت منفی
     checkNegativePowerUpCollision(); // بررسی برخورد توپ با آیتم منفی
+
+    // بقیه کدهای update که مربوط به بازی هستند...
 }
 
 // اضافه کردن رسم قدرت منفی به `render`
 function render() {
+    // رسم پس‌زمینه و زمین بازی به‌درستی
+    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#0F2027");
+    gradient.addColorStop(0.5, "#203A43");
+    gradient.addColorStop(1, "#2C5364");
+    drawRect(0, 0, canvas.width, canvas.height, gradient);
+
+    // رسم زمین بازی
+    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
+
+    // رسم امتیازها
+    drawText(user.score, canvas.width / 4, canvas.height / 5);
+    drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
+
+    // رسم آیتم قدرت منفی اگر فعال باشد
     if (negativePowerUp.isActive) {
         drawRect(negativePowerUp.x, negativePowerUp.y, negativePowerUp.width, negativePowerUp.height, negativePowerUp.color);
     }
-}
+
+    // بقیه کدهای render برای رسم توپ و پدل‌ها
+    }
