@@ -33,7 +33,8 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#007BFF"
+    color: "#007BFF",
+    speed: 8
 };
 
 // پدل حریف (کامپیوتر)
@@ -43,7 +44,8 @@ const com = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#FF3B3B"
+    color: "#FF3B3B",
+    speed: 7 // سرعت حرکت کامپیوتر
 };
 
 // متغیر برای قدرت‌ها
@@ -52,7 +54,7 @@ let powerUp = {
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50",  // رنگ سبز برای قدرت مثبت
+    color: "#4CAF50",  // رنگ سبز برای قدرت بزرگ شدن راکت
     isActive: false,
     effect: null // نوع قدرتی که ایجاد شده
 };
@@ -117,7 +119,7 @@ function spawnPowerUp() {
         // قرار دادن آیتم در داخل محوطه بازی
         powerUp.x = Math.random() * (canvas.width - 100) + 50; // موقعیت افقی تصادفی
         powerUp.y = Math.random() * (canvas.height - 100) + 50; // موقعیت عمودی تصادفی
-        const randomEffect = Math.floor(Math.random() * 3); // برای انتخاب نوع Power-up
+        const randomEffect = Math.floor(Math.random() * 2); // برای انتخاب نوع Power-up (فقط دو نوع)
         if (randomEffect === 0) {
             powerUp.effect = "increasePaddleSize"; // بزرگ شدن پدل
             powerUp.color = "#4CAF50"; // سبز
@@ -141,14 +143,16 @@ function checkPowerUpCollision() {
 
         if (powerUp.effect === "increasePaddleSize") {
             user.height += 20;  // بزرگ کردن پدل بازیکن
+            setTimeout(() => {
+                user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
+            }, 5000);  // مدت زمان 5 ثانیه
         } else if (powerUp.effect === "reverseControls") {
             reverseControlsActive = true;  // فعال شدن معکوس شدن کنترل
+            powerUp.isActive = false;  // آیتم ناپدید می‌شود
             setTimeout(() => {
                 reverseControlsActive = false;  // غیر فعال شدن معکوس شدن کنترل بعد از 5 ثانیه
             }, 5000);  // مدت زمان 5 ثانیه
         }
-
-        powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
     }
 }
 
