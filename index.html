@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <title>saeed_game</title>
     <style>
-        body{
+        body {
             background-color: dimgray;
         }
-        #pong{
+        #pong {
             border: 2px solid #FFF;
             position: absolute;
             margin: auto;
@@ -38,40 +38,49 @@
             padding: 5px;
             font-size: 18px;
         }
-        #nameInput {
+        /* فرم ورود نام */
+        #nameForm {
             position: absolute;
-            top: 50%;
+            top: 40%;
             left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.7);
+            padding: 20px;
+            border-radius: 10px;
             color: white;
         }
-        #nameInput input {
+        #nameForm input {
             padding: 10px;
-            font-size: 18px;
+            font-size: 16px;
+            margin-bottom: 10px;
+            border-radius: 5px;
+            border: 1px solid #fff;
+            width: 200px;
         }
-        #nameInput button {
+        #nameForm button {
             padding: 10px;
-            font-size: 18px;
-            margin-top: 10px;
+            font-size: 16px;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
-    <!-- Canvas برای بازی -->
     <canvas id="pong" width="600" height="400"></canvas>
+
+    <!-- فرم وارد کردن نام -->
+    <div id="nameForm">
+        <input type="text" id="username" placeholder="نام خود را وارد کنید" />
+        <button id="startGameBtn">شروع بازی</button>
+    </div>
 
     <!-- جدول رتبه‌بندی -->
     <div id="leaderboard">
         <h2>🏆 جدول رتبه‌بندی</h2>
         <ul id="leaderboard-list"></ul>
-    </div>
-
-    <!-- فرم وارد کردن نام بازیکن -->
-    <div id="nameInput">
-        <h2>لطفاً نام خود را وارد کنید:</h2>
-        <input type="text" id="playerName" placeholder="نام شما"/>
-        <button onclick="startGame()">شروع بازی</button>
     </div>
 
     <script src="pong.js"></script>
