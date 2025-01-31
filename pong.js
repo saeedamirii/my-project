@@ -1,3 +1,4 @@
+
 // انتخاب عنصر canvas
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
@@ -172,22 +173,7 @@ function update() {
 
     // وقتی امتیاز یک نفر به 20 رسید
     if (user.score === 20 || com.score === 20) {
-        // بازی متوقف می‌شود
-        clearInterval(loop);
-        
-        // پیام به بازیکن
-        setTimeout(() => {
-            let winner = user.score === 20 ? "تو" : "کامپیوتر";
-            let message = user.score === 20 
-                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
-                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
-            alert(message); // پیام ساده
-            // ریست کردن امتیازات و شروع دوباره
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
-        }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
+        endGame();
     }
 }
 
@@ -236,19 +222,6 @@ function render() {
     }
 }
 
-// تابع اجرای بازی
-function game() {
-    update();
-    render();
-}
-
-// تعداد فریم در ثانیه
-let framePerSecond = 50;
-let loop = setInterval(game, 1000 / framePerSecond);
-
-
-
-
 // ذخیره و نمایش جدول رتبه‌بندی
 function updateLeaderboard(winner) {
     let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || {};
@@ -294,3 +267,7 @@ function endGame() {
 
 // نمایش رتبه‌بندی در شروع بازی
 displayLeaderboard(JSON.parse(localStorage.getItem("leaderboard")) || {});
+
+// تعداد فریم در ثانیه
+let framePerSecond = 50;
+let loop = setInterval(game, 1000 / framePerSecond);
