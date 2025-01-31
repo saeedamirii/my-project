@@ -2,33 +2,24 @@
 <html lang="fa">
 <head>
     <meta charset="UTF-8">
-    <title>بازی پینگ پنگ</title>
+    <title>saeed_game</title>
     <style>
         body {
             background-color: dimgray;
             text-align: center;
-            font-family: Arial, sans-serif;
         }
+
         #pong {
-            border: 2px solid white;
-            display: none;
-            margin-top: 20px;
-        }
-        #nameForm {
-            background: rgba(0, 0, 0, 0.7);
-            padding: 20px;
-            border-radius: 10px;
-            color: white;
-            display: block;
+            border: 2px solid #FFF;
+            display: none; /* در ابتدا مخفی باشد تا نام بازیکن وارد شود */
             margin: auto;
-            width: 300px;
-            margin-top: 100px;
+            top: 50%;
+            transform: translateY(-50%);
+            position: absolute;
+            left: 0;
+            right: 0;
         }
-        #nameForm input, #nameForm button {
-            width: 100%;
-            padding: 10px;
-            margin-top: 10px;
-        }
+
         #leaderboard {
             position: absolute;
             top: 20px;
@@ -37,16 +28,62 @@
             padding: 15px;
             border-radius: 10px;
             color: white;
-            display: none;
+            font-family: Arial, sans-serif;
+        }
+
+        #leaderboard h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #leaderboard-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #leaderboard-list li {
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        #start-screen {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(0, 0, 0, 0.8);
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            color: white;
+        }
+
+        #start-screen input {
+            padding: 10px;
+            font-size: 18px;
+            margin-bottom: 10px;
+            width: 80%;
+        }
+
+        #start-screen button {
+            padding: 10px 20px;
+            font-size: 18px;
+            background: #007BFF;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        #start-screen button:hover {
+            background: #0056b3;
         }
     </style>
 </head>
 <body>
-
-    <div id="nameForm">
-        <h2>نام خود را وارد کنید</h2>
-        <input type="text" id="username" placeholder="نام بازیکن">
-        <button id="startGameBtn">شروع بازی</button>
+    <div id="start-screen">
+        <h2>👋 خوش آمدید! نام خود را وارد کنید:</h2>
+        <input type="text" id="player-name" placeholder="نام شما">
+        <button onclick="startGame()">شروع بازی</button>
     </div>
 
     <canvas id="pong" width="600" height="400"></canvas>
@@ -56,7 +93,24 @@
         <ul id="leaderboard-list"></ul>
     </div>
 
-    <script src="pong.js"></script>
+    <script>
+        let playerName = "";
 
+        function startGame() {
+            let inputName = document.getElementById("player-name").value.trim();
+            if (inputName === "") {
+                alert("لطفاً نام خود را وارد کنید!");
+                return;
+            }
+
+            playerName = inputName;
+            localStorage.setItem("currentPlayer", playerName);  // ذخیره نام بازیکن فعلی
+            document.getElementById("start-screen").style.display = "none";
+            document.getElementById("pong").style.display = "block";
+            startPongGame(); // تابعی که کد بازی را اجرا می‌کند
+        }
+    </script>
+
+    <script src="pong.js"></script>
 </body>
 </html>
