@@ -44,73 +44,115 @@ const com = {
     color: "#FF3B3B" // قرمز مات
 };
 
-// متغیر برای قدرت‌ها
-let powerUpActive = false;
-let powerUp = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#4CAF50",  // رنگ سبز برای قدرت مثبت
-    isActive: false
-};
+// متغیر برای نام کاربر
+let username = "";
 
-// ذخیره نام بازیکن
-let playerName = "";
+// نمایش و مخفی کردن فرم نام
+const nameForm = document.getElementById("nameForm");
+const startGameBtn = document.getElementById("startGameBtn");
+const usernameInput = document.getElementById("username");
 
-// دریافت موقعیت ماوس
-canvas.addEventListener("mousemove", getMousePos);
-function getMousePos(evt) {
-    let rect = canvas.getBoundingClientRect();
-    user.y = evt.clientY - rect.top - user.height / 2;
-}
+// شروع بازی بعد از وارد کردن نام
+startGameBtn.addEventListener("click", function () {
+    username = usernameInput.value.trim();
+    if (username !== "") {
+        nameForm.style.display = "none"; // مخفی کردن فرم نام
+        startGame(); // شروع بازی
+    } else {
+        alert("لطفاً نام خود را وارد کنید.");
+    }
+});
 
-// ریست کردن توپ هنگام امتیازگیری
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.velocityX = -ball.velocityX;
-    ball.speed = 7;
-}
-
-// رسم مستطیل (برای پدل‌ها و پس‌زمینه)
-function drawRect(x, y, w, h, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, w, h);
-}
-
-// رسم دایره (برای توپ)
-function drawArc(x, y, r, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.fill();
-}
-
-// تابع شروع بازی
+// شروع بازی
 function startGame() {
-    playerName = document.getElementById("playerName").value.trim();
+    // توابع بازی و رویدادها...
     
-    if (playerName === "") {
-        alert("لطفاً یک نام وارد کنید!");
-        return;
+    // تابع بروزرسانی وضعیت بازی
+    function update() {
+        // اسپاون آیتم قدرت
+        spawnPowerUp();
+        // بررسی برخورد توپ با آیتم
+        checkPowerUpCollision();
+
+        if (ball.x - ball.radius < 0) {
+            com.score++;
+            comScore.play();
+            resetBall();
+        } else if (ball.x + ball.radius > canvas.width) {
+            user.score++;
+            userScore.play();
+            resetBall();
+        }
+
+        ball.x += ball.velocityX;
+        ball.y += ball.velocityY;
+
+        // حرکت کامپیوتر با کمی خطا
+        let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
+        com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
+
+        // جلوگیری از خارج شدن توپ از زمین
+        if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
+            ball.velocityY = -ball.velocityY;
+            wall.play();
+        }
+
+        let player = (ball.x < canvas.width / 2) ? user : com;
+
+        if (collision(ball, player)) {
+            hit.play();
+            let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
+            let angleRad = (Math.PI / 4) * collidePoint;
+            let direction = (ball.x < canvas.width / 2) ? 1 : -1;
+            ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+            ball.velocityY = ball.speed * Math.sin(angleRad);
+            ball.speed += 0.1;
+        }
+
+        // وقتی امتیاز یک نفر به 20 رسید
+        if (user.score === 20 || com.score === 20) {
+            // بازی متوقف می‌شود
+            clearInterval(loop);
+
+            // پیام به بازیکن
+            setTimeout(() => {
+                let winner = user.score === 20 ? "تو" : "کامپیوتر";
+                let message = user.score === 20 
+                    ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
+                    : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
+                alert(message); // پیام ساده
+                // ریست کردن امتیازات و شروع دوباره
+                user.score = 0;
+                com.score = 0;
+                resetBall();
+                loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
+            }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
+        }
     }
 
-    // مخفی کردن فرم نام
-    document.getElementById("nameInput").style.display = "none";
+    // ادامه توابع مربوط به بازی و رندر بازی...
 
-    loop = setInterval(game, 1000 / framePerSecond);
+    // تعداد فریم در ثانیه
+    let framePerSecond = 50;
+    let loop = setInterval(game, 1000 / framePerSecond);
+
+    function game() {
+        update();
+        render();
+    }
 }
 
 // ذخیره و نمایش جدول رتبه‌بندی
 function updateLeaderboard(winner) {
     let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || {};
-
+    
+    // افزایش برد بازیکن
     leaderboard[winner] = (leaderboard[winner] || 0) + 1;
 
+    // ذخیره در LocalStorage
     localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
 
+    // مرتب‌سازی و نمایش رتبه‌بندی
     displayLeaderboard(leaderboard);
 }
 
@@ -125,37 +167,6 @@ function displayLeaderboard(leaderboard) {
     });
 
     document.getElementById("leaderboard-list").innerHTML = leaderboardHTML;
-}
-
-// بروزرسانی وضعیت بازی
-function update() {
-    // ... سایر کدهای بازی که نیاز به تغییر ندارند
-}
-
-// تابع اجرای بازی
-function game() {
-    update();
-    render();
-}
-
-// تعداد فریم در ثانیه
-let framePerSecond = 50;
-let loop = setInterval(game, 1000 / framePerSecond);
-
-// پایان بازی و ذخیره نتیجه
-function endGame() {
-    clearInterval(loop);
-
-    let winner = user.score === 20 ? playerName : "کامپیوتر";
-    updateLeaderboard(winner);
-
-    setTimeout(() => {
-        alert(user.score === 20 ? "🎉 آفرین! تو برنده شدی! 🏆👏" : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎");
-        user.score = 0;
-        com.score = 0;
-        resetBall();
-        loop = setInterval(game, 1000 / framePerSecond);
-    }, 1000);
 }
 
 // نمایش رتبه‌بندی در شروع بازی
