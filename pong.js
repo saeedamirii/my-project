@@ -7,13 +7,11 @@ let hit = new Audio();
 let wall = new Audio();
 let userScore = new Audio();
 let comScore = new Audio();
-let powerupSound = new Audio();
 
 hit.src = "sounds/hit.mp3";
 wall.src = "sounds/wall.mp3";
 comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
-powerupSound.src = "sounds/powerup.mp3";
 
 // شیء توپ
 const ball = {
@@ -23,7 +21,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "#00FFFF"
+    color: "#00FFFF" // آبی نئونی
 };
 
 // پدل بازیکن
@@ -33,8 +31,7 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#007BFF",
-    speed: 8
+    color: "#007BFF" // آبی الکتریکی
 };
 
 // پدل حریف (کامپیوتر)
@@ -44,22 +41,19 @@ const com = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#FF3B3B",
-    speed: 7 // سرعت حرکت کامپیوتر
+    color: "#FF3B3B" // قرمز مات
 };
 
 // متغیر برای قدرت‌ها
+let powerUpActive = false;
 let powerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50",  // رنگ سبز برای قدرت بزرگ شدن راکت
-    isActive: false,
-    effect: null // نوع قدرتی که ایجاد شده
+    color: "#4CAF50",  // رنگ سبز برای قدرت مثبت
+    isActive: false
 };
-
-let reverseControlsActive = false; // برای معکوس شدن کنترل
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
@@ -67,7 +61,7 @@ function drawRect(x, y, w, h, color) {
     ctx.fillRect(x, y, w, h);
 }
 
-// رسم دایره (برای توپ و Power-Ups)
+// رسم دایره (برای توپ)
 function drawArc(x, y, r, color) {
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -80,12 +74,7 @@ function drawArc(x, y, r, color) {
 canvas.addEventListener("mousemove", getMousePos);
 function getMousePos(evt) {
     let rect = canvas.getBoundingClientRect();
-    if (reverseControlsActive) {
-        // معکوس شدن حرکت
-        user.y = canvas.height - (evt.clientY - rect.top) - user.height / 2;
-    } else {
-        user.y = evt.clientY - rect.top - user.height / 2;
-    }
+    user.y = evt.clientY - rect.top - user.height / 2;
 }
 
 // ریست کردن توپ هنگام امتیازگیری
@@ -116,17 +105,8 @@ function collision(b, p) {
 // تابع اسپاون (ظاهر شدن) قدرت
 function spawnPowerUp() {
     if (!powerUp.isActive) {
-        // قرار دادن آیتم در داخل محوطه بازی
         powerUp.x = Math.random() * (canvas.width - 100) + 50; // موقعیت افقی تصادفی
         powerUp.y = Math.random() * (canvas.height - 100) + 50; // موقعیت عمودی تصادفی
-        const randomEffect = Math.floor(Math.random() * 2); // برای انتخاب نوع Power-up (فقط دو نوع)
-        if (randomEffect === 0) {
-            powerUp.effect = "increasePaddleSize"; // بزرگ شدن پدل
-            powerUp.color = "#4CAF50"; // سبز
-        } else if (randomEffect === 1) {
-            powerUp.effect = "reverseControls"; // معکوس شدن کنترل
-            powerUp.color = "#FF6347"; // قرمز
-        }
         powerUp.isActive = true;
     }
 }
@@ -139,20 +119,11 @@ function checkPowerUpCollision() {
         ball.y + ball.radius > powerUp.y) {
         
         // وقتی توپ به آیتم برخورد کرد
-        powerupSound.play();
-
-        if (powerUp.effect === "increasePaddleSize") {
-            user.height += 20;  // بزرگ کردن پدل بازیکن
-            setTimeout(() => {
-                user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
-            }, 5000);  // مدت زمان 5 ثانیه
-        } else if (powerUp.effect === "reverseControls") {
-            reverseControlsActive = true;  // فعال شدن معکوس شدن کنترل
-            powerUp.isActive = false;  // آیتم ناپدید می‌شود
-            setTimeout(() => {
-                reverseControlsActive = false;  // غیر فعال شدن معکوس شدن کنترل بعد از 5 ثانیه
-            }, 5000);  // مدت زمان 5 ثانیه
-        }
+        user.height += 20;  // بزرگ کردن راکت بازیکن
+        powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
+        setTimeout(() => {
+            user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
+        }, 5000);  // مدت زمان 5 ثانیه
     }
 }
 
