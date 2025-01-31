@@ -245,3 +245,52 @@ function game() {
 // تعداد فریم در ثانیه
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
+
+
+
+
+// ذخیره و نمایش جدول رتبه‌بندی
+function updateLeaderboard(winner) {
+    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || {};
+    
+    // افزایش برد بازیکن
+    leaderboard[winner] = (leaderboard[winner] || 0) + 1;
+
+    // ذخیره در LocalStorage
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+    // مرتب‌سازی و نمایش رتبه‌بندی
+    displayLeaderboard(leaderboard);
+}
+
+// نمایش جدول رتبه‌بندی
+function displayLeaderboard(leaderboard) {
+    let sortedPlayers = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+
+    let leaderboardHTML = "";
+    sortedPlayers.forEach((player, index) => {
+        let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
+        leaderboardHTML += `<li>${medal} ${player[0]} - ${player[1]} برد</li>`;
+    });
+
+    document.getElementById("leaderboard-list").innerHTML = leaderboardHTML;
+}
+
+// بروزرسانی بعد از پایان بازی
+function endGame() {
+    clearInterval(loop);
+
+    let winner = user.score === 20 ? "بازیکن" : "کامپیوتر";
+    updateLeaderboard(winner);
+
+    setTimeout(() => {
+        alert(user.score === 20 ? "🎉 تو برنده شدی!" : "😢 باختی! دوباره امتحان کن!");
+        user.score = 0;
+        com.score = 0;
+        resetBall();
+        loop = setInterval(game, 1000 / framePerSecond);
+    }, 1000);
+}
+
+// نمایش رتبه‌بندی در شروع بازی
+displayLeaderboard(JSON.parse(localStorage.getItem("leaderboard")) || {});
