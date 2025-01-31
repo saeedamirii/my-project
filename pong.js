@@ -45,14 +45,15 @@ const com = {
 };
 
 // متغیر برای قدرت‌ها
-let powerUpActive = false;
 let powerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
     color: "#4CAF50",  // رنگ سبز برای قدرت مثبت
-    isActive: false
+    isActive: false,
+    duration: 10000, // مدت زمان فعال بودن قدرت
+    activeTime: 0 // زمان شروع فعال شدن قدرت
 };
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
@@ -104,10 +105,12 @@ function collision(b, p) {
 
 // تابع اسپاون (ظاهر شدن) قدرت
 function spawnPowerUp() {
-    if (!powerUp.isActive) {
+    // هر چند ثانیه یکبار آیتم ظاهر بشه (برای شلوغ نشدن بازی)
+    if (!powerUp.isActive && Math.random() < 0.01) { // احتمال 1 درصد در هر فریم
         powerUp.x = Math.random() * (canvas.width - 100) + 50; // موقعیت افقی تصادفی
         powerUp.y = Math.random() * (canvas.height - 100) + 50; // موقعیت عمودی تصادفی
         powerUp.isActive = true;
+        powerUp.activeTime = Date.now(); // زمان شروع قدرت
     }
 }
 
@@ -118,12 +121,17 @@ function checkPowerUpCollision() {
         ball.y - ball.radius < powerUp.y + powerUp.height &&
         ball.y + ball.radius > powerUp.y) {
         
-        // وقتی توپ به آیتم برخورد کرد
-        user.height += 20;  // بزرگ کردن راکت بازیکن
-        powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
-        setTimeout(() => {
-            user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
-        }, 5000);  // مدت زمان 5 ثانیه
+        // بررسی اینکه توپ از سمت بازیکن به آیتم برخورد کرده
+        if (ball.x - ball.radius < canvas.width / 2) {
+            // وقتی توپ از سمت بازیکن برخورد کرد
+            user.height += 20;  // بزرگ کردن راکت بازیکن
+            powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
+            setTimeout(() => {
+                user.height -= 20;  // بازگشت به اندازه اولیه بعد از ۱۰ ثانیه
+            }, 10000);  // مدت زمان ۱۰ ثانیه
+        } else {
+            powerUp.isActive = false; // اگر توپ از سمت کامپیوتر به آیتم برخورد کرد، آیتم پنهان می‌شود
+        }
     }
 }
 
@@ -134,6 +142,11 @@ function update() {
     
     // بررسی برخورد توپ با آیتم
     checkPowerUpCollision();
+
+    // بررسی مدت زمان فعال بودن قدرت
+    if (powerUp.isActive && Date.now() - powerUp.activeTime > powerUp.duration) {
+        powerUp.isActive = false; // قدرت منقضی شده و آیتم مخفی می‌شود
+    }
 
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -232,7 +245,7 @@ function render() {
 
     // رندر کردن آیتم قدرت
     if (powerUp.isActive) {
-        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
+        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color); // قدرت
     }
 }
 
@@ -243,5 +256,7 @@ function game() {
 }
 
 // تعداد فریم در ثانیه
-let framePerSecond = 50;
+let framePerSecond = 60;
+
+// شروع بازی
 let loop = setInterval(game, 1000 / framePerSecond);
