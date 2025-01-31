@@ -176,21 +176,59 @@ function update() {
         // بازی متوقف می‌شود
         clearInterval(loop);
         
-        // پیام به بازیکن
-        setTimeout(() => {
-            let winner = user.score === 20 ? "تو" : "کامپیوتر";
-            let message = user.score === 20 
-                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
-                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
-            alert(message); // پیام ساده
-            // ریست کردن امتیازات و شروع دوباره
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
-        }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
+        // پایان بازی و بروزرسانی جدول رتبه‌بندی
+        endGame();
     }
 }
+
+// تابع پایان بازی (بعد از رسیدن امتیاز به 20)
+function endGame() {
+    let winner = user.score === 20 ? "تو" : "کامپیوتر";
+    let message = user.score === 20
+        ? "🎉 آفرین! تو برنده شدی! 🏆👏"
+        : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
+    
+    alert(message); // پیام ساده
+    
+    // بروزرسانی جدول رتبه‌بندی
+    updateLeaderboard(winner);
+
+    // ریست کردن امتیازات و شروع دوباره
+    user.score = 0;
+    com.score = 0;
+    resetBall();
+    loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
+}
+
+// تابع ذخیره و نمایش جدول رتبه‌بندی
+function updateLeaderboard(winner) {
+    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || {};
+    
+    // افزایش برد بازیکن
+    leaderboard[winner] = (leaderboard[winner] || 0) + 1;
+
+    // ذخیره در LocalStorage
+    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+
+    // مرتب‌سازی و نمایش رتبه‌بندی
+    displayLeaderboard(leaderboard);
+}
+
+// تابع نمایش جدول رتبه‌بندی
+function displayLeaderboard(leaderboard) {
+    let sortedPlayers = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+
+    let leaderboardHTML = "";
+    sortedPlayers.forEach((player, index) => {
+        let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
+        leaderboardHTML += `<li>${medal} ${player[0]} - ${player[1]} برد</li>`;
+    });
+
+    document.getElementById("leaderboard-list").innerHTML = leaderboardHTML;
+}
+
+// نمایش رتبه‌بندی در شروع بازی
+displayLeaderboard(JSON.parse(localStorage.getItem("leaderboard")) || {});
 
 // تابع رسم تمام عناصر بازی
 function render() {
@@ -252,39 +290,12 @@ function startGame() {
     let name = document.getElementById("playerName").value;
     if (name) {
         user.name = name;
-        document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم وارد کردن نام
-        loop = setInterval(game, 1000 / framePerSecond);
+        document.getElementById("nameForm").style.display = "none";  // مخفی کردن فرم وارد کردن نام
+        loop = setInterval(game, 1000 / framePerSecond);  // شروع بازی
     } else {
         alert("لطفاً نام خود را وارد کنید!");
     }
 }
 
-// ذخیره و نمایش جدول رتبه‌بندی
-function updateLeaderboard(winner) {
-    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || {};
-    
-    // افزایش برد بازیکن
-    leaderboard[winner] = (leaderboard[winner] || 0) + 1;
-
-    // ذخیره در LocalStorage
-    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-
-    // مرتب‌سازی و نمایش رتبه‌بندی
-    displayLeaderboard(leaderboard);
-}
-
-// نمایش جدول رتبه‌بندی
-function displayLeaderboard(leaderboard) {
-    let sortedPlayers = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
-
-    let leaderboardHTML = "";
-    sortedPlayers.forEach((player, index) => {
-        let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
-        leaderboardHTML += `<li>${medal} ${player[0]} - ${player[1]} برد</li>`;
-    });
-
-    document.getElementById("leaderboard-list").innerHTML = leaderboardHTML;
-}
-
-// نمایش رتبه‌بندی در شروع بازی
-displayLeaderboard(JSON.parse(localStorage.getItem("leaderboard")) || {});
+// فراخوانی تابع شروع بازی
+document.getElementById("startBtn").addEventListener("click", startGame);
