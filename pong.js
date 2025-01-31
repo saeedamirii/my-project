@@ -245,3 +245,65 @@ function game() {
 // تعداد فریم در ثانیه
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
+
+
+// اضافه کردن قدرت منفی
+let negativePowerUp = {
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    color: "#FF0000", // رنگ قرمز برای قدرت منفی
+    isActive: false
+};
+
+let invertedControls = false; // متغیر برای معکوس شدن کنترل‌ها
+
+// تابع ظاهر شدن قدرت منفی
+function spawnNegativePowerUp() {
+    if (!negativePowerUp.isActive) {
+        setTimeout(() => {
+            negativePowerUp.x = Math.random() * (canvas.width - 100) + 50;
+            negativePowerUp.y = Math.random() * (canvas.height - 100) + 50;
+            negativePowerUp.isActive = true;
+        }, Math.random() * 7000 + 5000); // بین 5 تا 12 ثانیه تأخیر
+    }
+}
+
+// بررسی برخورد توپ با قدرت منفی
+function checkNegativePowerUpCollision() {
+    if (negativePowerUp.isActive &&
+        ball.x - ball.radius < negativePowerUp.x + negativePowerUp.width &&
+        ball.x + ball.radius > negativePowerUp.x &&
+        ball.y - ball.radius < negativePowerUp.y + negativePowerUp.height &&
+        ball.y + ball.radius > negativePowerUp.y) {
+        
+        negativePowerUp.isActive = false; // غیرفعال کردن آیتم
+        invertedControls = true; // فعال کردن کنترل معکوس
+
+        setTimeout(() => {
+            invertedControls = false; // بعد از 5 ثانیه کنترل‌ها به حالت عادی برمی‌گردند
+        }, 5000);
+    }
+}
+
+// تغییر در کنترل ماوس برای معکوس شدن کنترل‌ها
+canvas.addEventListener("mousemove", getMousePos);
+function getMousePos(evt) {
+    let rect = canvas.getBoundingClientRect();
+    let mouseY = evt.clientY - rect.top - user.height / 2;
+    user.y = invertedControls ? canvas.height - mouseY - user.height : mouseY;
+}
+
+// اضافه کردن تابع قدرت منفی به `update`
+function update() {
+    spawnNegativePowerUp(); // ظاهر شدن قدرت منفی
+    checkNegativePowerUpCollision(); // بررسی برخورد توپ با آیتم منفی
+}
+
+// اضافه کردن رسم قدرت منفی به `render`
+function render() {
+    if (negativePowerUp.isActive) {
+        drawRect(negativePowerUp.x, negativePowerUp.y, negativePowerUp.width, negativePowerUp.height, negativePowerUp.color);
+    }
+}
