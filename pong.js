@@ -45,12 +45,12 @@ const com = {
 };
 
 // متغیر برای قدرت‌ها
-let powerUp = {
+let powerUpGreen = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50", // رنگ سبز برای سطح متوسط و آسان
+    color: "#4CAF50",
     isActive: false
 };
 
@@ -59,7 +59,7 @@ let powerUpRed = {
     y: 0,
     width: 20,
     height: 20,
-    color: "#FF3B3B", // رنگ قرمز برای سطح سخت
+    color: "#FF0000",
     isActive: false
 };
 
@@ -106,17 +106,11 @@ function checkPaddleCollision() {
         ball.y > user.y && 
         ball.y < user.y + user.height) {
         
-        let angle = 0;
-        if (ball.y < user.y + user.height / 2) {
-            angle = -Math.PI / 4;  // برخورد توپ با قسمت بالای راکت
-        } else if (ball.y > user.y + user.height / 2) {
-            angle = Math.PI / 4;   // برخورد توپ با قسمت پایین راکت
-        }
-        
-        // اعمال زاویه برخورد
-        ball.velocityX = Math.abs(ball.velocityX) * Math.cos(angle);
-        ball.velocityY = Math.abs(ball.velocityY) * Math.sin(angle);
-        
+        // تغییر جهت توپ به صورت منطقی
+        ball.velocityX = Math.abs(ball.velocityX);  // همیشه توپ به سمت راست برود
+        let angle = (ball.y - (user.y + user.height / 2)) / (user.height / 2) * Math.PI / 4; // تغییر زاویه برخورد توپ
+        ball.velocityY = Math.sin(angle) * ball.speed;  // تغییر زاویه برخورد توپ با راکت
+
         hit.play();
     }
 
@@ -125,47 +119,40 @@ function checkPaddleCollision() {
         ball.y > com.y && 
         ball.y < com.y + com.height) {
         
-        let angle = 0;
-        if (ball.y < com.y + com.height / 2) {
-            angle = -Math.PI / 4;  // برخورد توپ با قسمت بالای راکت
-        } else if (ball.y > com.y + com.height / 2) {
-            angle = Math.PI / 4;   // برخورد توپ با قسمت پایین راکت
-        }
-        
-        // اعمال زاویه برخورد
-        ball.velocityX = -Math.abs(ball.velocityX) * Math.cos(angle);
-        ball.velocityY = Math.abs(ball.velocityY) * Math.sin(angle);
-        
+        // تغییر جهت توپ به صورت منطقی
+        ball.velocityX = -Math.abs(ball.velocityX);  // همیشه توپ به سمت چپ برود
+        let angle = (ball.y - (com.y + com.height / 2)) / (com.height / 2) * Math.PI / 4; // تغییر زاویه برخورد توپ
+        ball.velocityY = Math.sin(angle) * ball.speed;  // تغییر زاویه برخورد توپ با راکت
+
         hit.play();
     }
 }
 
-// تابع اسپاون قدرت
-function spawnPowerUp() {
-    if (!powerUp.isActive && !powerUpRed.isActive) {
-        let rand = Math.random();
-        if (rand < 0.5) {
-            powerUp.x = Math.random() * (canvas.width - 100) + 50;
-            powerUp.y = Math.random() * (canvas.height - 100) + 50;
-            powerUp.isActive = true;
-        } else {
-            powerUpRed.x = Math.random() * (canvas.width - 100) + 50;
-            powerUpRed.y = Math.random() * (canvas.height - 100) + 50;
-            powerUpRed.isActive = true;
-        }
+// تابع اسپاون قدرت‌ها
+function spawnPowerUps() {
+    if (!powerUpGreen.isActive) {
+        powerUpGreen.x = Math.random() * (canvas.width - 100) + 50;
+        powerUpGreen.y = Math.random() * (canvas.height - 100) + 50;
+        powerUpGreen.isActive = true;
+    }
+
+    if (!powerUpRed.isActive) {
+        powerUpRed.x = Math.random() * (canvas.width - 100) + 50;
+        powerUpRed.y = Math.random() * (canvas.height - 100) + 50;
+        powerUpRed.isActive = true;
     }
 }
 
 // بررسی برخورد توپ با قدرت‌ها
 function checkPowerUpCollision() {
-    if (powerUp.isActive &&
-        ball.x - ball.radius < powerUp.x + powerUp.width &&
-        ball.x + ball.radius > powerUp.x &&
-        ball.y - ball.radius < powerUp.y + powerUp.height &&
-        ball.y + ball.radius > powerUp.y) {
+    if (powerUpGreen.isActive &&
+        ball.x - ball.radius < powerUpGreen.x + powerUpGreen.width &&
+        ball.x + ball.radius > powerUpGreen.x &&
+        ball.y - ball.radius < powerUpGreen.y + powerUpGreen.height &&
+        ball.y + ball.radius > powerUpGreen.y) {
         
         user.height += 20;
-        powerUp.isActive = false;
+        powerUpGreen.isActive = false;
         setTimeout(() => {
             user.height -= 20;
         }, 5000);
@@ -177,19 +164,19 @@ function checkPowerUpCollision() {
         ball.y - ball.radius < powerUpRed.y + powerUpRed.height &&
         ball.y + ball.radius > powerUpRed.y) {
         
-        // تغییر کنترل راکت (برعکس شدن)
-        user.y = canvas.height - user.y - user.height;
+        user.y = canvas.height - user.height - user.y;
         powerUpRed.isActive = false;
         setTimeout(() => {
-            user.y = canvas.height - user.y - user.height; // بازگشت به حالت اولیه
+            user.y = canvas.height - user.height - user.y;
         }, 5000);
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
-    spawnPowerUp();
+    spawnPowerUps();
     checkPowerUpCollision();
+    checkPaddleCollision();
 
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -211,8 +198,6 @@ function update() {
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
-
-    checkPaddleCollision();
 
     if (user.score === 20 || com.score === 20) {
         clearInterval(loop);
@@ -263,8 +248,8 @@ function render() {
 
     ctx.shadowBlur = 0;
 
-    if (powerUp.isActive) {
-        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
+    if (powerUpGreen.isActive) {
+        drawRect(powerUpGreen.x, powerUpGreen.y, powerUpGreen.width, powerUpGreen.height, powerUpGreen.color);
     }
 
     if (powerUpRed.isActive) {
