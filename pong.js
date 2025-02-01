@@ -202,6 +202,7 @@ function render() {
 function startGame(level) {
     gameLevel = level;
     document.getElementById("levelMenu").style.display = "none";  // مخفی کردن منو
+    canvas.style.display = "block";  // نمایش canvas بازی
 
     // شروع بازی پس از انتخاب سطح
     loop = setInterval(game, 1000 / framePerSecond);
