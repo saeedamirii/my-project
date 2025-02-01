@@ -2,11 +2,6 @@
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
-// تنظیمات اولیه
-let currentLevel = 'medium'; // سطح پیش‌فرض
-let framePerSecond = 50;
-let loop;
-
 // بارگذاری صداها
 let hit = new Audio();
 let wall = new Audio();
@@ -37,7 +32,6 @@ const user = {
     height: 100,
     score: 0,
     color: "#007BFF", // آبی الکتریکی
-    name: ""
 };
 
 // پدل حریف (کامپیوتر)
@@ -50,39 +44,37 @@ const com = {
     color: "#FF3B3B" // قرمز مات
 };
 
-// تنظیمات سطح بازی
-function setGameLevel(level) {
-    if (level === "easy") {
-        ball.speed = 4;
-        com.height = 80;
-    } else if (level === "hard") {
-        ball.speed = 10;
-        com.height = 120;
-    } else {
-        ball.speed = 7;
-        com.height = 100;
-    }
-    currentLevel = level;
-}
+// تنظیمات سطح
+let gameLevel = 'medium'; // پیش‌فرض: متوسط
 
-// تابع شروع بازی
-function startGame() {
-    let name = document.getElementById("playerName").value;
-    if (name) {
-        user.name = name;
-        document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم وارد کردن نام
-        document.getElementById("levelForm").style.display = "block"; // نمایش فرم انتخاب سطح
-    } else {
-        alert("لطفاً نام خود را وارد کنید!");
-    }
-}
-
-// انتخاب سطح بازی
+// تغییر سطح بازی
 function chooseLevel() {
-    let level = document.getElementById("levelSelect").value;
-    setGameLevel(level);
+    gameLevel = document.getElementById("levelSelect").value;
     document.getElementById("levelForm").style.display = "none"; // مخفی کردن فرم انتخاب سطح
-    loop = setInterval(game, 1000 / framePerSecond); // شروع بازی
+    startGame();
+}
+
+// شروع بازی
+function startGame() {
+    configureGameLevel();
+    loop = setInterval(game, 1000 / 50);  // شروع بازی
+}
+
+// تنظیمات بازی بر اساس سطح انتخابی
+function configureGameLevel() {
+    if (gameLevel === 'easy') {
+        ball.speed = 4;
+        com.height = 100;
+        com.y = (canvas.height - com.height) / 2;
+    } else if (gameLevel === 'medium') {
+        ball.speed = 6;
+        com.height = 100;
+        com.y = (canvas.height - com.height) / 2;
+    } else if (gameLevel === 'hard') {
+        ball.speed = 8;
+        com.height = 70;
+        com.y = (canvas.height - com.height) / 2;
+    }
 }
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
@@ -132,7 +124,7 @@ function collision(b, p) {
     );
 }
 
-// بروزرسانی وضعیت بازی
+// تابع بروزرسانی وضعیت بازی
 function update() {
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -147,8 +139,8 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // حرکت کامپیوتر
-    let randomError = Math.random() * 0.5 - 0.25;
+    // حرکت کامپیوتر با کمی خطا
+    let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
     com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
 
     // جلوگیری از خارج شدن توپ از زمین
@@ -168,37 +160,25 @@ function update() {
         ball.velocityY = ball.speed * Math.sin(angleRad);
         ball.speed += 0.1;
     }
-
-    // وقتی امتیاز یک نفر به 20 رسید
-    if (user.score === 20 || com.score === 20) {
-        clearInterval(loop);
-        setTimeout(() => {
-            let winner = user.score === 20 ? "تو" : "کامپیوتر";
-            let message = user.score === 20 
-                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
-                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
-            alert(message); // پیام ساده
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
-        }, 1000);
-    }
 }
 
 // تابع رسم تمام عناصر بازی
 function render() {
+    // پس‌زمینه گرادینتی شیک
     let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#0F2027");
     gradient.addColorStop(0.5, "#203A43");
     gradient.addColorStop(1, "#2C5364");
     drawRect(0, 0, canvas.width, canvas.height, gradient);
 
+    // داخل میز (زمین بازی)
     drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
 
+    // امتیازدهی
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
 
+    // خط وسط زمین
     ctx.setLineDash([5, 5]);
     ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 2;
@@ -208,6 +188,7 @@ function render() {
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // افکت Glow برای توپ و پدل‌ها
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#00FFFF";
     drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
@@ -219,11 +200,6 @@ function render() {
     drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
 
     ctx.shadowBlur = 0;
-
-    // رندر کردن آیتم قدرت
-    if (powerUp.isActive) {
-        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
-    }
 }
 
 // تابع اجرای بازی
@@ -231,15 +207,3 @@ function game() {
     update();
     render();
 }
-
-// تابع شروع بازی از ابتدا
-function startGame() {
-    let name = document.getElementById("playerName").value;
-    if (name) {
-        user.name = name;
-        document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم وارد کردن نام
-        document.getElementById("levelForm").style.display = "block"; // نمایش فرم انتخاب سطح
-    } else {
-        alert("لطفاً نام خود را وارد کنید!");
-    }
-                }
