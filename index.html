@@ -6,6 +6,9 @@
     <style>
         body {
             background-color: dimgray;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
         }
 
         #pong {
@@ -18,30 +21,6 @@
             bottom: 0;
         }
 
-        #levelMenu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        #levelMenu button {
-            font-size: 20px;
-            padding: 10px;
-            margin: 5px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        #levelMenu button:hover {
-            background-color: #45a049;
-        }
-
         #leaderboard {
             position: absolute;
             top: 20px;
@@ -50,7 +29,6 @@
             padding: 15px;
             border-radius: 10px;
             color: white;
-            font-family: Arial, sans-serif;
         }
 
         #leaderboard h2 {
@@ -75,7 +53,6 @@
             transform: translate(-50%, -50%);
             text-align: center;
             color: white;
-            font-family: Arial, sans-serif;
         }
 
         #nameForm input {
@@ -97,23 +74,43 @@
         #nameForm button:hover {
             background-color: #45a049;
         }
+
+        #levelSelect {
+            text-align: center;
+            margin-top: 10px;
+            font-size: 20px;
+        }
+
+        #levelSelect button {
+            padding: 10px 20px;
+            margin: 10px;
+            background-color: #007BFF;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #levelSelect button:hover {
+            background-color: #0056b3;
+        }
+
     </style>
 </head>
 <body>
    <canvas id="pong" width="600" height="400"></canvas>
 
-   <div id="levelMenu">
-       <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
-       <button onclick="setLevel('easy')">سطح آسان</button>
-       <button onclick="setLevel('medium')">سطح متوسط</button>
-       <button onclick="setLevel('hard')">سطح سخت</button>
-   </div>
-
    <div id="nameForm">
        <h2>لطفاً نام خود را وارد کنید:</h2>
        <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
        <br>
-       <button id="startButton" onclick="startGame()">شروع بازی</button>
+       <button id="startButton" onclick="showLevelSelection()">شروع بازی</button>
+   </div>
+
+   <div id="levelSelect" style="display:none;">
+       <h2>انتخاب سطح بازی:</h2>
+       <button onclick="startGame('easy')">آسان</button>
+       <button onclick="startGame('medium')">متوسط</button>
+       <button onclick="startGame('hard')">سخت</button>
    </div>
 
    <div id="leaderboard">
