@@ -18,6 +18,30 @@
             bottom: 0;
         }
 
+        #levelMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #levelMenu button {
+            font-size: 20px;
+            padding: 10px;
+            margin: 5px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        #levelMenu button:hover {
+            background-color: #45a049;
+        }
+
         #leaderboard {
             position: absolute;
             top: 20px;
@@ -77,6 +101,13 @@
 </head>
 <body>
    <canvas id="pong" width="600" height="400"></canvas>
+
+   <div id="levelMenu">
+       <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
+       <button onclick="setLevel('easy')">سطح آسان</button>
+       <button onclick="setLevel('medium')">سطح متوسط</button>
+       <button onclick="setLevel('hard')">سطح سخت</button>
+   </div>
 
    <div id="nameForm">
        <h2>لطفاً نام خود را وارد کنید:</h2>
