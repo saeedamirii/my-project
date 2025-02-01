@@ -10,8 +10,8 @@ let comScore = new Audio();
 
 hit.src = "sounds/hit.mp3";
 wall.src = "sounds/wall.mp3";
-userScore.src = "sounds/userScore.mp3";
 comScore.src = "sounds/comScore.mp3";
+userScore.src = "sounds/userScore.mp3";
 
 // شیء توپ
 const ball = {
@@ -21,7 +21,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "#FFFFFF" // سفید، مثل سطح متوسط
+    color: "#00FFFF"
 };
 
 // پدل بازیکن
@@ -31,20 +31,20 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#FFFFFF" // سفید، مثل سطح متوسط
+    color: "#007BFF"
 };
 
-// پدل حریف (هوش مصنوعی)
+// پدل حریف (کامپیوتر)
 const com = {
     x: canvas.width - 60,
     y: (canvas.height - 100) / 2,
     width: 10,
     height: 100,
     score: 0,
-    color: "#FFFFFF" // سفید، مثل سطح متوسط
+    color: "#FF3B3B"
 };
 
-// آیتم‌های قدرت (سبز و طلایی)
+// آیتم سبز (افزایش طول راکت کاربر)
 let powerUpGreen = {
     x: 0,
     y: 0,
@@ -54,6 +54,7 @@ let powerUpGreen = {
     isActive: false
 };
 
+// آیتم طلایی (افزایش امتیاز مستقیم)
 let powerUpGold = {
     x: 0,
     y: 0,
@@ -78,7 +79,7 @@ function drawArc(x, y, r, color) {
     ctx.fill();
 }
 
-// کنترل حرکت پدل بازیکن با ماوس
+// حرکت ماوس برای کنترل پدل بازیکن
 canvas.addEventListener("mousemove", (evt) => {
     let rect = canvas.getBoundingClientRect();
     user.y = evt.clientY - rect.top - user.height / 2;
@@ -92,9 +93,9 @@ function resetBall() {
     ball.speed = 7;
 }
 
-// نمایش امتیاز
+// رسم امتیازها
 function drawText(text, x, y) {
-    ctx.fillStyle = "#FFFFFF"; // سفید، مثل سطح متوسط
+    ctx.fillStyle = "#FFD700";
     ctx.font = "50px fantasy";
     ctx.fillText(text, x, y);
 }
@@ -109,7 +110,7 @@ function collision(b, p) {
     );
 }
 
-// ایجاد آیتم‌های قدرت
+// تابع اسپاون آیتم‌ها
 function spawnPowerUp() {
     if (!powerUpGreen.isActive) {
         powerUpGreen.x = Math.random() * (canvas.width - 100) + 50;
@@ -123,7 +124,7 @@ function spawnPowerUp() {
     }
 }
 
-// بررسی برخورد توپ با آیتم‌های قدرت
+// بررسی برخورد توپ با آیتم‌ها
 function checkPowerUpCollision() {
     if (powerUpGreen.isActive &&
         ball.x - ball.radius < powerUpGreen.x + powerUpGreen.width &&
@@ -137,7 +138,7 @@ function checkPowerUpCollision() {
             user.height -= 20;
         }, 5000);
     }
-    
+
     if (powerUpGold.isActive &&
         ball.x - ball.radius < powerUpGold.x + powerUpGold.width &&
         ball.x + ball.radius > powerUpGold.x &&
@@ -167,9 +168,9 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // *** دقیقاً همان منطق سطح متوسط برای حرکت هوش مصنوعی ***
+    // هوش مصنوعی: دنبال کردن توپ
     let randomError = Math.random() * 0.5 - 0.25;
-    com.y += (ball.y - (com.y + com.height / 2)) * 0.1 + randomError;
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
 
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
@@ -205,13 +206,14 @@ function update() {
 
 // تابع رسم بازی
 function render() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    
     drawRect(0, 0, canvas.width, canvas.height, "#000");
 
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
 
     drawArc(ball.x, ball.y, ball.radius, ball.color);
-
     drawRect(user.x, user.y, user.width, user.height, user.color);
     drawRect(com.x, com.y, com.width, com.height, com.color);
 
@@ -223,7 +225,7 @@ function render() {
     }
 }
 
-// اجرای بازی
+// تابع اجرای بازی
 function game() {
     update();
     render();
