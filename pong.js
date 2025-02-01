@@ -21,7 +21,6 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    angle: Math.PI / 4, // زاویه اولیه حرکت توپ
     color: "#00FFFF"
 };
 
@@ -100,7 +99,6 @@ function resetBall() {
     ball.y = canvas.height / 2;
     ball.velocityX = -ball.velocityX;
     ball.speed = 7;
-    ball.angle = Math.PI / 4; // بازنشانی زاویه توپ
 }
 
 // رسم امتیازها
@@ -121,7 +119,6 @@ function checkPaddleCollision() {
         ball.velocityX = Math.abs(ball.velocityX);  // همیشه توپ به سمت راست برود
         let angle = (ball.y - (user.y + user.height / 2)) / (user.height / 2) * Math.PI / 4; // تغییر زاویه برخورد توپ
         ball.velocityY = Math.sin(angle) * ball.speed;  // تغییر زاویه برخورد توپ با راکت
-
         hit.play();
     }
 
@@ -134,7 +131,6 @@ function checkPaddleCollision() {
         ball.velocityX = -Math.abs(ball.velocityX);  // همیشه توپ به سمت چپ برود
         let angle = (ball.y - (com.y + com.height / 2)) / (com.height / 2) * Math.PI / 4; // تغییر زاویه برخورد توپ
         ball.velocityY = Math.sin(angle) * ball.speed;  // تغییر زاویه برخورد توپ با راکت
-
         hit.play();
     }
 }
@@ -224,8 +220,14 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    let randomError = Math.random() * 0.5 - 0.25;
-    com.y += (ball.y - (com.y + com.height / 2)) * 0.1 + randomError; // حرکت طبیعی‌تر راکت کامپیوتر
+    // هوش مصنوعی (راکت کامپیوتر)
+    let errorMargin = 0.05; // خطای کوچک برای حرکت طبیعی
+    let targetY = ball.y - com.height / 2;
+    com.y += (targetY - com.y) * errorMargin;
+
+    // محدود کردن حرکت راکت‌ها
+    com.y = Math.max(Math.min(com.y, canvas.height - com.height), 0);  // راکت حریف نباید از محدوده بازی خارج بشه
+    user.y = Math.max(Math.min(user.y, canvas.height - user.height), 0);  // راکت کاربر نباید از محدوده بازی خارج بشه
 
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
@@ -237,6 +239,10 @@ function update() {
         ball.velocityX += 0.01; // افزایش تدریجی سرعت در راستای x
     }
 
+    // محدود کردن سرعت توپ
+    ball.speed = 7;
+
+    // اگر امتیاز یکی از بازیکنان به 20 برسد، بازی تمام می‌شود
     if (user.score === 20 || com.score === 20) {
         clearInterval(loop);
         setTimeout(() => {
@@ -279,28 +285,33 @@ function render() {
     drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
 
     ctx.shadowColor = "#007BFF";
-    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
+    drawRect(user.x, user.y, user.width, user.height, user.color);
 
     ctx.shadowColor = "#FF3B3B";
-    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
-
-    ctx.shadowBlur = 0;
+    drawRect(com.x, com.y, com.width, com.height, com.color);
 
     if (powerUpGold.isActive) {
+        ctx.shadowColor = "#FFD700";
         drawRect(powerUpGold.x, powerUpGold.y, powerUpGold.width, powerUpGold.height, powerUpGold.color);
     }
 
     if (powerUpGreen.isActive) {
+        ctx.shadowColor = "#4CAF50";
         drawRect(powerUpGreen.x, powerUpGreen.y, powerUpGreen.width, powerUpGreen.height, powerUpGreen.color);
+    }
+
+    if (powerUpRed.isActive) {
+        ctx.shadowColor = "#FF0000";
+        drawRect(powerUpRed.x, powerUpRed.y, powerUpRed.width, powerUpRed.height, powerUpRed.color);
     }
 }
 
-// تابع اجرای بازی
+// ایجاد یک حلقه بازی
 function game() {
     update();
     render();
 }
 
-// تعداد فریم در ثانیه
-let framePerSecond = 50;
+// راه اندازی بازی
+let framePerSecond = 60;
 let loop = setInterval(game, 1000 / framePerSecond);
