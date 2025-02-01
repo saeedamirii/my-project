@@ -56,8 +56,7 @@ let powerUp = {
     isActive: false
 };
 
-// متغیر سطح بازی
-let gameLevel = 'medium';
+let gameLevel = "medium"; // مقدار پیش‌فرض سطح بازی متوسط
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
@@ -123,17 +122,11 @@ function checkPowerUpCollision() {
         ball.y + ball.radius > powerUp.y) {
         
         // وقتی توپ به آیتم برخورد کرد
-        if (gameLevel === 'easy') {
-            user.score++;  // در سطح آسان امتیاز اضافه می‌شود
-        } else if (gameLevel === 'hard') {
-            user.y = canvas.height - user.y - user.height;  // تغییر جهت راکت در سطح سخت
-        } else {
-            user.height += 20;  // بزرگ کردن راکت در سطح متوسط
-            setTimeout(() => {
-                user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
-            }, 5000);  // مدت زمان 5 ثانیه
-        }
+        user.height += 20;  // بزرگ کردن راکت بازیکن
         powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
+        setTimeout(() => {
+            user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
+        }, 5000);  // مدت زمان 5 ثانیه
     }
 }
 
@@ -182,83 +175,67 @@ function update() {
 
     // وقتی امتیاز یک نفر به 20 رسید
     if (user.score === 20 || com.score === 20) {
-        // بازی متوقف می‌شود
-        clearInterval(loop);
-        
-        // پیام به بازیکن
-        setTimeout(() => {
-            let winner = user.score === 20 ? "تو" : "کامپیوتر";
-            let message = user.score === 20 
-                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
-                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
-            alert(message); // پیام ساده
-            // ریست کردن امتیازات و شروع دوباره
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);  // شروع دوباره بازی
-        }, 1000); // یک ثانیه صبر می‌کنیم که بازیکن نتیجه رو ببینه
+        // اگر یکی از بازیکنان به 20 برسد، بازی تمام می‌شود
+        gameOver();
     }
 }
 
-// تابع رسم تمام عناصر بازی
-function render() {
-    // پس‌زمینه گرادینتی شیک
-    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+// تابع بازی تمام شده
+function gameOver() {
+    let winner = (user.score > com.score) ? "شما برنده شدید!" : "کامپیوتر برنده شد!";
+    alert(winner + "\nامتیاز نهایی شما: " + user.score + " - کامپیوتر: " + com.score);
+    resetGame();
+}
 
-gradient.addColorStop(0, "#3E8E41");
-    gradient.addColorStop(1, "#2F6A37");
-    ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+// ریست کردن بازی
+function resetGame() {
+    user.score = 0;
+    com.score = 0;
+    resetBall();
+    draw();
+}
 
-    // رسم توپ
-    drawArc(ball.x, ball.y, ball.radius, ball.color);
-
-    // رسم پدل‌ها
-    drawRect(user.x, user.y, user.width, user.height, user.color);
-    drawRect(com.x, com.y, com.width, com.height, com.color);
-
-    // رسم امتیازها
+// رسم تمام اجزا
+function draw() {
+    drawRect(0, 0, canvas.width, canvas.height, "black");
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, 3 * canvas.width / 4, canvas.height / 5);
-
-    // رسم آیتم قدرت در صورت فعال بودن
+    drawRect(user.x, user.y, user.width, user.height, user.color);
+    drawRect(com.x, com.y, com.width, com.height, com.color);
+    drawArc(ball.x, ball.y, ball.radius, ball.color);
+    
+    // اگر آیتم قدرت فعال باشد، آن را رسم کنیم
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
+
+    // بازی را هر فریم بروزرسانی کن
+    requestAnimationFrame(update);
 }
 
-// تابع برای شروع بازی
-function startGame() {
-    const playerNameInput = document.getElementById("playerName").value;
-    if (playerNameInput) {
-        user.name = playerNameInput;
-        document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم نام
-        document.getElementById("levelMenu").style.display = "none"; // مخفی کردن منوی انتخاب سطح
-        loop = setInterval(game, 1000 / framePerSecond); // شروع بازی
-    } else {
-        alert("لطفاً نام خود را وارد کنید!");
-    }
+// نمایش صفحه انتخاب سطح بازی
+function showLevelSelection() {
+    document.getElementById('nameForm').style.display = 'none';
+    document.getElementById('levelSelect').style.display = 'block';
 }
 
-// تابع برای تنظیم سطح بازی
-function setLevel(level) {
+// شروع بازی با سطح انتخابی
+function startGame(level) {
     gameLevel = level;
-    document.getElementById("levelMenu").style.display = "none"; // مخفی کردن منوی انتخاب سطح
-    document.getElementById("nameForm").style.display = "block"; // نمایش فرم وارد کردن نام
-}
-
-// این متغیر برای تعداد فریم‌های بازی استفاده می‌شود
-let framePerSecond = 60;
-let loop;
-
-// اجرای بازی
-function game() {
-    update();  // بروزرسانی وضعیت بازی
-    render();  // رسم عناصر بازی
-}
-
-// شروع بازی با یک تاخیر
-setTimeout(() => {
-    document.getElementById("levelMenu").style.display = "block"; // نمایش منوی انتخاب سطح
-}, 1000);
+    document.getElementById('levelSelect').style.display = 'none';
+    document.getElementById('leaderboard').style.display = 'block';
+    // تنظیم سرعت و ویژگی‌های بازی طبق سطح انتخابی
+    switch (gameLevel) {
+        case 'easy':
+            ball.speed = 4;
+            break;
+        case 'medium':
+            ball.speed = 7;
+            break;
+        case 'hard':
+            ball.speed = 10;
+            break;
+    }
+    resetGame();
+    draw();
+                            }
