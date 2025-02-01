@@ -2,10 +2,12 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Pong Game</title>
+    <title>saeed_game</title>
     <style>
         body {
-            background-color: #282828;
+            background-color: dimgray;
+            margin: 0;
+            overflow: hidden;
         }
 
         #pong {
@@ -17,11 +19,42 @@
             left: 0;
             bottom: 0;
         }
+
+        #menu {
+            color: white;
+            font-family: Arial, sans-serif;
+            text-align: center;
+            position: absolute;
+            top: 30%;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .button {
+            margin: 20px;
+            padding: 15px 30px;
+            font-size: 20px;
+            background-color: #333;
+            border: none;
+            color: white;
+            cursor: pointer;
+        }
+
+        .button:hover {
+            background-color: #777;
+        }
     </style>
 </head>
 <body>
-   <canvas id="pong" width="600" height="400"></canvas>
+    <canvas id="pong" width="600" height="400"></canvas>
 
-   <script src="script.js"></script>
+    <div id="menu">
+        <h1>انتخاب سطح</h1>
+        <button class="button" onclick="startGame('easy')">آسان</button>
+        <button class="button" onclick="startGame('medium')">متوسط</button>
+        <button class="button" onclick="startGame('hard')">سخت</button>
+    </div>
+
+    <script src="script.js"></script>
 </body>
 </html>
