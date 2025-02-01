@@ -44,7 +44,7 @@ const com = {
     color: "#FF3B3B"
 };
 
-// ایتم سبز (همانند سطح متوسط)
+// متغیر برای آیتم سبز (از سطح متوسط)
 let powerUp = {
     x: 0,
     y: 0,
@@ -54,7 +54,7 @@ let powerUp = {
     isActive: false
 };
 
-// **ایتم طلایی مخصوص سطح آسان**
+// متغیر برای آیتم طلایی (جدید در سطح آسان)
 let goldenItem = {
     x: 0,
     y: 0,
@@ -93,31 +93,16 @@ function resetBall() {
     ball.speed = 7;
 }
 
-// رسم امتیازها
-function drawText(text, x, y) {
-    ctx.fillStyle = "#FFD700";
-    ctx.font = "50px fantasy";
-    ctx.fillText(text, x, y);
-}
-
-// بررسی برخورد توپ با پدل
-function collision(b, p) {
-    return (
-        b.x - b.radius < p.x + p.width &&
-        b.x + b.radius > p.x &&
-        b.y - b.radius < p.y + p.height &&
-        b.y + b.radius > p.y
-    );
-}
-
-// اسپاون کردن ایتم‌ها
-function spawnPowerUps() {
+// تابع اسپاون آیتم‌ها
+function spawnPowerUp() {
     if (!powerUp.isActive) {
         powerUp.x = Math.random() * (canvas.width - 100) + 50;
         powerUp.y = Math.random() * (canvas.height - 100) + 50;
         powerUp.isActive = true;
     }
+}
 
+function spawnGoldenItem() {
     if (!goldenItem.isActive) {
         goldenItem.x = Math.random() * (canvas.width - 100) + 50;
         goldenItem.y = Math.random() * (canvas.height - 100) + 50;
@@ -125,7 +110,7 @@ function spawnPowerUps() {
     }
 }
 
-// برخورد توپ با ایتم سبز
+// بررسی برخورد توپ با آیتم‌ها
 function checkPowerUpCollision() {
     if (powerUp.isActive &&
         ball.x - ball.radius < powerUp.x + powerUp.width &&
@@ -141,7 +126,6 @@ function checkPowerUpCollision() {
     }
 }
 
-// برخورد توپ با ایتم طلایی
 function checkGoldenItemCollision() {
     if (goldenItem.isActive &&
         ball.x - ball.radius < goldenItem.x + goldenItem.width &&
@@ -149,68 +133,31 @@ function checkGoldenItemCollision() {
         ball.y - ball.radius < goldenItem.y + goldenItem.height &&
         ball.y + ball.radius > goldenItem.y) {
         
-        user.score += 1; // امتیاز اضافه شود
+        user.score++;
         goldenItem.isActive = false;
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
-    spawnPowerUps();
+    spawnPowerUp();
+    spawnGoldenItem();
     checkPowerUpCollision();
     checkGoldenItemCollision();
-
-    if (ball.x - ball.radius < 0) {
-        com.score++;
-        comScore.play();
-        resetBall();
-    } else if (ball.x + ball.radius > canvas.width) {
-        user.score++;
-        userScore.play();
-        resetBall();
-    }
 
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    let randomError = Math.random() * 0.5 - 0.25;
-    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
-
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
-    }
-
-    let player = (ball.x < canvas.width / 2) ? user : com;
-
-    if (collision(ball, player)) {
-        hit.play();
-        let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
-        let angleRad = (Math.PI / 4) * collidePoint;
-        let direction = (ball.x < canvas.width / 2) ? 1 : -1;
-        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
-        ball.velocityY = ball.speed * Math.sin(angleRad);
-        ball.speed += 0.1;
-    }
-
-    if (user.score === 20 || com.score === 20) {
-        clearInterval(loop);
-        setTimeout(() => {
-            let message = user.score === 20
-                ? "🎉 آفرین! تو برنده شدی! 🏆👏"
-                : "😢 آخی! باختی! دوباره امتحان کن!";
-            alert(message);
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);
-        }, 1000);
     }
 }
 
 // تابع رسم بازی
 function render() {
     drawRect(0, 0, canvas.width, canvas.height, "#000");
+    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
 
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
@@ -222,7 +169,6 @@ function render() {
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
-
     if (goldenItem.isActive) {
         drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, goldenItem.color);
     }
@@ -234,5 +180,6 @@ function game() {
     render();
 }
 
+// اجرای حلقه بازی
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
