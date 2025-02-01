@@ -44,13 +44,13 @@ const com = {
     color: "#FF3B3B"
 };
 
-// متغیر برای ایتم قرمز
-let redItem = {
+// متغیر برای قدرت‌ها
+let powerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#FF0000",
+    color: "#FFD700", // رنگ طلایی
     isActive: false
 };
 
@@ -100,37 +100,32 @@ function collision(b, p) {
     );
 }
 
-// تابع اسپاون ایتم قرمز
-function spawnRedItem() {
-    if (!redItem.isActive) {
-        redItem.x = Math.random() * (canvas.width - 100) + 50;
-        redItem.y = Math.random() * (canvas.height - 100) + 50;
-        redItem.isActive = true;
+// تابع اسپاون قدرت
+function spawnPowerUp() {
+    if (!powerUp.isActive) {
+        powerUp.x = Math.random() * (canvas.width - 100) + 50;
+        powerUp.y = Math.random() * (canvas.height - 100) + 50;
+        powerUp.isActive = true;
     }
 }
 
-// بررسی برخورد توپ با ایتم قرمز
-function checkRedItemCollision() {
-    if (redItem.isActive &&
-        ball.x - ball.radius < redItem.x + redItem.width &&
-        ball.x + ball.radius > redItem.x &&
-        ball.y - ball.radius < redItem.y + redItem.height &&
-        ball.y + ball.radius > redItem.y) {
+// بررسی برخورد توپ با قدرت
+function checkPowerUpCollision() {
+    if (powerUp.isActive &&
+        ball.x - ball.radius < powerUp.x + powerUp.width &&
+        ball.x + ball.radius > powerUp.x &&
+        ball.y - ball.radius < powerUp.y + powerUp.height &&
+        ball.y + ball.radius > powerUp.y) {
         
-        // معکوس کردن کنترل پدل بازیکن برای مدت زمان کوتاه
-        let originalY = user.y;
-        user.y = canvas.height - user.y - user.height;
-        setTimeout(() => {
-            user.y = originalY;
-        }, 2000);  // برگشتن کنترل بعد از 2 ثانیه
-        redItem.isActive = false;  // غیرفعال کردن ایتم پس از برخورد
+        user.score++; // افزایش امتیاز کاربر
+        powerUp.isActive = false;
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
-    spawnRedItem();
-    checkRedItemCollision();
+    spawnPowerUp();
+    checkPowerUpCollision();
 
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -214,8 +209,8 @@ function render() {
 
     ctx.shadowBlur = 0;
 
-    if (redItem.isActive) {
-        drawRect(redItem.x, redItem.y, redItem.width, redItem.height, redItem.color);
+    if (powerUp.isActive) {
+        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
 }
 
