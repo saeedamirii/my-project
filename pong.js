@@ -44,34 +44,6 @@ const com = {
     color: "#FF3B3B"
 };
 
-// متغیر برای قدرت‌ها
-let powerUpGreen = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#4CAF50",
-    isActive: false
-};
-
-let powerUpGold = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#FFD700",
-    isActive: false
-};
-
-let powerUpRed = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#FF0000",
-    isActive: false
-};
-
 // رسم مستطیل
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -135,78 +107,8 @@ function checkPaddleCollision() {
     }
 }
 
-// تابع اسپاون قدرت‌ها
-function spawnPowerUps() {
-    if (!powerUpGold.isActive) {
-        powerUpGold.x = Math.random() * (canvas.width - 100) + 50;
-        powerUpGold.y = Math.random() * (canvas.height - 100) + 50;
-        powerUpGold.isActive = true;
-    }
-
-    if (!powerUpGreen.isActive) {
-        powerUpGreen.x = Math.random() * (canvas.width - 100) + 50;
-        powerUpGreen.y = Math.random() * (canvas.height - 100) + 50;
-        powerUpGreen.isActive = true;
-    }
-
-    if (!powerUpRed.isActive) {
-        powerUpRed.x = Math.random() * (canvas.width - 100) + 50;
-        powerUpRed.y = Math.random() * (canvas.height - 100) + 50;
-        powerUpRed.isActive = true;
-    }
-}
-
-// بررسی برخورد توپ با قدرت‌ها
-function checkPowerUpCollision() {
-    // برخورد با ایتم طلایی (سطح آسان)
-    if (powerUpGold.isActive &&
-        ball.x - ball.radius < powerUpGold.x + powerUpGold.width &&
-        ball.x + ball.radius > powerUpGold.x &&
-        ball.y - ball.radius < powerUpGold.y + powerUpGold.height &&
-        ball.y + ball.radius > powerUpGold.y) {
-        
-        user.height += 20;
-        powerUpGold.isActive = false;
-        setTimeout(() => {
-            user.height -= 20;
-        }, 5000);
-    }
-
-    // برخورد با ایتم سبز (سطح آسان یا متوسط)
-    if (powerUpGreen.isActive &&
-        ball.x - ball.radius < powerUpGreen.x + powerUpGreen.width &&
-        ball.x + ball.radius > powerUpGreen.x &&
-        ball.y - ball.radius < powerUpGreen.y + powerUpGreen.height &&
-        ball.y + ball.radius > powerUpGreen.y) {
-        
-        user.height += 20;
-        powerUpGreen.isActive = false;
-        setTimeout(() => {
-            user.height -= 20;
-        }, 5000);
-    }
-
-    // برخورد با ایتم قرمز (سطح سخت)
-    if (powerUpRed.isActive &&
-        ball.x - ball.radius < powerUpRed.x + powerUpRed.width &&
-        ball.x + ball.radius > powerUpRed.x &&
-        ball.y - ball.radius < powerUpRed.y + powerUpRed.height &&
-        ball.y + ball.radius > powerUpRed.y) {
-        
-        user.y = canvas.height - user.height - user.y;
-        powerUpRed.isActive = false;
-        setTimeout(() => {
-            user.y = canvas.height - user.height - user.y;
-        }, 5000);
-    }
-}
-
 // بروزرسانی وضعیت بازی
 function update() {
-    spawnPowerUps();
-    checkPowerUpCollision();
-    checkPaddleCollision();
-
     if (ball.x - ball.radius < 0) {
         com.score++;
         comScore.play();
@@ -220,7 +122,7 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // هوش مصنوعی (راکت کامپیوتر)
+    // هوش مصنوعی (راکت کامپیوتر - دقیقاً مشابه سطح متوسط)
     let errorMargin = 0.05; // خطای کوچک برای حرکت طبیعی
     let targetY = ball.y - com.height / 2;
     com.y += (targetY - com.y) * errorMargin;
@@ -289,21 +191,6 @@ function render() {
 
     ctx.shadowColor = "#FF3B3B";
     drawRect(com.x, com.y, com.width, com.height, com.color);
-
-    if (powerUpGold.isActive) {
-        ctx.shadowColor = "#FFD700";
-        drawRect(powerUpGold.x, powerUpGold.y, powerUpGold.width, powerUpGold.height, powerUpGold.color);
-    }
-
-    if (powerUpGreen.isActive) {
-        ctx.shadowColor = "#4CAF50";
-        drawRect(powerUpGreen.x, powerUpGreen.y, powerUpGreen.width, powerUpGreen.height, powerUpGreen.color);
-    }
-
-    if (powerUpRed.isActive) {
-        ctx.shadowColor = "#FF0000";
-        drawRect(powerUpRed.x, powerUpRed.y, powerUpRed.width, powerUpRed.height, powerUpRed.color);
-    }
 }
 
 // ایجاد یک حلقه بازی
