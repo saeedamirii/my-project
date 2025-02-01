@@ -21,7 +21,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "#00FFFF" // آبی نئونی
+    color: "#00FFFF"
 };
 
 // پدل بازیکن
@@ -31,8 +31,9 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#007BFF", // آبی الکتریکی
-    name: ""
+    color: "#007BFF",
+    name: "",
+    reversed: false // برای معکوس کردن کنترل
 };
 
 // پدل حریف (کامپیوتر)
@@ -42,7 +43,7 @@ const com = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#FF3B3B" // قرمز مات
+    color: "#FF3B3B"
 };
 
 // متغیر برای قدرت‌ها
@@ -52,115 +53,113 @@ let powerUp = {
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50",  // رنگ سبز برای قدرت مثبت
+    color: "#4CAF50",  
     isActive: false
 };
 
-// آیتم‌های جدید برای سطوح
-let goldenItem = {
+let goldenPowerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#FFD700", // رنگ طلایی
+    color: "#FFD700", 
     isActive: false
 };
 
-let redItem = {
+let redPowerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#FF0000", // رنگ قرمز
+    color: "#FF0000", 
     isActive: false
 };
 
-let invertedControls = false;  // برای تغییر کنترل در سطح سخت
+let gameLevel = '';  // سطح بازی (آسان، متوسط، سخت)
 
-// سطح بازی
-let gameLevel = "";
-
-// نمایش منوی انتخاب سطح
-function showLevelSelection() {
-    document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم نام
-    document.getElementById("levelSelection").style.display = "block"; // نمایش منو انتخاب سطح
+// رسم مستطیل (برای پدل‌ها و پس‌زمینه)
+function drawRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
 }
 
-// تنظیم سطح بازی
-function setLevel(level) {
-    gameLevel = level;
-    document.getElementById("levelSelection").style.display = "none"; // مخفی کردن منو انتخاب سطح
-    user.name = document.getElementById("playerName").value; // گرفتن نام بازیکن
-    loop = setInterval(game, 1000 / framePerSecond); // شروع بازی
-}
-
-// تابع اسپاون (ظاهر شدن) قدرت‌ها
-function spawnGoldenItem() {
-    if (gameLevel === "easy" && !goldenItem.isActive) {
-        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
-        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
-        goldenItem.isActive = true;
-        setTimeout(() => {
-            goldenItem.isActive = false;
-        }, 5000);
-    }
-}
-
-function spawnRedItem() {
-    if (gameLevel === "hard" && !redItem.isActive) {
-        redItem.x = Math.random() * (canvas.width - 100) + 50;
-        redItem.y = Math.random() * (canvas.height - 100) + 50;
-        redItem.isActive = true;
-    }
-}
-
-// بررسی برخورد توپ با آیتم‌ها
-function checkGoldenItemCollision() {
-    if (goldenItem.isActive &&
-        ball.x - ball.radius < goldenItem.x + goldenItem.width &&
-        ball.x + ball.radius > goldenItem.x &&
-        ball.y - ball.radius < goldenItem.y + goldenItem.height &&
-        ball.y + ball.radius > goldenItem.y) {
-
-        user.score++;
-        goldenItem.isActive = false;
-    }
-}
-
-function checkRedItemCollision() {
-    if (redItem.isActive &&
-        ball.x - ball.radius < redItem.x + redItem.width &&
-        ball.x + ball.radius > redItem.x &&
-        ball.y - ball.radius < redItem.y + redItem.height &&
-        ball.y + ball.radius > redItem.y) {
-
-        redItem.isActive = false;
-        invertedControls = true;  // معکوس کردن کنترل
-        setTimeout(() => {
-            invertedControls = false;  // برگشت به حالت عادی
-        }, 5000);
-    }
+// رسم دایره (برای توپ)
+function drawArc(x, y, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
 }
 
 // گوش دادن به حرکت ماوس برای کنترل پدل بازیکن
-canvas.addEventListener("mousemove", function(evt) {
+canvas.addEventListener("mousemove", getMousePos);
+function getMousePos(evt) {
     let rect = canvas.getBoundingClientRect();
-    if (!invertedControls) {
+    if (!user.reversed) {
         user.y = evt.clientY - rect.top - user.height / 2;
     } else {
-        user.y = canvas.height - (evt.clientY - rect.top) - user.height / 2;
+        user.y = canvas.height - (evt.clientY - rect.top + user.height / 2);
     }
-});
+}
+
+// تابع اسپاون قدرت‌ها
+function spawnPowerUp() {
+    if (!powerUp.isActive && gameLevel === 'hard') {
+        powerUp.x = Math.random() * (canvas.width - 100) + 50; 
+        powerUp.y = Math.random() * (canvas.height - 100) + 50;
+        powerUp.isActive = true;
+    }
+
+    if (!goldenPowerUp.isActive && gameLevel === 'easy') {
+        goldenPowerUp.x = Math.random() * (canvas.width - 100) + 50;
+        goldenPowerUp.y = Math.random() * (canvas.height - 100) + 50;
+        goldenPowerUp.isActive = true;
+    }
+
+    if (!redPowerUp.isActive && gameLevel === 'hard') {
+        redPowerUp.x = Math.random() * (canvas.width - 100) + 50;
+        redPowerUp.y = Math.random() * (canvas.height - 100) + 50;
+        redPowerUp.isActive = true;
+    }
+}
+
+// بررسی برخورد با آیتم‌ها
+function checkPowerUpCollision() {
+    if (powerUp.isActive && ball.x - ball.radius < powerUp.x + powerUp.width && 
+        ball.x + ball.radius > powerUp.x && 
+        ball.y - ball.radius < powerUp.y + powerUp.height &&
+        ball.y + ball.radius > powerUp.y) {
+        
+        user.height += 20;  
+        powerUp.isActive = false;
+        setTimeout(() => { user.height -= 20; }, 5000);
+    }
+
+    if (goldenPowerUp.isActive && ball.x - ball.radius < goldenPowerUp.x + goldenPowerUp.width && 
+        ball.x + ball.radius > goldenPowerUp.x && 
+        ball.y - ball.radius < goldenPowerUp.y + goldenPowerUp.height &&
+        ball.y + ball.radius > goldenPowerUp.y) {
+
+        user.score += 1;
+        goldenPowerUp.isActive = false;
+    }
+
+    if (redPowerUp.isActive && ball.x - ball.radius < redPowerUp.x + redPowerUp.width && 
+        ball.x + ball.radius > redPowerUp.x && 
+        ball.y - ball.radius < redPowerUp.y + redPowerUp.height &&
+        ball.y + ball.radius > redPowerUp.y) {
+
+        user.reversed = !user.reversed;
+        redPowerUp.isActive = false;
+    }
+}
 
 // تابع بروزرسانی وضعیت بازی
 function update() {
-    spawnGoldenItem();
-    spawnRedItem();
+    spawnPowerUp();
+    checkPowerUpCollision();
 
-    checkGoldenItemCollision();
-    checkRedItemCollision();
-
-    // بررسی برخورد توپ با دیوار
     if (ball.x - ball.radius < 0) {
         com.score++;
         comScore.play();
@@ -171,97 +170,93 @@ function update() {
         resetBall();
     }
 
-    // حرکت توپ
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // برخورد توپ با سقف و کف
-    if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+    let randomError = Math.random() * 0.5 - 0.25;
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
+
+    if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
 
-    // حرکت پدل کامپیوتر
-    if (gameLevel === "hard") {
-        if (ball.y < com.y + com.height / 2) {
-            com.y -= 4;
-        } else if (ball.y > com.y + com.height / 2) {
-            com.y += 4;
-        }
-    } else {
-        // حرکت ساده‌تر پدل کامپیوتر در سطوح آسان و متوسط
-        if (ball.y < com.y + com.height / 2) {
-            com.y -= 2;
-        } else if (ball.y > com.y + com.height / 2) {
-            com.y += 2;
-        }
+    let player = (ball.x < canvas.width / 2) ? user : com;
+
+    if (collision(ball, player)) {
+        hit.play();
+        let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
+        let angleRad = (Math.PI / 4) * collidePoint;
+        let direction = (ball.x < canvas.width / 2) ? 1 : -1;
+        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+        ball.velocityY = ball.speed * Math.sin(angleRad);
+        ball.speed += 0.1;
     }
 
-    // برخورد توپ با پدل‌ها
-    let player = (ball.x - ball.radius < user.x + user.width && ball.x - ball.radius > user.x) ? user : com;
-    if (ball.x - ball.radius < player.x + player.width && ball.x + ball.radius > player.x) {
-        if (ball.y > player.y && ball.y < player.y + player.height) {
-            ball.velocityX = -ball.velocityX;
-            hit.play();
-        }
+    if (user.score === 20 || com.score === 20) {
+        clearInterval(loop);
+        setTimeout(() => {
+            let winner = user.score === 20 ? "تو" : "کامپیوتر";
+            let message = user.score === 20 
+                ? "🎉 آفرین! تو برنده شدی! 🏆👏" 
+                : "😢 آخی! باختی! دوباره امتحان کن، شاید دفعه بعد برنده بشی! 😎";
+            alert(message);
+            user.score = 0;
+            com.score = 0;
+            resetBall();
+            loop = setInterval(game, 1000 / framePerSecond); 
+        }, 1000);
     }
 }
 
-// رسم عناصر بازی
-function draw() {
-    // پس‌زمینه
-    ctx.fillStyle = "#2e3d49";
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
+// تابع رسم تمام عناصر بازی
+function render() {
+    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#0F2027");
+    gradient.addColorStop(0.5, "#203A43");
+    gradient.addColorStop(1, "#2C5364");
+    drawRect(0, 0, canvas.width, canvas.height, gradient);
 
-    // توپ
-    ctx.fillStyle = ball.color;
+    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
+
+    drawText(user.score, canvas.width / 4, canvas.height / 5);
+    drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
+
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
-    ctx.fill();
+    ctx.moveTo(canvas.width / 2, 50);
+    ctx.lineTo(canvas.width / 2, canvas.height - 50);
+    ctx.stroke();
+    ctx.setLineDash([]);
 
-    // پدل‌ها
-    ctx.fillStyle = user.color;
-    ctx.fillRect(user.x, user.y, user.width, user.height);
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00FFFF";
+    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
 
-    ctx.fillStyle = com.color;
-    ctx.fillRect(com.x, com.y, com.width, com.height);
+    ctx.shadowColor = "#007BFF";
+    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
 
-    // آیتم‌های ویژه
-    if (goldenItem.isActive) {
-        ctx.fillStyle = goldenItem.color;
-        ctx.fillRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height);
+    ctx.shadowColor = "#FF3B3B";
+    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
+
+    ctx.shadowBlur = 0;
+
+    if (powerUp.isActive) {
+        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
-
-    if (redItem.isActive) {
-        ctx.fillStyle = redItem.color;
-        ctx.fillRect(redItem.x, redItem.y, redItem.width, redItem.height);
+    if (goldenPowerUp.isActive) {
+        drawRect(goldenPowerUp.x, goldenPowerUp.y, goldenPowerUp.width, goldenPowerUp.height, goldenPowerUp.color);
     }
-
-    // امتیازات
-    ctx.fillStyle = "#FFF";
-    ctx.font = "20px Arial";
-    ctx.fillText(user.name + ": " + user.score, 50, 30);
-    ctx.fillText("کامپیوتر: " + com.score, canvas.width - 150, 30);
+    if (redPowerUp.isActive) {
+        drawRect(redPowerUp.x, redPowerUp.y, redPowerUp.width, redPowerUp.height, redPowerUp.color);
+    }
 }
 
-// بازنشانی توپ
-function resetBall() {
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.velocityX = -ball.velocityX;
-    ball.velocityY = 5;
-}
-
-// حلقه اصلی بازی
-let framePerSecond = 60;
-let loop;
-
-function game() {
-    update();
-    draw();
-}
-
-// شروع بازی
-function startGame() {
-    showLevelSelection(); // نمایش منو انتخاب سطح بازی
-}
+// تابع شروع بازی
+function startGame(level) {
+    gameLevel = level;
+    document.getElementById("levelMenu").style.display = "none"; 
+    loop = setInterval(game, 1000 / framePerSecond);
+        }
