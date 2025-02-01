@@ -267,4 +267,4 @@ function startGame(level) {
 function game() {
     update();
     render();
-}
+                   }
