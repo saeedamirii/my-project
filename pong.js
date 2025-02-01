@@ -76,6 +76,8 @@ let redPowerUp = {
 };
 
 let gameLevel = '';  // سطح بازی (آسان، متوسط، سخت)
+let loop;
+let framePerSecond = 60;  // تعداد فریم‌ها در ثانیه
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
@@ -257,6 +259,12 @@ function render() {
 // تابع شروع بازی
 function startGame(level) {
     gameLevel = level;
-    document.getElementById("levelMenu").style.display = "none"; 
+    document.getElementById("levelMenu").style.display = "none"; // پنهان کردن منو
     loop = setInterval(game, 1000 / framePerSecond);
-        }
+}
+
+// بازی
+function game() {
+    update();
+    render();
+}
