@@ -17,78 +17,10 @@
             left: 0;
             bottom: 0;
         }
-
-        #leaderboard {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        #leaderboard h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        #leaderboard-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        #leaderboard-list li {
-            padding: 5px;
-            font-size: 18px;
-        }
-
-        #nameForm {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        #nameForm input {
-            font-size: 20px;
-            padding: 10px;
-            width: 200px;
-            margin-bottom: 10px;
-        }
-
-        #nameForm button {
-            font-size: 20px;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        #nameForm button:hover {
-            background-color: #45a049;
-        }
     </style>
 </head>
 <body>
    <canvas id="pong" width="600" height="400"></canvas>
-
-   <div id="nameForm">
-       <h2>لطفاً نام خود را وارد کنید:</h2>
-       <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
-       <br>
-       <button id="startButton" onclick="startGame()">شروع بازی</button>
-   </div>
-
-   <div id="leaderboard">
-       <h2>🏆 جدول رتبه‌بندی</h2>
-       <ul id="leaderboard-list"></ul>
-   </div>
 
    <script src="pong.js"></script>
 </body>
