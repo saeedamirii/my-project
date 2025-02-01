@@ -1,4 +1,3 @@
-// انتخاب عنصر canvas
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
@@ -32,8 +31,7 @@ const user = {
     height: 100,
     score: 0,
     color: "#007BFF", // آبی الکتریکی
-    name: "",
-    velocityX: 0 // برای معکوس کردن جهت راکت
+    name: ""
 };
 
 // پدل حریف (کامپیوتر)
@@ -46,37 +44,56 @@ const com = {
     color: "#FF3B3B" // قرمز مات
 };
 
-// متغیر برای قدرت‌ها
-let powerUpActive = false;
-let powerUp = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#4CAF50",  // رنگ سبز برای قدرت مثبت
-    isActive: false
-};
+// متغیر برای انتخاب سطح بازی
+let gameLevel = 'medium';
 
-// سطح بازی
-let gameLevel = ''; // سطح بازی
+// تغییر سطح بازی
+function setLevel(level) {
+    gameLevel = level;
+    document.getElementById("levelForm").style.display = "none"; // مخفی کردن انتخاب سطح
+    startGame(); // شروع بازی
+}
 
-// نمایش منوی انتخاب سطح بازی
-function showLevelMenu() {
+// نمایش فرم انتخاب سطح
+function showLevelSelection() {
     let name = document.getElementById("playerName").value;
     if (name) {
         user.name = name;
         document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم وارد کردن نام
-        document.getElementById("levelMenu").style.display = "block"; // نمایش منوی انتخاب سطح
+        document.getElementById("levelForm").style.display = "block"; // نمایش انتخاب سطح
     } else {
         alert("لطفاً نام خود را وارد کنید!");
     }
 }
 
-// شروع بازی با سطح انتخابی
-function startGameWithLevel(level) {
-    gameLevel = level;
-    document.getElementById("levelMenu").style.display = "none"; // مخفی کردن منوی انتخاب سطح
-    loop = setInterval(game, 1000 / framePerSecond); // شروع بازی
+// ریست کردن توپ هنگام امتیازگیری
+function resetBall() {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.velocityX = -ball.velocityX;
+    ball.speed = 7;
+}
+
+// رسم مستطیل (برای پدل‌ها و پس‌زمینه)
+function drawRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
+}
+
+// رسم دایره (برای توپ)
+function drawArc(x, y, r, color) {
+    ctx.fillStyle = color;
+    ctx.beginPath();
+    ctx.arc(x, y, r, 0, Math.PI * 2, true);
+    ctx.closePath();
+    ctx.fill();
+}
+
+// گوش دادن به حرکت ماوس برای کنترل پدل بازیکن
+canvas.addEventListener("mousemove", getMousePos);
+function getMousePos(evt) {
+    let rect = canvas.getBoundingClientRect();
+    user.y = evt.clientY - rect.top - user.height / 2;
 }
 
 // تابع اسپاون (ظاهر شدن) قدرت
@@ -95,21 +112,35 @@ function checkPowerUpCollision() {
         ball.y - ball.radius < powerUp.y + powerUp.height &&
         ball.y + ball.radius > powerUp.y) {
         
-        if (gameLevel === 'easy') {
-            // سطح آسان: وقتی توپ به آیتم برخورد کرد، یک امتیاز به بازیکن اضافه می‌شود
-            user.score++;
-        } else if (gameLevel === 'hard') {
-            // سطح سخت: وقتی توپ به آیتم برخورد کرد، کنترل راکت برعکس می‌شود
-            user.velocityX = -user.velocityX;
-            com.velocityX = -com.velocityX;
-        }
+        // وقتی توپ به آیتم برخورد کرد
+        user.height += 20;  // بزرگ کردن راکت بازیکن
         powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
+        setTimeout(() => {
+            user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
+        }, 5000);  // مدت زمان 5 ثانیه
     }
 }
 
-// سایر توابع و منطق بازی مانند سابق
+// تابع بروزرسانی وضعیت بازی
 function update() {
+    if (gameLevel === 'easy') {
+        ball.speed = 4;
+        user.height = 100;
+        com.height = 100;
+    } else if (gameLevel === 'medium') {
+        ball.speed = 7;
+        user.height = 100;
+        com.height = 100;
+    } else if (gameLevel === 'hard') {
+        ball.speed = 10;
+        user.height = 90;
+        com.height = 110;
+    }
+
+    // اسپاون آیتم قدرت
     spawnPowerUp();
+    
+    // بررسی برخورد توپ با آیتم
     checkPowerUpCollision();
 
     if (ball.x - ball.radius < 0) {
@@ -125,7 +156,7 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // حرکت کامپیوتر با کمی خطا
+// حرکت کامپیوتر با کمی خطا
     let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
     com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
 
@@ -147,7 +178,7 @@ function update() {
         ball.speed += 0.1;
     }
 
-// وقتی امتیاز یک نفر به 20 رسید
+    // وقتی امتیاز یک نفر به 20 رسید
     if (user.score === 20 || com.score === 20) {
         // بازی متوقف می‌شود
         clearInterval(loop);
@@ -229,7 +260,7 @@ function startGame() {
     if (name) {
         user.name = name;
         document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم وارد کردن نام
-        loop = setInterval(game, 1000 / framePerSecond); // شروع بازی
+        loop = setInterval(game, 1000 / framePerSecond);
     } else {
         alert("لطفاً نام خود را وارد کنید!");
     }
