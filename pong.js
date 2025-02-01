@@ -24,8 +24,8 @@ let ball = {
 let user = { x: 50, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: "#007BFF" };
 let com = { x: canvas.width - 60, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: "#FF3B3B" };
 
-let goldenItem = { x: 0, y: 0, size: 15, color: "gold", isActive: false };
-let redItem = { x: 0, y: 0, size: 15, color: "red", isActive: false };
+let greenItem = { x: 0, y: 0, size: 20, color: "green", isActive: false };
+let redItem = { x: 0, y: 0, size: 20, color: "red", isActive: false };
 
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -59,12 +59,12 @@ function resetBall() {
     ball.speed = 7;
 }
 
-function spawnGoldenItem() {
-    if (!goldenItem.isActive) {
-        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
-        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
-        goldenItem.isActive = true;
-        setTimeout(() => goldenItem.isActive = false, 5000);
+function spawnGreenItem() {
+    if (!greenItem.isActive) {
+        greenItem.x = Math.random() * (canvas.width - 100) + 50;
+        greenItem.y = Math.random() * (canvas.height - 100) + 50;
+        greenItem.isActive = true;
+        setTimeout(() => greenItem.isActive = false, 5000);
     }
 }
 
@@ -75,16 +75,17 @@ function spawnRedItem() {
 }
 
 function checkItemCollisions() {
-    if (goldenItem.isActive && ball.x > goldenItem.x && ball.x < goldenItem.x + goldenItem.size &&
-        ball.y > goldenItem.y && ball.y < goldenItem.y + goldenItem.size) {
+    if (greenItem.isActive && ball.x > greenItem.x && ball.x < greenItem.x + greenItem.size &&
+        ball.y > greenItem.y && ball.y < greenItem.y + greenItem.size) {
         user.score++;
-        goldenItem.isActive = false;
+        greenItem.isActive = false;
     }
 
     if (redItem.isActive && ball.x > redItem.x && ball.x < redItem.x + redItem.size &&
         ball.y > redItem.y && ball.y < redItem.y + redItem.size) {
         isControlReversed = true;
         setTimeout(() => isControlReversed = false, 5000);
+        redItem.isActive = false;
     }
 }
 
@@ -96,8 +97,15 @@ function collision(b, p) {
 }
 
 function update() {
-    if (difficulty === "easy") spawnGoldenItem();
-    if (difficulty === "hard" && !redItem.isActive) spawnRedItem();
+    if (difficulty === "easy" || difficulty === "medium") {
+        spawnGreenItem();
+    }
+
+    if (difficulty === "hard") {
+        if (!redItem.isActive) {
+            setTimeout(spawnRedItem, Math.random() * 5000 + 3000);
+        }
+    }
 
     checkItemCollisions();
 
@@ -137,8 +145,8 @@ function render() {
     drawArc(ball.x, ball.y, ball.radius, ball.color);
     drawRect(user.x, user.y, user.width, user.height, user.color);
     drawRect(com.x, com.y, com.width, com.height, com.color);
-    
-    if (goldenItem.isActive) drawRect(goldenItem.x, goldenItem.y, goldenItem.size, goldenItem.size, goldenItem.color);
+
+    if (greenItem.isActive) drawRect(greenItem.x, greenItem.y, greenItem.size, greenItem.size, greenItem.color);
     if (redItem.isActive) drawRect(redItem.x, redItem.y, redItem.size, redItem.size, redItem.color);
 }
 
