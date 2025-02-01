@@ -10,8 +10,8 @@ let comScore = new Audio();
 
 hit.src = "sounds/hit.mp3";
 wall.src = "sounds/wall.mp3";
-comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
+comScore.src = "sounds/comScore.mp3";
 
 // شیء توپ
 const ball = {
@@ -21,7 +21,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "#00FFFF"
+    color: "#FFFFFF" // سفید، مثل سطح متوسط
 };
 
 // پدل بازیکن
@@ -31,7 +31,7 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#007BFF"
+    color: "#FFFFFF" // سفید، مثل سطح متوسط
 };
 
 // پدل حریف (هوش مصنوعی)
@@ -41,7 +41,7 @@ const com = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#FF3B3B"
+    color: "#FFFFFF" // سفید، مثل سطح متوسط
 };
 
 // آیتم‌های قدرت (سبز و طلایی)
@@ -94,7 +94,7 @@ function resetBall() {
 
 // نمایش امتیاز
 function drawText(text, x, y) {
-    ctx.fillStyle = "#FFD700";
+    ctx.fillStyle = "#FFFFFF"; // سفید، مثل سطح متوسط
     ctx.font = "50px fantasy";
     ctx.fillText(text, x, y);
 }
