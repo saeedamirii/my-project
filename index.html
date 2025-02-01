@@ -9,12 +9,17 @@
             text-align: center;
         }
         #menu {
-            margin-top: 50px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
         }
         button {
             padding: 10px 20px;
             margin: 10px;
-            font-size: 18px;
+            font-size: 20px;
+            cursor: pointer;
         }
         #pong {
             display: none;
@@ -31,9 +36,9 @@
 <body>
     <div id="menu">
         <h1>سطح بازی را انتخاب کنید</h1>
-        <button onclick="startGame('easy')">سطح آسان</button>
-        <button onclick="startGame('medium')">سطح متوسط</button>
-        <button onclick="startGame('hard')">سطح سخت</button>
+        <button onclick="startGame('easy')">آسان</button>
+        <button onclick="startGame('medium')">متوسط</button>
+        <button onclick="startGame('hard')">سخت</button>
     </div>
     <canvas id="pong" width="600" height="400"></canvas>
     <script src="script.js"></script>
