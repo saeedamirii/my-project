@@ -11,6 +11,7 @@ function startGame(level) {
     initializeGame();
 }
 
+// توپ و بازیکنان (همون کد اولیه بدون تغییر)
 let ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -24,6 +25,7 @@ let ball = {
 let user = { x: 50, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: "#007BFF" };
 let com = { x: canvas.width - 60, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: "#FF3B3B" };
 
+// آیتم‌ها فقط اضافه شدن، بدون تغییر چیزی دیگه
 let greenItem = { x: 0, y: 0, size: 20, color: "green", isActive: false };
 let goldItem = { x: 0, y: 0, size: 20, color: "gold", isActive: false };
 let redItem = { x: 0, y: 0, size: 20, color: "red", isActive: false };
@@ -60,24 +62,33 @@ function resetBall() {
     ball.speed = 7;
 }
 
+// تابع‌های تولید آیتم‌ها
 function spawnGreenItem() {
     greenItem.x = Math.random() * (canvas.width - 100) + 50;
     greenItem.y = Math.random() * (canvas.height - 100) + 50;
     greenItem.isActive = true;
+    setTimeout(() => greenItem.isActive = false, 5000);
 }
 
 function spawnGoldItem() {
     goldItem.x = Math.random() * (canvas.width - 100) + 50;
     goldItem.y = Math.random() * (canvas.height - 100) + 50;
     goldItem.isActive = true;
+    setTimeout(() => goldItem.isActive = false, 5000);
 }
 
 function spawnRedItem() {
-    redItem.x = Math.random() * (canvas.width - 100) + 50;
-    redItem.y = Math.random() * (canvas.height - 100) + 50;
-    redItem.isActive = true;
+    if (!redItem.isActive) {
+        setTimeout(() => {
+            redItem.x = Math.random() * (canvas.width - 100) + 50;
+            redItem.y = Math.random() * (canvas.height - 100) + 50;
+            redItem.isActive = true;
+            setTimeout(() => redItem.isActive = false, 5000);
+        }, Math.random() * 5000 + 3000);
+    }
 }
 
+// بررسی برخورد با آیتم‌ها
 function checkItemCollisions() {
     if (greenItem.isActive && ball.x > greenItem.x && ball.x < greenItem.x + greenItem.size &&
         ball.y > greenItem.y && ball.y < greenItem.y + greenItem.size) {
@@ -107,16 +118,21 @@ function collision(b, p) {
 }
 
 function update() {
+    // **سطح آسان**: بازی اصلی + آیتم سبز و طلایی
     if (difficulty === "easy") {
         if (!greenItem.isActive) spawnGreenItem();
         if (!goldItem.isActive) spawnGoldItem();
-    } else if (difficulty === "medium") {
-        // در این سطح هیچ تغییری نباید در بازی انجام شود
-    } else if (difficulty === "hard") {
+    }
+
+    // **سطح متوسط**: دقیقاً مثل بازی اولیه، بدون تغییر
+    if (difficulty === "medium") {
+        // هیچ آیتمی اضافه نمی‌شود
+    }
+
+    // **سطح سخت**: بازی اصلی + آیتم سبز با فواصل زمانی + آیتم قرمز با فواصل زمانی
+    if (difficulty === "hard") {
         if (!greenItem.isActive) spawnGreenItem();
-        if (!redItem.isActive) {
-            setTimeout(spawnRedItem, Math.random() * 5000 + 3000);
-        }
+        if (!redItem.isActive) spawnRedItem();
     }
 
     checkItemCollisions();
@@ -170,4 +186,4 @@ function gameLoop() {
 
 function initializeGame() {
     setInterval(gameLoop, 1000 / 60);
-}
+    }
