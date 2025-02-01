@@ -44,7 +44,7 @@ const com = {
     color: "#FF3B3B"
 };
 
-// متغیر برای قدرت‌ها
+// آیتم‌ها
 let powerUp = {
     x: 0,
     y: 0,
@@ -54,26 +54,23 @@ let powerUp = {
     isActive: false
 };
 
-let goldenItem = { // آیتم طلایی برای سطح آسان
+let goldenItem = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "gold",
+    color: "#FFD700",
     isActive: false
 };
 
-let redItem = { // آیتم قرمز برای سطح سخت
+let redItem = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "red",
+    color: "#FF0000",
     isActive: false
 };
-
-let isControlReversed = false; // برای کنترل معکوس در سطح سخت
-let difficulty = "easy"; // سطح بازی پیش فرض
 
 // رسم مستطیل
 function drawRect(x, y, w, h, color) {
@@ -121,15 +118,7 @@ function collision(b, p) {
     );
 }
 
-// تابع اسپاون آیتم‌ها
-function spawnGoldenItem() {
-    if (!goldenItem.isActive) {
-        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
-        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
-        goldenItem.isActive = true;
-    }
-}
-
+// تابع اسپاون قدرت
 function spawnPowerUp() {
     if (!powerUp.isActive) {
         powerUp.x = Math.random() * (canvas.width - 100) + 50;
@@ -138,6 +127,16 @@ function spawnPowerUp() {
     }
 }
 
+// تابع اسپاون ایتم طلایی
+function spawnGoldenItem() {
+    if (!goldenItem.isActive) {
+        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
+        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
+        goldenItem.isActive = true;
+    }
+}
+
+// تابع اسپاون ایتم قرمز
 function spawnRedItem() {
     if (!redItem.isActive) {
         redItem.x = Math.random() * (canvas.width - 100) + 50;
@@ -169,7 +168,7 @@ function checkGoldenItemCollision() {
         ball.y - ball.radius < goldenItem.y + goldenItem.height &&
         ball.y + ball.radius > goldenItem.y) {
         
-        user.score++;
+        user.score += 1;
         goldenItem.isActive = false;
     }
 }
@@ -181,24 +180,27 @@ function checkRedItemCollision() {
         ball.y - ball.radius < redItem.y + redItem.height &&
         ball.y + ball.radius > redItem.y) {
         
-        isControlReversed = true;
-        setTimeout(() => {
-            isControlReversed = false;
-        }, 5000);
+        // معکوس کردن جهت حرکت پدل بازیکن
+        user.y = canvas.height - user.y - user.height;
         redItem.isActive = false;
+        setTimeout(() => {
+            user.y = canvas.height - user.y - user.height; // بازگشت به حالت اولیه
+        }, 5000); // مدت زمان 5 ثانیه برای معکوس بودن کنترل
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
-    spawnGoldenItem();
-    spawnPowerUp();
-    if (difficulty === "hard") {
+    if (difficulty === 'easy') {
+        spawnGoldenItem();
+    }
+    if (difficulty === 'hard') {
         spawnRedItem();
     }
 
-    checkGoldenItemCollision();
+    spawnPowerUp();
     checkPowerUpCollision();
+    checkGoldenItemCollision();
     checkRedItemCollision();
 
     if (ball.x - ball.radius < 0) {
@@ -269,13 +271,21 @@ function render() {
     ctx.moveTo(canvas.width / 2, 50);
     ctx.lineTo(canvas.width / 2, canvas.height - 50);
     ctx.stroke();
+    ctx.setLineDash([]);
 
-    drawRect(user.x, user.y, user.width, user.height, user.color);
-    drawRect(com.x, com.y, com.width, com.height, com.color);
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00FFFF";
+    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
 
-    drawArc(ball.x, ball.y, ball.radius, ball.color);
+    ctx.shadowColor = "#007BFF";
+    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
 
-    // رسم آیتم‌های طلایی و قرمز و قدرت‌ها بر اساس سطح
+    ctx.shadowColor = "#FF3B3B";
+    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
+
+    ctx.shadowBlur = 0;
+
+    // رسم آیتم‌های مختلف
     if (goldenItem.isActive) {
         drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, goldenItem.color);
     }
@@ -291,24 +301,7 @@ function render() {
 function startGame(selectedLevel) {
     difficulty = selectedLevel;
 
-    // در صورت انتخاب سطح آسان، ایتم طلایی فعال شود
-    if (difficulty === 'easy') {
-        goldenItem.isActive = true;
-    }
-
-    // شروع بازی
+    // شروع بازی و اعمال آیتم‌ها بر اساس سطح
     resetBall();
     loop = setInterval(game, 1000 / framePerSecond);
 }
-
-// حلقه بازی
-function game() {
-    update();
-    render();
-}
-
-// شروع بازی به طور پیش‌فرض در سطح آسان
-let loop;
-const framePerSecond = 60;
-
-loop = setInterval(game, 1000 / framePerSecond);
