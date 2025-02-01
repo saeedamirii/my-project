@@ -16,111 +16,43 @@
             right: 0;
             left: 0;
             bottom: 0;
-        }
-
-        #leaderboard {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        #leaderboard h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        #leaderboard-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        #leaderboard-list li {
-            padding: 5px;
-            font-size: 18px;
-        }
-
-        #nameForm {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        #nameForm input {
-            font-size: 20px;
-            padding: 10px;
-            width: 200px;
-            margin-bottom: 10px;
-        }
-
-        #nameForm button {
-            font-size: 20px;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-        }
-
-        #nameForm button:hover {
-            background-color: #45a049;
-        }
-
-        #levelForm {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
             display: none;
         }
 
-        #levelForm button {
+        #menu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #menu button {
             font-size: 20px;
             padding: 10px;
+            margin: 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
-            margin: 10px;
         }
 
-        #levelForm button:hover {
+        #menu button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
 <body>
+    <div id="menu">
+        <h2>سطح بازی را انتخاب کنید:</h2>
+        <button onclick="startGame('easy')">آسان</button>
+        <button onclick="startGame('medium')">متوسط</button>
+        <button onclick="startGame('hard')">سخت</button>
+    </div>
+
     <canvas id="pong" width="600" height="400"></canvas>
-
-    <div id="nameForm">
-        <h2>لطفاً نام خود را وارد کنید:</h2>
-        <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
-        <br>
-        <button id="startButton" onclick="startGame()">شروع بازی</button>
-    </div>
-
-    <div id="levelForm">
-        <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
-        <button onclick="setLevel('easy')">آسان</button>
-        <button onclick="setLevel('medium')">متوسط</button>
-        <button onclick="setLevel('hard')">سخت</button>
-    </div>
-
-    <div id="leaderboard">
-        <h2>🏆 جدول رتبه‌بندی</h2>
-        <ul id="leaderboard-list"></ul>
-    </div>
 
     <script src="pong.js"></script>
 </body>
