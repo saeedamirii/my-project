@@ -63,6 +63,15 @@ let powerUpRed = {
     isActive: false
 };
 
+let powerUpGold = {
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    color: "#FFD700",
+    isActive: false
+};
+
 // رسم مستطیل
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -130,13 +139,17 @@ function checkPaddleCollision() {
 
 // تابع اسپاون قدرت‌ها
 function spawnPowerUps() {
-    if (!powerUpGreen.isActive) {
+    if (!powerUpGold.isActive) {
+        powerUpGold.x = Math.random() * (canvas.width - 100) + 50;
+        powerUpGold.y = Math.random() * (canvas.height - 100) + 50;
+        powerUpGold.isActive = true;
+    }
+
+    if (!powerUpGreen.isActive && !powerUpRed.isActive) {
         powerUpGreen.x = Math.random() * (canvas.width - 100) + 50;
         powerUpGreen.y = Math.random() * (canvas.height - 100) + 50;
         powerUpGreen.isActive = true;
-    }
 
-    if (!powerUpRed.isActive) {
         powerUpRed.x = Math.random() * (canvas.width - 100) + 50;
         powerUpRed.y = Math.random() * (canvas.height - 100) + 50;
         powerUpRed.isActive = true;
@@ -145,6 +158,21 @@ function spawnPowerUps() {
 
 // بررسی برخورد توپ با قدرت‌ها
 function checkPowerUpCollision() {
+    // برخورد با ایتم طلایی (سطح آسان)
+    if (powerUpGold.isActive &&
+        ball.x - ball.radius < powerUpGold.x + powerUpGold.width &&
+        ball.x + ball.radius > powerUpGold.x &&
+        ball.y - ball.radius < powerUpGold.y + powerUpGold.height &&
+        ball.y + ball.radius > powerUpGold.y) {
+        
+        user.height += 20;
+        powerUpGold.isActive = false;
+        setTimeout(() => {
+            user.height -= 20;
+        }, 5000);
+    }
+
+    // برخورد با ایتم سبز (سطح آسان یا متوسط)
     if (powerUpGreen.isActive &&
         ball.x - ball.radius < powerUpGreen.x + powerUpGreen.width &&
         ball.x + ball.radius > powerUpGreen.x &&
@@ -158,6 +186,7 @@ function checkPowerUpCollision() {
         }, 5000);
     }
 
+    // برخورد با ایتم قرمز (سطح سخت)
     if (powerUpRed.isActive &&
         ball.x - ball.radius < powerUpRed.x + powerUpRed.width &&
         ball.x + ball.radius > powerUpRed.x &&
@@ -247,6 +276,10 @@ function render() {
     drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
 
     ctx.shadowBlur = 0;
+
+    if (powerUpGold.isActive) {
+        drawRect(powerUpGold.x, powerUpGold.y, powerUpGold.width, powerUpGold.height, powerUpGold.color);
+    }
 
     if (powerUpGreen.isActive) {
         drawRect(powerUpGreen.x, powerUpGreen.y, powerUpGreen.width, powerUpGreen.height, powerUpGreen.color);
