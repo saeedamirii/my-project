@@ -34,7 +34,7 @@ const user = {
     color: "#007BFF"
 };
 
-// پدل حریف (کامپیوتر)
+// پدل حریف (هوش مصنوعی)
 const com = {
     x: canvas.width - 60,
     y: (canvas.height - 100) / 2,
@@ -42,6 +42,25 @@ const com = {
     height: 100,
     score: 0,
     color: "#FF3B3B"
+};
+
+// آیتم‌های قدرت (سبز و طلایی)
+let powerUpGreen = {
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    color: "#4CAF50",
+    isActive: false
+};
+
+let powerUpGold = {
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    color: "#FFD700",
+    isActive: false
 };
 
 // رسم مستطیل
@@ -59,7 +78,7 @@ function drawArc(x, y, r, color) {
     ctx.fill();
 }
 
-// حرکت ماوس برای کنترل پدل بازیکن
+// کنترل حرکت پدل بازیکن با ماوس
 canvas.addEventListener("mousemove", (evt) => {
     let rect = canvas.getBoundingClientRect();
     user.y = evt.clientY - rect.top - user.height / 2;
@@ -73,42 +92,68 @@ function resetBall() {
     ball.speed = 7;
 }
 
-// رسم امتیازها
+// نمایش امتیاز
 function drawText(text, x, y) {
     ctx.fillStyle = "#FFD700";
     ctx.font = "50px fantasy";
     ctx.fillText(text, x, y);
 }
 
-// بررسی برخورد توپ با پدل‌ها
-function checkPaddleCollision() {
-    // برخورد توپ با پدل بازیکن
-    if (ball.x - ball.radius < user.x + user.width &&
-        ball.y > user.y && 
-        ball.y < user.y + user.height) {
-        
-        // تغییر جهت توپ به صورت منطقی
-        ball.velocityX = Math.abs(ball.velocityX);  // همیشه توپ به سمت راست برود
-        let angle = (ball.y - (user.y + user.height / 2)) / (user.height / 2) * Math.PI / 4; // تغییر زاویه برخورد توپ
-        ball.velocityY = Math.sin(angle) * ball.speed;  // تغییر زاویه برخورد توپ با راکت
-        hit.play();
-    }
+// بررسی برخورد توپ با پدل
+function collision(b, p) {
+    return (
+        b.x - b.radius < p.x + p.width &&
+        b.x + b.radius > p.x &&
+        b.y - b.radius < p.y + p.height &&
+        b.y + b.radius > p.y
+    );
+}
 
-    // برخورد توپ با پدل کامپیوتر
-    if (ball.x + ball.radius > com.x &&
-        ball.y > com.y && 
-        ball.y < com.y + com.height) {
+// ایجاد آیتم‌های قدرت
+function spawnPowerUp() {
+    if (!powerUpGreen.isActive) {
+        powerUpGreen.x = Math.random() * (canvas.width - 100) + 50;
+        powerUpGreen.y = Math.random() * (canvas.height - 100) + 50;
+        powerUpGreen.isActive = true;
+    }
+    if (!powerUpGold.isActive) {
+        powerUpGold.x = Math.random() * (canvas.width - 100) + 50;
+        powerUpGold.y = Math.random() * (canvas.height - 100) + 50;
+        powerUpGold.isActive = true;
+    }
+}
+
+// بررسی برخورد توپ با آیتم‌های قدرت
+function checkPowerUpCollision() {
+    if (powerUpGreen.isActive &&
+        ball.x - ball.radius < powerUpGreen.x + powerUpGreen.width &&
+        ball.x + ball.radius > powerUpGreen.x &&
+        ball.y - ball.radius < powerUpGreen.y + powerUpGreen.height &&
+        ball.y + ball.radius > powerUpGreen.y) {
         
-        // تغییر جهت توپ به صورت منطقی
-        ball.velocityX = -Math.abs(ball.velocityX);  // همیشه توپ به سمت چپ برود
-        let angle = (ball.y - (com.y + com.height / 2)) / (com.height / 2) * Math.PI / 4; // تغییر زاویه برخورد توپ
-        ball.velocityY = Math.sin(angle) * ball.speed;  // تغییر زاویه برخورد توپ با راکت
-        hit.play();
+        user.height += 20;
+        powerUpGreen.isActive = false;
+        setTimeout(() => {
+            user.height -= 20;
+        }, 5000);
+    }
+    
+    if (powerUpGold.isActive &&
+        ball.x - ball.radius < powerUpGold.x + powerUpGold.width &&
+        ball.x + ball.radius > powerUpGold.x &&
+        ball.y - ball.radius < powerUpGold.y + powerUpGold.height &&
+        ball.y + ball.radius > powerUpGold.y) {
+        
+        user.score++;
+        powerUpGold.isActive = false;
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
+    spawnPowerUp();
+    checkPowerUpCollision();
+
     if (ball.x - ball.radius < 0) {
         com.score++;
         comScore.play();
@@ -122,29 +167,27 @@ function update() {
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // هوش مصنوعی (راکت کامپیوتر - دقیقاً مشابه سطح متوسط)
-    let errorMargin = 0.05; // خطای کوچک برای حرکت طبیعی
-    let targetY = ball.y - com.height / 2;
-    com.y += (targetY - com.y) * errorMargin;
-
-    // محدود کردن حرکت راکت‌ها
-    com.y = Math.max(Math.min(com.y, canvas.height - com.height), 0);  // راکت حریف نباید از محدوده بازی خارج بشه
-    user.y = Math.max(Math.min(user.y, canvas.height - user.height), 0);  // راکت کاربر نباید از محدوده بازی خارج بشه
+    // *** دقیقاً همان منطق سطح متوسط برای حرکت هوش مصنوعی ***
+    let randomError = Math.random() * 0.5 - 0.25;
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.1 + randomError;
 
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
 
-    // حرکت طبیعی‌تر توپ
-    if (ball.velocityX > 0) {
-        ball.velocityX += 0.01; // افزایش تدریجی سرعت در راستای x
+    let player = (ball.x < canvas.width / 2) ? user : com;
+
+    if (collision(ball, player)) {
+        hit.play();
+        let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
+        let angleRad = (Math.PI / 4) * collidePoint;
+        let direction = (ball.x < canvas.width / 2) ? 1 : -1;
+        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+        ball.velocityY = ball.speed * Math.sin(angleRad);
+        ball.speed += 0.1;
     }
 
-    // محدود کردن سرعت توپ
-    ball.speed = 7;
-
-    // اگر امتیاز یکی از بازیکنان به 20 برسد، بازی تمام می‌شود
     if (user.score === 20 || com.score === 20) {
         clearInterval(loop);
         setTimeout(() => {
@@ -162,43 +205,30 @@ function update() {
 
 // تابع رسم بازی
 function render() {
-    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#0F2027");
-    gradient.addColorStop(0.5, "#203A43");
-    gradient.addColorStop(1, "#2C5364");
-    drawRect(0, 0, canvas.width, canvas.height, gradient);
-
-    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
+    drawRect(0, 0, canvas.width, canvas.height, "#000");
 
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
 
-    ctx.setLineDash([5, 5]);
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 50);
-    ctx.lineTo(canvas.width / 2, canvas.height - 50);
-    ctx.stroke();
-    ctx.setLineDash([]);
+    drawArc(ball.x, ball.y, ball.radius, ball.color);
 
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#00FFFF";
-    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
-
-    ctx.shadowColor = "#007BFF";
     drawRect(user.x, user.y, user.width, user.height, user.color);
-
-    ctx.shadowColor = "#FF3B3B";
     drawRect(com.x, com.y, com.width, com.height, com.color);
+
+    if (powerUpGreen.isActive) {
+        drawRect(powerUpGreen.x, powerUpGreen.y, powerUpGreen.width, powerUpGreen.height, powerUpGreen.color);
+    }
+    if (powerUpGold.isActive) {
+        drawRect(powerUpGold.x, powerUpGold.y, powerUpGold.width, powerUpGold.height, powerUpGold.color);
+    }
 }
 
-// ایجاد یک حلقه بازی
+// اجرای بازی
 function game() {
     update();
     render();
 }
 
-// راه اندازی بازی
-let framePerSecond = 60;
+// تعداد فریم در ثانیه
+let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
