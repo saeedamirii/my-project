@@ -54,9 +54,6 @@ let powerUp = {
     isActive: false
 };
 
-// متغیر تنظیمات سطح
-let gameLevel = 'easy';
-
 // رسم مستطیل
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -128,6 +125,33 @@ function checkPowerUpCollision() {
     }
 }
 
+// انتخاب سطح بازی
+let gameLevel = "easy";
+
+// شروع بازی بر اساس سطح انتخابی
+function startGame(level) {
+    document.getElementById("menu").style.display = "none";
+    gameLevel = level;
+    user.score = 0;
+    com.score = 0;
+    resetBall();
+
+    // تنظیمات سطح بازی
+    if (gameLevel === 'easy') {
+        powerUp.color = "#4CAF50";  // آیتم سبز برای سطح آسان
+        powerUp.isActive = false;
+    } else if (gameLevel === 'medium') {
+        powerUp.color = "#FFD700";  // آیتم طلایی برای سطح متوسط
+        powerUp.isActive = true;
+    } else if (gameLevel === 'hard') {
+        powerUp.color = "#FF0000";  // آیتم قرمز برای سطح سخت
+        powerUp.isActive = true;
+        setInterval(spawnPowerUp, 5000);  // ظاهر شدن آیتم‌ها هر 5 ثانیه
+    }
+
+    loop = setInterval(game, 1000 / framePerSecond);
+}
+
 // بروزرسانی وضعیت بازی
 function update() {
     spawnPowerUp();
@@ -180,8 +204,7 @@ function update() {
         }, 1000);
     }
 }
-
-// تابع رسم بازی
+// رسم بازی
 function render() {
     let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#0F2027");
@@ -228,31 +251,4 @@ function game() {
 
 // تعداد فریم در ثانیه
 let framePerSecond = 50;
-let loop;
-
-// شروع بازی بر اساس سطح انتخابی
-    function startGame(level) {
-        document.getElementById("menu").style.display = "none";
-        gameLevel = level;
-        user.score = 0;
-        com.score = 0;
-        resetBall();
-
-        // تعیین سرعت و فراوانی آیتم‌ها براساس سطح
-        if (gameLevel === 'easy') {
-            powerUp.color = "#4CAF50";  // رنگ آیتم سبز برای سطح آسان
-            powerUp.isActive = false;   // آیتم در سطح آسان فعال نیست
-        } else if (gameLevel === 'medium') {
-            powerUp.color = "#FFD700";  // رنگ آیتم طلایی برای سطح متوسط
-            powerUp.isActive = true;    // آیتم فعال است
-        } else if (gameLevel === 'hard') {
-            powerUp.color = "#FF0000";  // رنگ آیتم قرمز برای سطح سخت
-            powerUp.isActive = true;    // آیتم فعال است
-            setInterval(spawnPowerUp, 5000);  // ظاهر شدن آیتم‌ها هر 5 ثانیه
-        }
-
-        loop = setInterval(game, 1000 / framePerSecond);
-    }
-
-    // شروع بازی از حالت پیش‌فرض
-    startGame('easy');
+let loop = setInterval(game, 1000 / framePerSecond);
