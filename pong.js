@@ -105,4 +105,126 @@ function spawnRedItem() {
     if (!redItem.isActive) {
         redItem.x = Math.random() * (canvas.width - 100) + 50;
         redItem.y = Math.random() * (canvas.height - 100) + 50;
-        redItem.is
+        redItem.isActive = true;
+    }
+}
+
+// بررسی برخورد توپ با ایتم قرمز
+function checkRedItemCollision() {
+    if (redItem.isActive &&
+        ball.x - ball.radius < redItem.x + redItem.width &&
+        ball.x + ball.radius > redItem.x &&
+        ball.y - ball.radius < redItem.y + redItem.height &&
+        ball.y + ball.radius > redItem.y) {
+        
+        // معکوس کردن کنترل پدل بازیکن برای مدت زمان کوتاه
+        let originalY = user.y;
+        user.y = canvas.height - user.y - user.height;
+        setTimeout(() => {
+            user.y = originalY;
+        }, 2000);  // برگشتن کنترل بعد از 2 ثانیه
+        redItem.isActive = false;  // غیرفعال کردن ایتم پس از برخورد
+    }
+}
+
+// بروزرسانی وضعیت بازی
+function update() {
+    spawnRedItem();
+    checkRedItemCollision();
+
+    if (ball.x - ball.radius < 0) {
+        com.score++;
+        comScore.play();
+        resetBall();
+    } else if (ball.x + ball.radius > canvas.width) {
+        user.score++;
+        userScore.play();
+        resetBall();
+    }
+
+    ball.x += ball.velocityX;
+    ball.y += ball.velocityY;
+
+    let randomError = Math.random() * 0.5 - 0.25;
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
+
+    if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
+        ball.velocityY = -ball.velocityY;
+        wall.play();
+    }
+
+    let player = (ball.x < canvas.width / 2) ? user : com;
+
+    if (collision(ball, player)) {
+        hit.play();
+        let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
+        let angleRad = (Math.PI / 4) * collidePoint;
+        let direction = (ball.x < canvas.width / 2) ? 1 : -1;
+        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+        ball.velocityY = ball.speed * Math.sin(angleRad);
+        ball.speed += 0.1;
+    }
+
+    if (user.score === 20 || com.score === 20) {
+        clearInterval(loop);
+        setTimeout(() => {
+            let message = user.score === 20
+                ? "🎉 آفرین! تو برنده شدی! 🏆👏"
+                : "😢 آخی! باختی! دوباره امتحان کن!";
+            alert(message);
+            user.score = 0;
+            com.score = 0;
+            resetBall();
+            loop = setInterval(game, 1000 / framePerSecond);
+        }, 1000);
+    }
+}
+
+// تابع رسم بازی
+function render() {
+    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#0F2027");
+    gradient.addColorStop(0.5, "#203A43");
+    gradient.addColorStop(1, "#2C5364");
+    drawRect(0, 0, canvas.width, canvas.height, gradient);
+
+    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
+
+    drawText(user.score, canvas.width / 4, canvas.height / 5);
+    drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
+
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 50);
+    ctx.lineTo(canvas.width / 2, canvas.height - 50);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00FFFF";
+    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
+
+    ctx.shadowColor = "#007BFF";
+    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
+
+    ctx.shadowColor = "#FF3B3B";
+    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
+
+    ctx.shadowBlur = 0;
+
+    if (redItem.isActive) {
+        drawRect(redItem.x, redItem.y, redItem.width, redItem.height, redItem.color);
+    }
+}
+
+// تابع اجرای بازی
+function game() {
+    update();
+    render();
+}
+
+// تعداد فریم در ثانیه
+let framePerSecond = 50;
+let loop = setInterval(game, 1000 / framePerSecond);
