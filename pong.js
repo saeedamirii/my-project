@@ -44,7 +44,7 @@ const com = {
     color: "#FF3B3B"
 };
 
-// متغیر برای آیتم سبز (از سطح متوسط)
+// متغیر برای آیتم‌ها
 let powerUp = {
     x: 0,
     y: 0,
@@ -54,7 +54,7 @@ let powerUp = {
     isActive: false
 };
 
-// متغیر برای آیتم طلایی (جدید در سطح آسان)
+// آیتم طلایی (ویژگی اضافه‌شده برای سطح آسان)
 let goldenItem = {
     x: 0,
     y: 0,
@@ -156,25 +156,48 @@ function update() {
 
 // تابع رسم بازی
 function render() {
-    drawRect(0, 0, canvas.width, canvas.height, "#000");
+    let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+    gradient.addColorStop(0, "#0F2027");
+    gradient.addColorStop(0.5, "#203A43");
+    gradient.addColorStop(1, "#2C5364");
+    drawRect(0, 0, canvas.width, canvas.height, gradient);
+
     drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
 
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
 
-    drawArc(ball.x, ball.y, ball.radius, ball.color);
-    drawRect(user.x, user.y, user.width, user.height, user.color);
-    drawRect(com.x, com.y, com.width, com.height, com.color);
+    ctx.setLineDash([5, 5]);
+    ctx.strokeStyle = "#FFFFFF";
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(canvas.width / 2, 50);
+    ctx.lineTo(canvas.width / 2, canvas.height - 50);
+    ctx.stroke();
+    ctx.setLineDash([]);
+
+    ctx.shadowBlur = 15;
+    ctx.shadowColor = "#00FFFF";
+    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
+
+    ctx.shadowColor = "#007BFF";
+    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
+
+    ctx.shadowColor = "#FF3B3B";
+    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
+
+    ctx.shadowBlur = 0;
 
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
+
     if (goldenItem.isActive) {
         drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, goldenItem.color);
     }
 }
 
-// اجرای بازی
+// تابع اجرای بازی
 function game() {
     update();
     render();
