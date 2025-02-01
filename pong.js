@@ -1,19 +1,12 @@
-// انتخاب عنصر canvas
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
-// بارگذاری صداها
-let hit = new Audio();
-let wall = new Audio();
-let userScore = new Audio();
-let comScore = new Audio();
+// متغیرها برای تنظیمات سطح بازی
+let gameLevel = '';  // سطح بازی
+let loop;            // حلقه بازی
+let framePerSecond = 60;  // تعداد فریم‌ها در ثانیه
 
-hit.src = "sounds/hit.mp3";
-wall.src = "sounds/wall.mp3";
-comScore.src = "sounds/comScore.mp3";
-userScore.src = "sounds/userScore.mp3";
-
-// شیء توپ
+// تنظیمات برای توپ، پدل‌ها و قدرت‌ها
 const ball = {
     x: canvas.width / 2,
     y: canvas.height / 2,
@@ -24,7 +17,6 @@ const ball = {
     color: "#00FFFF"
 };
 
-// پدل بازیکن
 const user = {
     x: 50,
     y: (canvas.height - 100) / 2,
@@ -32,11 +24,9 @@ const user = {
     height: 100,
     score: 0,
     color: "#007BFF",
-    name: "",
-    reversed: false // برای معکوس کردن کنترل
+    reversed: false
 };
 
-// پدل حریف (کامپیوتر)
 const com = {
     x: canvas.width - 60,
     y: (canvas.height - 100) / 2,
@@ -46,38 +36,26 @@ const com = {
     color: "#FF3B3B"
 };
 
-// متغیر برای قدرت‌ها
 let powerUpActive = false;
 let powerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50",  
+    color: "#4CAF50",
     isActive: false
 };
 
-let goldenPowerUp = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#FFD700", 
-    isActive: false
-};
+// صداها
+let hit = new Audio();
+let wall = new Audio();
+let userScore = new Audio();
+let comScore = new Audio();
 
-let redPowerUp = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#FF0000", 
-    isActive: false
-};
-
-let gameLevel = '';  // سطح بازی (آسان، متوسط، سخت)
-let loop;
-let framePerSecond = 60;  // تعداد فریم‌ها در ثانیه
+hit.src = "sounds/hit.mp3";
+wall.src = "sounds/wall.mp3";
+comScore.src = "sounds/comScore.mp3";
+userScore.src = "sounds/userScore.mp3";
 
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
@@ -112,18 +90,6 @@ function spawnPowerUp() {
         powerUp.y = Math.random() * (canvas.height - 100) + 50;
         powerUp.isActive = true;
     }
-
-    if (!goldenPowerUp.isActive && gameLevel === 'easy') {
-        goldenPowerUp.x = Math.random() * (canvas.width - 100) + 50;
-        goldenPowerUp.y = Math.random() * (canvas.height - 100) + 50;
-        goldenPowerUp.isActive = true;
-    }
-
-    if (!redPowerUp.isActive && gameLevel === 'hard') {
-        redPowerUp.x = Math.random() * (canvas.width - 100) + 50;
-        redPowerUp.y = Math.random() * (canvas.height - 100) + 50;
-        redPowerUp.isActive = true;
-    }
 }
 
 // بررسی برخورد با آیتم‌ها
@@ -136,24 +102,6 @@ function checkPowerUpCollision() {
         user.height += 20;  
         powerUp.isActive = false;
         setTimeout(() => { user.height -= 20; }, 5000);
-    }
-
-    if (goldenPowerUp.isActive && ball.x - ball.radius < goldenPowerUp.x + goldenPowerUp.width && 
-        ball.x + ball.radius > goldenPowerUp.x && 
-        ball.y - ball.radius < goldenPowerUp.y + goldenPowerUp.height &&
-        ball.y + ball.radius > goldenPowerUp.y) {
-
-        user.score += 1;
-        goldenPowerUp.isActive = false;
-    }
-
-    if (redPowerUp.isActive && ball.x - ball.radius < redPowerUp.x + redPowerUp.width && 
-        ball.x + ball.radius > redPowerUp.x && 
-        ball.y - ball.radius < redPowerUp.y + redPowerUp.height &&
-        ball.y + ball.radius > redPowerUp.y) {
-
-        user.reversed = !user.reversed;
-        redPowerUp.isActive = false;
     }
 }
 
@@ -248,18 +196,14 @@ function render() {
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
-    if (goldenPowerUp.isActive) {
-        drawRect(goldenPowerUp.x, goldenPowerUp.y, goldenPowerUp.width, goldenPowerUp.height, goldenPowerUp.color);
-    }
-    if (redPowerUp.isActive) {
-        drawRect(redPowerUp.x, redPowerUp.y, redPowerUp.width, redPowerUp.height, redPowerUp.color);
-    }
 }
 
 // تابع شروع بازی
 function startGame(level) {
     gameLevel = level;
-    document.getElementById("levelMenu").style.display = "none"; // پنهان کردن منو
+    document.getElementById("levelMenu").style.display = "none";  // مخفی کردن منو
+
+    // شروع بازی پس از انتخاب سطح
     loop = setInterval(game, 1000 / framePerSecond);
 }
 
@@ -267,4 +211,4 @@ function startGame(level) {
 function game() {
     update();
     render();
-                   }
+}
