@@ -1,4 +1,3 @@
-// انتخاب عنصر canvas
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
@@ -44,7 +43,7 @@ const com = {
     color: "#FF3B3B"
 };
 
-// متغیر برای آیتم‌ها
+// آیتم‌ها
 let powerUp = {
     x: 0,
     y: 0,
@@ -54,7 +53,7 @@ let powerUp = {
     isActive: false
 };
 
-// آیتم طلایی (ویژگی اضافه‌شده برای سطح آسان)
+// آیتم طلایی برای سطح آسان
 let goldenItem = {
     x: 0,
     y: 0,
@@ -79,6 +78,14 @@ function drawArc(x, y, r, color) {
     ctx.fill();
 }
 
+// نمایش متن
+function drawText(text, x, y) {
+    ctx.font = "32px Arial";
+    ctx.fillStyle = "#FFFFFF";
+    ctx.textAlign = "center";
+    ctx.fillText(text, x, y);
+}
+
 // حرکت ماوس برای کنترل پدل بازیکن
 canvas.addEventListener("mousemove", (evt) => {
     let rect = canvas.getBoundingClientRect();
@@ -93,7 +100,7 @@ function resetBall() {
     ball.speed = 7;
 }
 
-// تابع اسپاون آیتم‌ها
+// اسپاون آیتم‌ها
 function spawnPowerUp() {
     if (!powerUp.isActive) {
         powerUp.x = Math.random() * (canvas.width - 100) + 50;
@@ -156,17 +163,21 @@ function update() {
 
 // تابع رسم بازی
 function render() {
+    // پس‌زمینه بازی
     let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#0F2027");
     gradient.addColorStop(0.5, "#203A43");
     gradient.addColorStop(1, "#2C5364");
     drawRect(0, 0, canvas.width, canvas.height, gradient);
 
+    // رسم ناحیه بازی
     drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
 
+    // نمایش امتیاز
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
 
+    // رسم خط وسط
     ctx.setLineDash([5, 5]);
     ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 2;
@@ -176,18 +187,20 @@ function render() {
     ctx.stroke();
     ctx.setLineDash([]);
 
+    // نمایش توپ
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#00FFFF";
     drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
 
+    // نمایش راکت‌ها
     ctx.shadowColor = "#007BFF";
     drawRect(user.x, user.y, user.width, user.height, "#007BFF");
 
     ctx.shadowColor = "#FF3B3B";
     drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
 
+    // نمایش آیتم‌ها
     ctx.shadowBlur = 0;
-
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
@@ -197,7 +210,7 @@ function render() {
     }
 }
 
-// تابع اجرای بازی
+// اجرای بازی
 function game() {
     update();
     render();
