@@ -54,21 +54,21 @@ let powerUpGreen = {
     isActive: false
 };
 
-let powerUpRed = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#FF0000",
-    isActive: false
-};
-
 let powerUpGold = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
     color: "#FFD700",
+    isActive: false
+};
+
+let powerUpRed = {
+    x: 0,
+    y: 0,
+    width: 20,
+    height: 20,
+    color: "#FF0000",
     isActive: false
 };
 
@@ -145,11 +145,13 @@ function spawnPowerUps() {
         powerUpGold.isActive = true;
     }
 
-    if (!powerUpGreen.isActive && !powerUpRed.isActive) {
+    if (!powerUpGreen.isActive) {
         powerUpGreen.x = Math.random() * (canvas.width - 100) + 50;
         powerUpGreen.y = Math.random() * (canvas.height - 100) + 50;
         powerUpGreen.isActive = true;
+    }
 
+    if (!powerUpRed.isActive) {
         powerUpRed.x = Math.random() * (canvas.width - 100) + 50;
         powerUpRed.y = Math.random() * (canvas.height - 100) + 50;
         powerUpRed.isActive = true;
@@ -283,10 +285,6 @@ function render() {
 
     if (powerUpGreen.isActive) {
         drawRect(powerUpGreen.x, powerUpGreen.y, powerUpGreen.width, powerUpGreen.height, powerUpGreen.color);
-    }
-
-    if (powerUpRed.isActive) {
-        drawRect(powerUpRed.x, powerUpRed.y, powerUpRed.width, powerUpRed.height, powerUpRed.color);
     }
 }
 
