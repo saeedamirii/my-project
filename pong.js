@@ -44,23 +44,22 @@ const com = {
     color: "#FF3B3B"
 };
 
-// متغیر برای قدرت‌ها
+// متغیر برای قدرت‌ها (سبز و قرمز)
 let powerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50", // رنگ سبز مثل سطح متوسط
+    color: "#4CAF50", // سبز
     isActive: false
 };
 
-// متغیر برای آیتم طلایی
-let goldenItem = {
+let redItem = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#FFD700", // رنگ طلایی
+    color: "#FF0000", // قرمز
     isActive: false
 };
 
@@ -110,7 +109,7 @@ function collision(b, p) {
     );
 }
 
-// تابع اسپاون قدرت‌ها
+// تابع اسپاون آیتم‌ها
 function spawnPowerUp() {
     if (!powerUp.isActive) {
         powerUp.x = Math.random() * (canvas.width - 100) + 50;
@@ -119,16 +118,15 @@ function spawnPowerUp() {
     }
 }
 
-// تابع اسپاون آیتم طلایی
-function spawnGoldenItem() {
-    if (!goldenItem.isActive) {
-        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
-        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
-        goldenItem.isActive = true;
+function spawnRedItem() {
+    if (!redItem.isActive) {
+        redItem.x = Math.random() * (canvas.width - 100) + 50;
+        redItem.y = Math.random() * (canvas.height - 100) + 50;
+        redItem.isActive = true;
     }
 }
 
-// بررسی برخورد توپ با قدرت
+// بررسی برخورد توپ با آیتم سبز
 function checkPowerUpCollision() {
     if (powerUp.isActive &&
         ball.x - ball.radius < powerUp.x + powerUp.width &&
@@ -144,25 +142,34 @@ function checkPowerUpCollision() {
     }
 }
 
-// بررسی برخورد توپ با آیتم طلایی
-function checkGoldenItemCollision() {
-    if (goldenItem.isActive &&
-        ball.x - ball.radius < goldenItem.x + goldenItem.width &&
-        ball.x + ball.radius > goldenItem.x &&
-        ball.y - ball.radius < goldenItem.y + goldenItem.height &&
-        ball.y + ball.radius > goldenItem.y) {
+// بررسی برخورد توپ با آیتم قرمز (کنترل راکت معکوس می‌شود)
+function checkRedItemCollision() {
+    if (redItem.isActive &&
+        ball.x - ball.radius < redItem.x + redItem.width &&
+        ball.x + ball.radius > redItem.x &&
+        ball.y - ball.radius < redItem.y + redItem.height &&
+        ball.y + ball.radius > redItem.y) {
         
-        user.score++;
-        goldenItem.isActive = false;
+        redItem.isActive = false;
+        canvas.addEventListener("mousemove", reverseControl);
+        setTimeout(() => {
+            canvas.removeEventListener("mousemove", reverseControl);
+        }, 3000);
     }
+}
+
+// معکوس کردن کنترل
+function reverseControl(evt) {
+    let rect = canvas.getBoundingClientRect();
+    user.y = canvas.height - (evt.clientY - rect.top) - user.height / 2;
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
     spawnPowerUp();
-    spawnGoldenItem();
+    spawnRedItem();
     checkPowerUpCollision();
-    checkGoldenItemCollision();
+    checkRedItemCollision();
 
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -228,8 +235,8 @@ function render() {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
 
-    if (goldenItem.isActive) {
-        drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, goldenItem.color);
+    if (redItem.isActive) {
+        drawRect(redItem.x, redItem.y, redItem.width, redItem.height, redItem.color);
     }
 }
 
