@@ -2,45 +2,40 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Breakout Game</title>
+    <title>saeed_game</title>
     <style>
-        /* سبک‌های پایه */
-        #gameCanvas {
-            background-color: #f0f0f0;
-            display: block;
-            margin: 0 auto;
-        }
-
-        /* منو سطح بازی */
-        #levelMenu {
+        body {
+            background-color: dimgray;
             text-align: center;
+        }
+        #menu {
             margin-top: 50px;
         }
-
-        #gameScreen {
-            display: none;
-        }
-
         button {
+            padding: 10px 20px;
             margin: 10px;
-            padding: 10px;
-            font-size: 16px;
+            font-size: 18px;
+        }
+        #pong {
+            display: none;
+            border: 2px solid #FFF;
+            position: absolute;
+            margin: auto;
+            top: 0;
+            right: 0;
+            left: 0;
+            bottom: 0;
         }
     </style>
 </head>
 <body>
-    <div id="levelMenu">
-        <h1>Choose Difficulty Level</h1>
-        <button id="easyBtn">Easy</button>
-        <button id="mediumBtn">Medium</button>
-        <button id="hardBtn">Hard</button>
+    <div id="menu">
+        <h1>سطح بازی را انتخاب کنید</h1>
+        <button onclick="startGame('easy')">سطح آسان</button>
+        <button onclick="startGame('medium')">سطح متوسط</button>
+        <button onclick="startGame('hard')">سطح سخت</button>
     </div>
-
-    <div id="gameScreen">
-        <canvas id="gameCanvas" width="400" height="400"></canvas>
-    </div>
-
+    <canvas id="pong" width="600" height="400"></canvas>
     <script src="script.js"></script>
 </body>
 </html>
