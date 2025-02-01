@@ -33,7 +33,7 @@ const user = {
     color: "#007BFF"
 };
 
-// پدل حریف (کامپیوتر)
+// پدل کامپیوتر
 const com = {
     x: canvas.width - 60,
     y: (canvas.height - 100) / 2,
@@ -145,19 +145,59 @@ function checkGoldenItemCollision() {
     }
 }
 
+// حرکت هوش مصنوعی
+function moveComputer() {
+    // هوش مصنوعی کامپیوتر که توپ رو دنبال می‌کنه
+    if (com.y + com.height / 2 < ball.y) {
+        com.y += 4;
+    } else if (com.y + com.height / 2 > ball.y) {
+        com.y -= 4;
+    }
+}
+
 // بروزرسانی وضعیت بازی
 function update() {
     spawnPowerUp();
     spawnGoldenItem();
     checkPowerUpCollision();
     checkGoldenItemCollision();
+    moveComputer(); // حرکت هوش مصنوعی
 
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
+    // برخورد توپ با دیواره بالا و پایین
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
+    }
+
+    // برخورد توپ با پدل‌ها
+    if (ball.x - ball.radius < user.x + user.width && 
+        ball.y > user.y && 
+        ball.y < user.y + user.height) {
+        ball.velocityX = -ball.velocityX;
+        hit.play();
+    }
+
+    if (ball.x + ball.radius > com.x && 
+        ball.y > com.y && 
+        ball.y < com.y + com.height) {
+        ball.velocityX = -ball.velocityX;
+        hit.play();
+    }
+
+    // اگر توپ از صفحه خارج شد
+    if (ball.x - ball.radius < 0) {
+        com.score++;
+        resetBall();
+        comScore.play();
+    }
+
+    if (ball.x + ball.radius > canvas.width) {
+        user.score++;
+        resetBall();
+        userScore.play();
     }
 }
 
