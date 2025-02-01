@@ -56,6 +56,9 @@ let powerUp = {
     isActive: false
 };
 
+// متغیر سطح بازی
+let gameLevel = 'medium';
+
 // رسم مستطیل (برای پدل‌ها و پس‌زمینه)
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
@@ -120,11 +123,17 @@ function checkPowerUpCollision() {
         ball.y + ball.radius > powerUp.y) {
         
         // وقتی توپ به آیتم برخورد کرد
-        user.height += 20;  // بزرگ کردن راکت بازیکن
+        if (gameLevel === 'easy') {
+            user.score++;  // در سطح آسان امتیاز اضافه می‌شود
+        } else if (gameLevel === 'hard') {
+            user.y = canvas.height - user.y - user.height;  // تغییر جهت راکت در سطح سخت
+        } else {
+            user.height += 20;  // بزرگ کردن راکت در سطح متوسط
+            setTimeout(() => {
+                user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
+            }, 5000);  // مدت زمان 5 ثانیه
+        }
         powerUp.isActive = false;  // مخفی کردن آیتم بعد از برخورد
-        setTimeout(() => {
-            user.height -= 20;  // بازگشت به اندازه اولیه بعد از 5 ثانیه
-        }, 5000);  // مدت زمان 5 ثانیه
     }
 }
 
@@ -196,95 +205,60 @@ function update() {
 function render() {
     // پس‌زمینه گرادینتی شیک
     let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
-    gradient.addColorStop(0, "#0F2027");
-    gradient.addColorStop(0.5, "#203A43");
-    gradient.addColorStop(1, "#2C5364");
-    drawRect(0, 0, canvas.width, canvas.height, gradient);
 
-    // داخل میز (زمین بازی)
-    drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
+gradient.addColorStop(0, "#3E8E41");
+    gradient.addColorStop(1, "#2F6A37");
+    ctx.fillStyle = gradient;
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // امتیازدهی
+    // رسم توپ
+    drawArc(ball.x, ball.y, ball.radius, ball.color);
+
+    // رسم پدل‌ها
+    drawRect(user.x, user.y, user.width, user.height, user.color);
+    drawRect(com.x, com.y, com.width, com.height, com.color);
+
+    // رسم امتیازها
     drawText(user.score, canvas.width / 4, canvas.height / 5);
-    drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
+    drawText(com.score, 3 * canvas.width / 4, canvas.height / 5);
 
-    // خط وسط زمین
-    ctx.setLineDash([5, 5]);
-    ctx.strokeStyle = "#FFFFFF";
-    ctx.lineWidth = 2;
-    ctx.beginPath();
-    ctx.moveTo(canvas.width / 2, 50);
-    ctx.lineTo(canvas.width / 2, canvas.height - 50);
-    ctx.stroke();
-    ctx.setLineDash([]);
-
-    // افکت Glow برای توپ و پدل‌ها
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#00FFFF";
-    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
-
-    ctx.shadowColor = "#007BFF";
-    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
-
-    ctx.shadowColor = "#FF3B3B";
-    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
-
-    ctx.shadowBlur = 0;
-
-    // رندر کردن آیتم قدرت
+    // رسم آیتم قدرت در صورت فعال بودن
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
 }
 
-// تابع اجرای بازی
-function game() {
-    update();
-    render();
-}
-
-// تعداد فریم در ثانیه
-let framePerSecond = 50;
-let loop;
-
-// تابع شروع بازی
+// تابع برای شروع بازی
 function startGame() {
-    let name = document.getElementById("playerName").value;
-    if (name) {
-        user.name = name;
-        document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم وارد کردن نام
-        loop = setInterval(game, 1000 / framePerSecond);
+    const playerNameInput = document.getElementById("playerName").value;
+    if (playerNameInput) {
+        user.name = playerNameInput;
+        document.getElementById("nameForm").style.display = "none"; // مخفی کردن فرم نام
+        document.getElementById("levelMenu").style.display = "none"; // مخفی کردن منوی انتخاب سطح
+        loop = setInterval(game, 1000 / framePerSecond); // شروع بازی
     } else {
         alert("لطفاً نام خود را وارد کنید!");
     }
 }
 
-// ذخیره و نمایش جدول رتبه‌بندی
-function updateLeaderboard(winner) {
-    let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || {};
-    
-    // افزایش برد بازیکن
-    leaderboard[winner] = (leaderboard[winner] || 0) + 1;
-
-    // ذخیره در LocalStorage
-    localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
-
-    // مرتب‌سازی و نمایش رتبه‌بندی
-    displayLeaderboard(leaderboard);
+// تابع برای تنظیم سطح بازی
+function setLevel(level) {
+    gameLevel = level;
+    document.getElementById("levelMenu").style.display = "none"; // مخفی کردن منوی انتخاب سطح
+    document.getElementById("nameForm").style.display = "block"; // نمایش فرم وارد کردن نام
 }
 
-// نمایش جدول رتبه‌بندی
-function displayLeaderboard(leaderboard) {
-    let sortedPlayers = Object.entries(leaderboard).sort((a, b) => b[1] - a[1]);
+// این متغیر برای تعداد فریم‌های بازی استفاده می‌شود
+let framePerSecond = 60;
+let loop;
 
-    let leaderboardHTML = "";
-    sortedPlayers.forEach((player, index) => {
-        let medal = index === 0 ? "🥇" : index === 1 ? "🥈" : index === 2 ? "🥉" : "";
-        leaderboardHTML += `<li>${medal} ${player[0]} - ${player[1]} برد</li>`;
-    });
-
-    document.getElementById("leaderboard-list").innerHTML = leaderboardHTML;
+// اجرای بازی
+function game() {
+    update();  // بروزرسانی وضعیت بازی
+    render();  // رسم عناصر بازی
 }
 
-// نمایش رتبه‌بندی در شروع بازی
-displayLeaderboard(JSON.parse(localStorage.getItem("leaderboard")) || {});
+// شروع بازی با یک تاخیر
+setTimeout(() => {
+    document.getElementById("levelMenu").style.display = "block"; // نمایش منوی انتخاب سطح
+}, 1000);
