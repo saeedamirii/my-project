@@ -242,3 +242,26 @@ function game() {
 // اجرای بازی
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
+
+
+
+
+function checkWinCondition() {
+    if (user.score === 30) {
+        clearInterval(loop);
+        setTimeout(() => {
+            alert("🎉 آفرین! ولی سطح آسان بود، راست می‌گی برو سطح بالا! 😉");
+            user.score = 0;
+            com.score = 0;
+            resetBall();
+            loop = setInterval(game, 1000 / framePerSecond);
+        }, 500);
+    }
+}
+
+// اضافه کردن این تابع در حلقه بازی
+function game() {
+    update();
+    render();
+    checkWinCondition();
+}
