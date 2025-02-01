@@ -18,33 +18,7 @@
             bottom: 0;
         }
 
-        #leaderboard {
-            position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.7);
-            padding: 15px;
-            border-radius: 10px;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        #leaderboard h2 {
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        #leaderboard-list {
-            list-style: none;
-            padding: 0;
-        }
-
-        #leaderboard-list li {
-            padding: 5px;
-            font-size: 18px;
-        }
-
-        #nameForm, #levelForm {
+        #levelForm {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -54,14 +28,14 @@
             font-family: Arial, sans-serif;
         }
 
-        #nameForm input, #levelForm select {
+        #levelForm select {
             font-size: 20px;
             padding: 10px;
             width: 200px;
             margin-bottom: 10px;
         }
 
-        #nameForm button, #levelForm button {
+        #levelForm button {
             font-size: 20px;
             padding: 10px;
             background-color: #4CAF50;
@@ -70,23 +44,15 @@
             cursor: pointer;
         }
 
-        #nameForm button:hover, #levelForm button:hover {
+        #levelForm button:hover {
             background-color: #45a049;
         }
-
     </style>
 </head>
 <body>
    <canvas id="pong" width="600" height="400"></canvas>
 
-   <div id="nameForm">
-       <h2>لطفاً نام خود را وارد کنید:</h2>
-       <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
-       <br>
-       <button id="startButton" onclick="startGame()">شروع بازی</button>
-   </div>
-
-   <div id="levelForm" style="display: none;">
+   <div id="levelForm">
        <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
        <select id="levelSelect">
            <option value="easy">آسان</option>
@@ -95,11 +61,6 @@
        </select>
        <br>
        <button onclick="chooseLevel()">تایید</button>
-   </div>
-
-   <div id="leaderboard">
-       <h2>🏆 جدول رتبه‌بندی</h2>
-       <ul id="leaderboard-list"></ul>
    </div>
 
    <script src="pong.js"></script>
