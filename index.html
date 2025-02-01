@@ -1,49 +1,44 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa">
 <head>
     <meta charset="UTF-8">
     <title>saeed_game</title>
     <style>
         body {
             background-color: dimgray;
+            text-align: center;
+        }
+
+        #menu {
+            position: absolute;
+            width: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 18px;
+            margin: 10px;
+            cursor: pointer;
         }
 
         #pong {
             border: 2px solid #FFF;
-            position: absolute;
+            display: none; /* مخفی کردن بازی تا زمانی که سطح انتخاب شود */
             margin: auto;
-            top: 0;
-            right: 0;
-            left: 0;
-            bottom: 0;
-        }
-
-        #menu {
-            text-align: center;
-            padding-top: 100px;
-        }
-
-        button {
-            background-color: #4CAF50;
-            padding: 10px 20px;
-            margin: 10px;
-            font-size: 20px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-   <div id="menu">
+    <div id="menu">
         <h1>سطح بازی را انتخاب کنید</h1>
         <button onclick="startGame('easy')">آسان</button>
         <button onclick="startGame('medium')">متوسط</button>
         <button onclick="startGame('hard')">سخت</button>
     </div>
+
     <canvas id="pong" width="600" height="400"></canvas>
-   <script src="script.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
