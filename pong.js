@@ -1,3 +1,4 @@
+// انتخاب عنصر canvas
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
@@ -33,7 +34,7 @@ const user = {
     color: "#007BFF"
 };
 
-// پدل کامپیوتر
+// پدل حریف (کامپیوتر)
 const com = {
     x: canvas.width - 60,
     y: (canvas.height - 100) / 2,
@@ -43,23 +44,22 @@ const com = {
     color: "#FF3B3B"
 };
 
-// آیتم‌ها
+// متغیر برای قدرت‌ها
 let powerUp = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50",
+    color: "#4CAF50", // رنگ سبز برای سطح متوسط و آسان
     isActive: false
 };
 
-// آیتم طلایی برای سطح آسان
-let goldenItem = {
+let powerUpRed = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#FFD700",
+    color: "#FF3B3B", // رنگ قرمز برای سطح سخت
     isActive: false
 };
 
@@ -78,14 +78,6 @@ function drawArc(x, y, r, color) {
     ctx.fill();
 }
 
-// نمایش متن
-function drawText(text, x, y) {
-    ctx.font = "32px Arial";
-    ctx.fillStyle = "#FFFFFF";
-    ctx.textAlign = "center";
-    ctx.fillText(text, x, y);
-}
-
 // حرکت ماوس برای کنترل پدل بازیکن
 canvas.addEventListener("mousemove", (evt) => {
     let rect = canvas.getBoundingClientRect();
@@ -100,24 +92,71 @@ function resetBall() {
     ball.speed = 7;
 }
 
-// اسپاون آیتم‌ها
+// رسم امتیازها
+function drawText(text, x, y) {
+    ctx.fillStyle = "#FFD700";
+    ctx.font = "50px fantasy";
+    ctx.fillText(text, x, y);
+}
+
+// بررسی برخورد توپ با پدل‌ها
+function checkPaddleCollision() {
+    // برخورد توپ با پدل بازیکن
+    if (ball.x - ball.radius < user.x + user.width &&
+        ball.y > user.y && 
+        ball.y < user.y + user.height) {
+        
+        let angle = 0;
+        if (ball.y < user.y + user.height / 2) {
+            angle = -Math.PI / 4;  // برخورد توپ با قسمت بالای راکت
+        } else if (ball.y > user.y + user.height / 2) {
+            angle = Math.PI / 4;   // برخورد توپ با قسمت پایین راکت
+        }
+        
+        // اعمال زاویه برخورد
+        ball.velocityX = Math.abs(ball.velocityX) * Math.cos(angle);
+        ball.velocityY = Math.abs(ball.velocityY) * Math.sin(angle);
+        
+        hit.play();
+    }
+
+    // برخورد توپ با پدل کامپیوتر
+    if (ball.x + ball.radius > com.x &&
+        ball.y > com.y && 
+        ball.y < com.y + com.height) {
+        
+        let angle = 0;
+        if (ball.y < com.y + com.height / 2) {
+            angle = -Math.PI / 4;  // برخورد توپ با قسمت بالای راکت
+        } else if (ball.y > com.y + com.height / 2) {
+            angle = Math.PI / 4;   // برخورد توپ با قسمت پایین راکت
+        }
+        
+        // اعمال زاویه برخورد
+        ball.velocityX = -Math.abs(ball.velocityX) * Math.cos(angle);
+        ball.velocityY = Math.abs(ball.velocityY) * Math.sin(angle);
+        
+        hit.play();
+    }
+}
+
+// تابع اسپاون قدرت
 function spawnPowerUp() {
-    if (!powerUp.isActive) {
-        powerUp.x = Math.random() * (canvas.width - 100) + 50;
-        powerUp.y = Math.random() * (canvas.height - 100) + 50;
-        powerUp.isActive = true;
+    if (!powerUp.isActive && !powerUpRed.isActive) {
+        let rand = Math.random();
+        if (rand < 0.5) {
+            powerUp.x = Math.random() * (canvas.width - 100) + 50;
+            powerUp.y = Math.random() * (canvas.height - 100) + 50;
+            powerUp.isActive = true;
+        } else {
+            powerUpRed.x = Math.random() * (canvas.width - 100) + 50;
+            powerUpRed.y = Math.random() * (canvas.height - 100) + 50;
+            powerUpRed.isActive = true;
+        }
     }
 }
 
-function spawnGoldenItem() {
-    if (!goldenItem.isActive) {
-        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
-        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
-        goldenItem.isActive = true;
-    }
-}
-
-// بررسی برخورد توپ با آیتم‌ها
+// بررسی برخورد توپ با قدرت‌ها
 function checkPowerUpCollision() {
     if (powerUp.isActive &&
         ball.x - ball.radius < powerUp.x + powerUp.width &&
@@ -131,93 +170,78 @@ function checkPowerUpCollision() {
             user.height -= 20;
         }, 5000);
     }
-}
 
-function checkGoldenItemCollision() {
-    if (goldenItem.isActive &&
-        ball.x - ball.radius < goldenItem.x + goldenItem.width &&
-        ball.x + ball.radius > goldenItem.x &&
-        ball.y - ball.radius < goldenItem.y + goldenItem.height &&
-        ball.y + ball.radius > goldenItem.y) {
+    if (powerUpRed.isActive &&
+        ball.x - ball.radius < powerUpRed.x + powerUpRed.width &&
+        ball.x + ball.radius > powerUpRed.x &&
+        ball.y - ball.radius < powerUpRed.y + powerUpRed.height &&
+        ball.y + ball.radius > powerUpRed.y) {
         
-        user.score++;
-        goldenItem.isActive = false;
-    }
-}
-
-// حرکت هوش مصنوعی
-function moveComputer() {
-    // هوش مصنوعی کامپیوتر که توپ رو دنبال می‌کنه
-    if (com.y + com.height / 2 < ball.y) {
-        com.y += 4;
-    } else if (com.y + com.height / 2 > ball.y) {
-        com.y -= 4;
+        // تغییر کنترل راکت (برعکس شدن)
+        user.y = canvas.height - user.y - user.height;
+        powerUpRed.isActive = false;
+        setTimeout(() => {
+            user.y = canvas.height - user.y - user.height; // بازگشت به حالت اولیه
+        }, 5000);
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
     spawnPowerUp();
-    spawnGoldenItem();
     checkPowerUpCollision();
-    checkGoldenItemCollision();
-    moveComputer(); // حرکت هوش مصنوعی
+
+    if (ball.x - ball.radius < 0) {
+        com.score++;
+        comScore.play();
+        resetBall();
+    } else if (ball.x + ball.radius > canvas.width) {
+        user.score++;
+        userScore.play();
+        resetBall();
+    }
 
     ball.x += ball.velocityX;
     ball.y += ball.velocityY;
 
-    // برخورد توپ با دیواره بالا و پایین
+    let randomError = Math.random() * 0.5 - 0.25;
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
+
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
     }
 
-    // برخورد توپ با پدل‌ها
-    if (ball.x - ball.radius < user.x + user.width && 
-        ball.y > user.y && 
-        ball.y < user.y + user.height) {
-        ball.velocityX = -ball.velocityX;
-        hit.play();
-    }
+    checkPaddleCollision();
 
-    if (ball.x + ball.radius > com.x && 
-        ball.y > com.y && 
-        ball.y < com.y + com.height) {
-        ball.velocityX = -ball.velocityX;
-        hit.play();
-    }
-
-    // اگر توپ از صفحه خارج شد
-    if (ball.x - ball.radius < 0) {
-        com.score++;
-        resetBall();
-        comScore.play();
-    }
-
-    if (ball.x + ball.radius > canvas.width) {
-        user.score++;
-        resetBall();
-        userScore.play();
+    if (user.score === 20 || com.score === 20) {
+        clearInterval(loop);
+        setTimeout(() => {
+            let message = user.score === 20
+                ? "🎉 آفرین! تو برنده شدی! 🏆👏"
+                : "😢 آخی! باختی! دوباره امتحان کن!";
+            alert(message);
+            user.score = 0;
+            com.score = 0;
+            resetBall();
+            loop = setInterval(game, 1000 / framePerSecond);
+        }, 1000);
     }
 }
 
 // تابع رسم بازی
 function render() {
-    // پس‌زمینه بازی
     let gradient = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
     gradient.addColorStop(0, "#0F2027");
     gradient.addColorStop(0.5, "#203A43");
     gradient.addColorStop(1, "#2C5364");
     drawRect(0, 0, canvas.width, canvas.height, gradient);
 
-    // رسم ناحیه بازی
     drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
 
-    // نمایش امتیاز
     drawText(user.score, canvas.width / 4, canvas.height / 5);
     drawText(com.score, (3 * canvas.width) / 4, canvas.height / 5);
 
-    // رسم خط وسط
     ctx.setLineDash([5, 5]);
     ctx.strokeStyle = "#FFFFFF";
     ctx.lineWidth = 2;
@@ -227,35 +251,33 @@ function render() {
     ctx.stroke();
     ctx.setLineDash([]);
 
-    // نمایش توپ
     ctx.shadowBlur = 15;
     ctx.shadowColor = "#00FFFF";
     drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
 
-    // نمایش راکت‌ها
     ctx.shadowColor = "#007BFF";
     drawRect(user.x, user.y, user.width, user.height, "#007BFF");
 
     ctx.shadowColor = "#FF3B3B";
     drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
 
-    // نمایش آیتم‌ها
     ctx.shadowBlur = 0;
+
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
 
-    if (goldenItem.isActive) {
-        drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, goldenItem.color);
+    if (powerUpRed.isActive) {
+        drawRect(powerUpRed.x, powerUpRed.y, powerUpRed.width, powerUpRed.height, powerUpRed.color);
     }
 }
 
-// اجرای بازی
+// تابع اجرای بازی
 function game() {
     update();
     render();
 }
 
-// اجرای حلقه بازی
+// تعداد فریم در ثانیه
 let framePerSecond = 50;
 let loop = setInterval(game, 1000 / framePerSecond);
