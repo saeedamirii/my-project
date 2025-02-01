@@ -44,7 +44,7 @@
             font-size: 18px;
         }
 
-        #nameForm, #levelForm {
+        #nameForm {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -54,14 +54,14 @@
             font-family: Arial, sans-serif;
         }
 
-        #nameForm input, #levelForm button {
+        #nameForm input {
             font-size: 20px;
             padding: 10px;
             width: 200px;
             margin-bottom: 10px;
         }
 
-        #nameForm button, #levelForm button {
+        #nameForm button {
             font-size: 20px;
             padding: 10px;
             background-color: #4CAF50;
@@ -70,37 +70,58 @@
             cursor: pointer;
         }
 
-        #nameForm button:hover, #levelForm button:hover {
+        #nameForm button:hover {
             background-color: #45a049;
         }
 
         #levelForm {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
             display: none;
+        }
+
+        #levelForm button {
+            font-size: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        #levelForm button:hover {
+            background-color: #45a049;
         }
     </style>
 </head>
 <body>
-   <canvas id="pong" width="600" height="400"></canvas>
+    <canvas id="pong" width="600" height="400"></canvas>
 
-   <div id="nameForm">
-       <h2>لطفاً نام خود را وارد کنید:</h2>
-       <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
-       <br>
-       <button id="startButton" onclick="startGame()">شروع بازی</button>
-   </div>
+    <div id="nameForm">
+        <h2>لطفاً نام خود را وارد کنید:</h2>
+        <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
+        <br>
+        <button id="startButton" onclick="startGame()">شروع بازی</button>
+    </div>
 
-   <div id="levelForm">
-       <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
-       <button onclick="startLevel('easy')">آسان</button>
-       <button onclick="startLevel('medium')">متوسط</button>
-       <button onclick="startLevel('hard')">سخت</button>
-   </div>
+    <div id="levelForm">
+        <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
+        <button onclick="setLevel('easy')">آسان</button>
+        <button onclick="setLevel('medium')">متوسط</button>
+        <button onclick="setLevel('hard')">سخت</button>
+    </div>
 
-   <div id="leaderboard">
-       <h2>🏆 جدول رتبه‌بندی</h2>
-       <ul id="leaderboard-list"></ul>
-   </div>
+    <div id="leaderboard">
+        <h2>🏆 جدول رتبه‌بندی</h2>
+        <ul id="leaderboard-list"></ul>
+    </div>
 
-   <script src="pong.js"></script>
+    <script src="pong.js"></script>
 </body>
 </html>
