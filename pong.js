@@ -54,7 +54,7 @@ let powerUp = {
     isActive: false
 };
 
-let goldenPowerUp = {
+let goldenItem = { // آیتم طلایی برای سطح آسان
     x: 0,
     y: 0,
     width: 20,
@@ -63,7 +63,7 @@ let goldenPowerUp = {
     isActive: false
 };
 
-let redPowerUp = {
+let redItem = { // آیتم قرمز برای سطح سخت
     x: 0,
     y: 0,
     width: 20,
@@ -71,6 +71,9 @@ let redPowerUp = {
     color: "red",
     isActive: false
 };
+
+let isControlReversed = false; // برای کنترل معکوس در سطح سخت
+let difficulty = "easy"; // سطح بازی پیش فرض
 
 // رسم مستطیل
 function drawRect(x, y, w, h, color) {
@@ -118,7 +121,15 @@ function collision(b, p) {
     );
 }
 
-// تابع اسپاون قدرت‌ها
+// تابع اسپاون آیتم‌ها
+function spawnGoldenItem() {
+    if (!goldenItem.isActive) {
+        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
+        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
+        goldenItem.isActive = true;
+    }
+}
+
 function spawnPowerUp() {
     if (!powerUp.isActive) {
         powerUp.x = Math.random() * (canvas.width - 100) + 50;
@@ -127,19 +138,11 @@ function spawnPowerUp() {
     }
 }
 
-function spawnGoldenPowerUp() {
-    if (!goldenPowerUp.isActive) {
-        goldenPowerUp.x = Math.random() * (canvas.width - 100) + 50;
-        goldenPowerUp.y = Math.random() * (canvas.height - 100) + 50;
-        goldenPowerUp.isActive = true;
-    }
-}
-
-function spawnRedPowerUp() {
-    if (!redPowerUp.isActive) {
-        redPowerUp.x = Math.random() * (canvas.width - 100) + 50;
-        redPowerUp.y = Math.random() * (canvas.height - 100) + 50;
-        redPowerUp.isActive = true;
+function spawnRedItem() {
+    if (!redItem.isActive) {
+        redItem.x = Math.random() * (canvas.width - 100) + 50;
+        redItem.y = Math.random() * (canvas.height - 100) + 50;
+        redItem.isActive = true;
     }
 }
 
@@ -157,46 +160,46 @@ function checkPowerUpCollision() {
             user.height -= 20;
         }, 5000);
     }
+}
 
-    if (goldenPowerUp.isActive &&
-        ball.x - ball.radius < goldenPowerUp.x + goldenPowerUp.width &&
-        ball.x + ball.radius > goldenPowerUp.x &&
-        ball.y - ball.radius < goldenPowerUp.y + goldenPowerUp.height &&
-        ball.y + ball.radius > goldenPowerUp.y) {
+function checkGoldenItemCollision() {
+    if (goldenItem.isActive &&
+        ball.x - ball.radius < goldenItem.x + goldenItem.width &&
+        ball.x + ball.radius > goldenItem.x &&
+        ball.y - ball.radius < goldenItem.y + goldenItem.height &&
+        ball.y + ball.radius > goldenItem.y) {
         
         user.score++;
-        goldenPowerUp.isActive = false;
+        goldenItem.isActive = false;
     }
+}
 
-    if (redPowerUp.isActive &&
-        ball.x - ball.radius < redPowerUp.x + redPowerUp.width &&
-        ball.x + ball.radius > redPowerUp.x &&
-        ball.y - ball.radius < redPowerUp.y + redPowerUp.height &&
-        ball.y + ball.radius > redPowerUp.y) {
+function checkRedItemCollision() {
+    if (redItem.isActive &&
+        ball.x - ball.radius < redItem.x + redItem.width &&
+        ball.x + ball.radius > redItem.x &&
+        ball.y - ball.radius < redItem.y + redItem.height &&
+        ball.y + ball.radius > redItem.y) {
         
-        user.y = canvas.height - user.y - user.height; // معکوس کردن حرکت پدل
-        redPowerUp.isActive = false;
+        isControlReversed = true;
         setTimeout(() => {
-            user.y = canvas.height - user.y - user.height; // برگشت به حالت اولیه
+            isControlReversed = false;
         }, 5000);
+        redItem.isActive = false;
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
-    if (difficulty === "easy") {
-        spawnGoldenPowerUp();
-    }
-    
-    if (difficulty === "easy" || difficulty === "hard") {
-        spawnPowerUp();
-    }
-
+    spawnGoldenItem();
+    spawnPowerUp();
     if (difficulty === "hard") {
-        spawnRedPowerUp();
+        spawnRedItem();
     }
 
+    checkGoldenItemCollision();
     checkPowerUpCollision();
+    checkRedItemCollision();
 
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -266,55 +269,46 @@ function render() {
     ctx.moveTo(canvas.width / 2, 50);
     ctx.lineTo(canvas.width / 2, canvas.height - 50);
     ctx.stroke();
-    ctx.setLineDash([]);
 
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = "#00FFFF";
-    drawArc(ball.x, ball.y, ball.radius, "#00FFFF");
+    drawRect(user.x, user.y, user.width, user.height, user.color);
+    drawRect(com.x, com.y, com.width, com.height, com.color);
 
-    ctx.shadowColor = "#007BFF";
-    drawRect(user.x, user.y, user.width, user.height, "#007BFF");
+    drawArc(ball.x, ball.y, ball.radius, ball.color);
 
-    ctx.shadowColor = "#FF3B3B";
-    drawRect(com.x, com.y, com.width, com.height, "#FF3B3B");
-
-    ctx.shadowBlur = 0;
-
+    // رسم آیتم‌های طلایی و قرمز و قدرت‌ها بر اساس سطح
+    if (goldenItem.isActive) {
+        drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, goldenItem.color);
+    }
+    if (redItem.isActive) {
+        drawRect(redItem.x, redItem.y, redItem.width, redItem.height, redItem.color);
+    }
     if (powerUp.isActive) {
         drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
     }
-
-    if (goldenPowerUp.isActive) {
-        drawRect(goldenPowerUp.x, goldenPowerUp.y, goldenPowerUp.width, goldenPowerUp.height, goldenPowerUp.color);
-    }
-
-    if (redPowerUp.isActive) {
-        drawRect(redPowerUp.x, redPowerUp.y, redPowerUp.width, redPowerUp.height, redPowerUp.color);
-    }
 }
 
-// تابع اجرای بازی
+// تابع شروع بازی (برای انتخاب سطح بازی)
+function startGame(selectedLevel) {
+    difficulty = selectedLevel;
+
+    // در صورت انتخاب سطح آسان، ایتم طلایی فعال شود
+    if (difficulty === 'easy') {
+        goldenItem.isActive = true;
+    }
+
+    // شروع بازی
+    resetBall();
+    loop = setInterval(game, 1000 / framePerSecond);
+}
+
+// حلقه بازی
 function game() {
     update();
     render();
 }
 
-// تعداد فریم در ثانیه
-let framePerSecond = 50;
+// شروع بازی به طور پیش‌فرض در سطح آسان
 let loop;
+const framePerSecond = 60;
 
-// تابع شروع بازی بر اساس سطح انتخابی
-let difficulty = "";
-
-function startGame(level) {
-    difficulty = level;
-    user.score = 0;
-    com.score = 0;
-    resetBall();
-    
-    // پنهان کردن منو
-    document.getElementById("menu").style.display = "none";
-    
-    // شروع بازی
-    loop = setInterval(game, 1000 / framePerSecond);
-}
+loop = setInterval(game, 1000 / framePerSecond);
