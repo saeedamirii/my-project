@@ -45,12 +45,12 @@ const com = {
 };
 
 // متغیر برای قدرت‌ها
-let powerUp = {
+let goldenItem = {
     x: 0,
     y: 0,
     width: 20,
     height: 20,
-    color: "#4CAF50",
+    color: "#FFD700",
     isActive: false
 };
 
@@ -100,35 +100,32 @@ function collision(b, p) {
     );
 }
 
-// تابع اسپاون قدرت
-function spawnPowerUp() {
-    if (!powerUp.isActive) {
-        powerUp.x = Math.random() * (canvas.width - 100) + 50;
-        powerUp.y = Math.random() * (canvas.height - 100) + 50;
-        powerUp.isActive = true;
+// تابع اسپاون ایتم طلایی
+function spawnGoldenItem() {
+    if (!goldenItem.isActive) {
+        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
+        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
+        goldenItem.isActive = true;
     }
 }
 
-// بررسی برخورد توپ با قدرت
-function checkPowerUpCollision() {
-    if (powerUp.isActive &&
-        ball.x - ball.radius < powerUp.x + powerUp.width &&
-        ball.x + ball.radius > powerUp.x &&
-        ball.y - ball.radius < powerUp.y + powerUp.height &&
-        ball.y + ball.radius > powerUp.y) {
+// بررسی برخورد توپ با ایتم طلایی
+function checkGoldenItemCollision() {
+    if (goldenItem.isActive &&
+        ball.x - ball.radius < goldenItem.x + goldenItem.width &&
+        ball.x + ball.radius > goldenItem.x &&
+        ball.y - ball.radius < goldenItem.y + goldenItem.height &&
+        ball.y + ball.radius > goldenItem.y) {
         
-        user.height += 20;
-        powerUp.isActive = false;
-        setTimeout(() => {
-            user.height -= 20;
-        }, 5000);
+        user.score += 1;  // اضافه کردن یک امتیاز به کاربر
+        goldenItem.isActive = false;  // غیرفعال کردن ایتم پس از برخورد
     }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
-    spawnPowerUp();
-    checkPowerUpCollision();
+    spawnGoldenItem();
+    checkGoldenItemCollision();
 
     if (ball.x - ball.radius < 0) {
         com.score++;
@@ -212,8 +209,8 @@ function render() {
 
     ctx.shadowBlur = 0;
 
-    if (powerUp.isActive) {
-        drawRect(powerUp.x, powerUp.y, powerUp.width, powerUp.height, powerUp.color);
+    if (goldenItem.isActive) {
+        drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, goldenItem.color);
     }
 }
 
