@@ -6,8 +6,6 @@
     <style>
         body {
             background-color: dimgray;
-            margin: 0;
-            overflow: hidden;
         }
 
         #pong {
@@ -21,40 +19,37 @@
         }
 
         #menu {
-            color: white;
-            font-family: Arial, sans-serif;
-            text-align: center;
             position: absolute;
-            top: 30%;
+            top: 50%;
             left: 50%;
-            transform: translateX(-50%);
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-size: 30px;
         }
 
         .button {
-            margin: 20px;
-            padding: 15px 30px;
-            font-size: 20px;
-            background-color: #333;
-            border: none;
+            margin: 10px;
+            padding: 15px;
+            background-color: #007BFF;
             color: white;
+            border: none;
+            font-size: 20px;
             cursor: pointer;
-        }
-
-        .button:hover {
-            background-color: #777;
         }
     </style>
 </head>
 <body>
-    <canvas id="pong" width="600" height="400"></canvas>
 
     <div id="menu">
-        <h1>انتخاب سطح</h1>
-        <button class="button" onclick="startGame('easy')">آسان</button>
-        <button class="button" onclick="startGame('medium')">متوسط</button>
-        <button class="button" onclick="startGame('hard')">سخت</button>
+        <h1>Select Difficulty Level</h1>
+        <button class="button" onclick="startGame('easy')">Easy</button>
+        <button class="button" onclick="startGame('medium')">Medium</button>
+        <button class="button" onclick="startGame('hard')">Hard</button>
     </div>
 
-    <script src="script.js"></script>
+    <canvas id="pong" width="600" height="400"></canvas>
+
+    <script src="pong.js"></script>
 </body>
 </html>
