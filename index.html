@@ -16,10 +16,35 @@
             right: 0;
             left: 0;
             bottom: 0;
-            display: none;
         }
 
-        #menu {
+        #leaderboard {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+            border-radius: 10px;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #leaderboard h2 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        #leaderboard-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        #leaderboard-list li {
+            padding: 5px;
+            font-size: 18px;
+        }
+
+        #nameForm {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -29,31 +54,73 @@
             font-family: Arial, sans-serif;
         }
 
-        #menu button {
+        #nameForm input {
             font-size: 20px;
             padding: 10px;
-            margin: 10px;
+            width: 200px;
+            margin-bottom: 10px;
+        }
+
+        #nameForm button {
+            font-size: 20px;
+            padding: 10px;
             background-color: #4CAF50;
             color: white;
             border: none;
             cursor: pointer;
         }
 
-        #menu button:hover {
+        #nameForm button:hover {
+            background-color: #45a049;
+        }
+
+        #levelMenu {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+
+        #levelMenu button {
+            font-size: 20px;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+            margin: 10px;
+        }
+
+        #levelMenu button:hover {
             background-color: #45a049;
         }
     </style>
 </head>
 <body>
-    <div id="menu">
-        <h2>سطح بازی را انتخاب کنید:</h2>
-        <button onclick="startGame('easy')">آسان</button>
-        <button onclick="startGame('medium')">متوسط</button>
-        <button onclick="startGame('hard')">سخت</button>
-    </div>
+   <canvas id="pong" width="600" height="400"></canvas>
 
-    <canvas id="pong" width="600" height="400"></canvas>
+   <div id="nameForm">
+       <h2>لطفاً نام خود را وارد کنید:</h2>
+       <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
+       <br>
+       <button id="startButton" onclick="showLevelMenu()">شروع بازی</button>
+   </div>
 
-    <script src="pong.js"></script>
+   <div id="levelMenu" style="display:none;">
+       <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
+       <button onclick="startGameWithLevel('easy')">آسان</button>
+       <button onclick="startGameWithLevel('medium')">متوسط</button>
+       <button onclick="startGameWithLevel('hard')">سخت</button>
+   </div>
+
+   <div id="leaderboard">
+       <h2>🏆 جدول رتبه‌بندی</h2>
+       <ul id="leaderboard-list"></ul>
+   </div>
+
+   <script src="pong.js"></script>
 </body>
 </html>
