@@ -1,224 +1,168 @@
-// متغیرهای global برای نگهداری وضعیت بازی
-let paddleWidth = 100;
-let paddleHeight = 15;
-let ballRadius = 10;
-let ballSpeedX = 2;
-let ballSpeedY = -2;
-let ballX = 200;
-let ballY = 300;
-let paddleX = 150;
-let paddleSpeed = 20;
-let score = 0;
-let gameInterval;
-let level = 'easy'; // تنظیم سطح بازی پیش‌فرض
-let goldenItemInterval;
-let redItemInterval;
-let goldenItemX, goldenItemY;
-let redItemX, redItemY;
-let redItemActive = false;
-
-// دریافت المنت canvas و تنظیم context
-const canvas = document.getElementById("gameCanvas");
+const canvas = document.getElementById("pong");
 const ctx = canvas.getContext("2d");
 
-// بارگذاری صداها
-const hitSound = new Audio('sounds/hit.mp3');
-const scoreSound = new Audio('sounds/score.mp3');
-const gameOverSound = new Audio('sounds/gameover.mp3');
+let gameLevel = "medium"; // سطح پیش‌فرض
+let gameRunning = false;
 
-// رسم راکت
-function drawPaddle() {
-  ctx.beginPath();
-  ctx.rect(paddleX, canvas.height - paddleHeight, paddleWidth, paddleHeight);
-  ctx.fillStyle = "#0095DD";
-  ctx.fill();
-  ctx.closePath();
+// صداها
+let hit = new Audio("sounds/hit.mp3");
+let wall = new Audio("sounds/wall.mp3");
+let userScore = new Audio("sounds/userScore.mp3");
+let comScore = new Audio("sounds/comScore.mp3");
+
+// شیء توپ
+const ball = {
+    x: canvas.width / 2,
+    y: canvas.height / 2,
+    radius: 10,
+    velocityX: 5,
+    velocityY: 5,
+    speed: 7,
+    color: "#00FFFF"
+};
+
+// شیء راکت‌ها
+const user = { x: 50, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: "#007BFF" };
+const com = { x: canvas.width - 60, y: (canvas.height - 100) / 2, width: 10, height: 100, score: 0, color: "#FF3B3B" };
+
+// آیتم‌های ویژه
+let goldenItem = { x: 0, y: 0, width: 15, height: 15, isActive: false };
+let redItem = { x: 0, y: 0, width: 15, height: 15, isActive: false };
+
+// تابع برای نمایش بازی بعد از انتخاب سطح
+function startGame(level) {
+    gameLevel = level;
+    document.getElementById("menu").style.display = "none";
+    canvas.style.display = "block";
+    gameRunning = true;
 }
 
-// رسم توپ
-function drawBall() {
-  ctx.beginPath();
-  ctx.arc(ballX, ballY, ballRadius, 0, Math.PI*2);
-  ctx.fillStyle = "#0095DD";
-  ctx.fill();
-  ctx.closePath();
+// کنترل راکت کاربر
+canvas.addEventListener("mousemove", (evt) => {
+    let rect = canvas.getBoundingClientRect();
+    user.y = evt.clientY - rect.top - user.height / 2;
+});
+
+// تابع برای رسم مستطیل
+function drawRect(x, y, w, h, color) {
+    ctx.fillStyle = color;
+    ctx.fillRect(x, y, w, h);
 }
 
-// رسم آیتم طلایی
-function drawGoldenItem() {
-  if (goldenItemX && goldenItemY) {
+// تابع برای رسم دایره (توپ)
+function drawArc(x, y, r, color) {
+    ctx.fillStyle = color;
     ctx.beginPath();
-    ctx.arc(goldenItemX, goldenItemY, 10, 0, Math.PI*2);
-    ctx.fillStyle = "gold";
+    ctx.arc(x, y, r, 0, Math.PI * 2);
     ctx.fill();
-    ctx.closePath();
-  }
 }
 
-// رسم آیتم قرمز
-function drawRedItem() {
-  if (redItemX && redItemY) {
-    ctx.beginPath();
-    ctx.arc(redItemX, redItemY, 10, 0, Math.PI*2);
-    ctx.fillStyle = "red";
-    ctx.fill();
-    ctx.closePath();
-  }
+// ریست کردن توپ بعد از امتیاز
+function resetBall() {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.velocityX = -ball.velocityX;
 }
 
-// حرکت توپ
-function moveBall() {
-  ballX += ballSpeedX;
-  ballY += ballSpeedY;
-
-  if(ballX + ballSpeedX > canvas.width - ballRadius || ballX + ballSpeedX < ballRadius) {
-    ballSpeedX = -ballSpeedX;
-  }
-  if(ballY + ballSpeedY < ballRadius) {
-    ballSpeedY = -ballSpeedY;
-  } else if(ballY + ballSpeedY > canvas.height - ballRadius) {
-    if(ballX > paddleX && ballX < paddleX + paddleWidth) {
-      ballSpeedY = -ballSpeedY;
-      score++;
-      scoreSound.play();
-    } else {
-      gameOver();
-    }
-  }
-  
-  // برخورد با آیتم طلایی
-  if (goldenItemX && goldenItemY) {
-    if (ballX > goldenItemX - 10 && ballX < goldenItemX + 10 && ballY > goldenItemY - 10 && ballY < goldenItemY + 10) {
-      score++;
-      goldenItemX = null;
-      goldenItemY = null;
-      scoreSound.play();
-    }
-  }
-
-  // برخورد با آیتم قرمز
-  if (redItemX && redItemY) {
-    if (ballX > redItemX - 10 && ballX < redItemX + 10 && ballY > redItemY - 10 && ballY < redItemY + 10) {
-      ballSpeedX = -ballSpeedX; // تغییر جهت توپ
-      ballSpeedY = -ballSpeedY; // تغییر جهت توپ
-      redItemX = null;
-      redItemY = null;
-    }
-  }
+// بررسی برخورد توپ با راکت
+function collision(b, p) {
+    return b.x - b.radius < p.x + p.width && b.x + b.radius > p.x &&
+           b.y - b.radius < p.y + p.height && b.y + b.radius > p.y;
 }
 
-// حرکت راکت
-function movePaddle(event) {
-  if(event.key === "Right" || event.key === "ArrowRight") {
-    if(paddleX < canvas.width - paddleWidth) {
-      paddleX += paddleSpeed;
+// اسپاون آیتم طلایی (فقط در سطح آسان)
+function spawnGoldenItem() {
+    if (gameLevel === "easy" && !goldenItem.isActive) {
+        goldenItem.x = Math.random() * (canvas.width - 100) + 50;
+        goldenItem.y = Math.random() * (canvas.height - 100) + 50;
+        goldenItem.isActive = true;
     }
-  } else if(event.key === "Left" || event.key === "ArrowLeft") {
-    if(paddleX > 0) {
-      paddleX -= paddleSpeed;
-    }
-  }
 }
 
-// مدیریت سطح بازی
-function setLevel(newLevel) {
-  level = newLevel;
-  score = 0; // ریست کردن امتیاز
-  ballX = 200;
-  ballY = 300;
-  ballSpeedX = 2;
-  ballSpeedY = -2;
-  paddleX = 150;
-  
-  // تغییرات سطح بازی
-  if(level === 'easy') {
-    ballSpeedX = 2;
-    ballSpeedY = -2;
-    clearInterval(goldenItemInterval);
-    goldenItemInterval = setInterval(generateGoldenItem, 3000); // آیتم طلایی هر 3 ثانیه
-    clearInterval(redItemInterval);
-    redItemInterval = null;
-  } else if(level === 'medium') {
-    ballSpeedX = 3;
-    ballSpeedY = -3;
-    clearInterval(goldenItemInterval);
-    goldenItemInterval = null;
-    clearInterval(redItemInterval);
-    redItemInterval = null;
-  } else if(level === 'hard') {
-    ballSpeedX = 4;
-    ballSpeedY = -4;
-    clearInterval(goldenItemInterval);
-    goldenItemInterval = null;
-    clearInterval(redItemInterval);
-    redItemInterval = setInterval(generateRedItem, 2000); // آیتم قرمز هر 2 ثانیه
-  }
-  clearInterval(gameInterval);
-  gameInterval = setInterval(update, 10);
+// اسپاون آیتم قرمز (فقط در سطح سخت)
+function spawnRedItem() {
+    if (gameLevel === "hard" && !redItem.isActive) {
+        redItem.x = Math.random() * (canvas.width - 100) + 50;
+        redItem.y = Math.random() * (canvas.height - 100) + 50;
+        redItem.isActive = true;
+    }
+}
+
+// بررسی برخورد توپ با آیتم‌ها
+function checkItemCollisions() {
+    if (goldenItem.isActive &&
+        ball.x - ball.radius < goldenItem.x + goldenItem.width &&
+        ball.x + ball.radius > goldenItem.x &&
+        ball.y - ball.radius < goldenItem.y + goldenItem.height &&
+        ball.y + ball.radius > goldenItem.y) {
+        user.score++;
+        goldenItem.isActive = false;
+    }
+
+    if (redItem.isActive &&
+        ball.x - ball.radius < redItem.x + redItem.width &&
+        ball.x + ball.radius > redItem.x &&
+        ball.y - ball.radius < redItem.y + redItem.height &&
+        ball.y + ball.radius > redItem.y) {
+        user.y = canvas.height - user.y - user.height;
+        redItem.isActive = false;
+    }
 }
 
 // بروزرسانی وضعیت بازی
 function update() {
-  ctx.clearRect(0, 0, canvas.width, canvas.height); // پاک کردن صفحه
-  drawBall();
-  drawPaddle();
-  drawGoldenItem();
-  drawRedItem();
-  moveBall();
+    if (!gameRunning) return;
+
+    ball.x += ball.velocityX;
+    ball.y += ball.velocityY;
+
+    if (gameLevel === "easy") spawnGoldenItem();
+    if (gameLevel === "hard") spawnRedItem();
+
+    checkItemCollisions();
+
+    if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+        ball.velocityY = -ball.velocityY;
+        wall.play();
+    }
+
+    let player = (ball.x < canvas.width / 2) ? user : com;
+
+    if (collision(ball, player)) {
+        hit.play();
+        ball.velocityX = -ball.velocityX;
+    }
+
+    if (ball.x - ball.radius < 0) {
+        com.score++;
+        resetBall();
+    } else if (ball.x + ball.radius > canvas.width) {
+        user.score++;
+        resetBall();
+    }
 }
 
-// شروع بازی
-function startGame(level) {
-  setLevel(level);
+// رسم عناصر بازی
+function render() {
+    drawRect(0, 0, canvas.width, canvas.height, "black");
+
+    drawText(user.score, canvas.width / 4, 50);
+    drawText(com.score, (3 * canvas.width) / 4, 50);
+
+    drawArc(ball.x, ball.y, ball.radius, ball.color);
+
+    drawRect(user.x, user.y, user.width, user.height, user.color);
+    drawRect(com.x, com.y, com.width, com.height, com.color);
+
+    if (goldenItem.isActive) drawRect(goldenItem.x, goldenItem.y, goldenItem.width, goldenItem.height, "gold");
+    if (redItem.isActive) drawRect(redItem.x, redItem.y, redItem.width, redItem.height, "red");
 }
 
-// پایان بازی
-function gameOver() {
-  clearInterval(gameInterval);
-  gameOverSound.play();
-  alert("Game Over! Your score was " + score);
+// اجرای بازی
+function gameLoop() {
+    update();
+    render();
 }
 
-// تولید آیتم طلایی
-function generateGoldenItem() {
-  goldenItemX = Math.random() * (canvas.width - 20) + 10;
-  goldenItemY = Math.random() * (canvas.height - 200) + 10;
-}
-
-// تولید آیتم قرمز
-function generateRedItem() {
-  redItemX = Math.random() * (canvas.width - 20) + 10;
-  redItemY = Math.random() * (canvas.height - 200) + 10;
-}
-
-// نمایش منو برای انتخاب سطح بازی
-function showLevelMenu() {
-  const levelMenu = document.getElementById('levelMenu');
-  levelMenu.style.display = 'block';
-
-  document.getElementById('easyBtn').addEventListener('click', () => {
-    showGameScreen();
-    startGame('easy');
-  });
-
-  document.getElementById('mediumBtn').addEventListener('click', () => {
-    showGameScreen();
-    startGame('medium');
-  });
-
-  document.getElementById('hardBtn').addEventListener('click', () => {
-    showGameScreen();
-    startGame('hard');
-  });
-}
-
-// نمایش صفحه بازی پس از انتخاب سطح
-function showGameScreen() {
-  const levelMenu = document.getElementById('levelMenu');
-  const gameScreen = document.getElementById('gameScreen');
-  levelMenu.style.display = 'none';
-  gameScreen.style.display = 'block';
-}
-
-// فراخوانی منو سطح بازی
-window.onload = showLevelMenu;
+// تنظیم حلقه بازی
+setInterval(gameLoop, 1000 / 60);
