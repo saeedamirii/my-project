@@ -2,17 +2,6 @@
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
 
-// بارگذاری صداها
-let hit = new Audio();
-let wall = new Audio();
-let userScore = new Audio();
-let comScore = new Audio();
-
-hit.src = "sounds/hit.mp3";
-wall.src = "sounds/wall.mp3";
-comScore.src = "sounds/comScore.mp3";
-userScore.src = "sounds/userScore.mp3";
-
 // شیء توپ
 const ball = {
     x: canvas.width / 2,
@@ -21,7 +10,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
-    color: "#00FFFF" // آبی نئونی
+    color: "#00FFFF"
 };
 
 // پدل بازیکن
@@ -31,26 +20,26 @@ const user = {
     width: 10,
     height: 100,
     score: 0,
-    color: "#007BFF", // آبی الکتریکی
+    color: "#007BFF",
 };
 
-// پدل حریف (کامپیوتر)
+// پدل کامپیوتر
 const com = {
     x: canvas.width - 60,
     y: (canvas.height - 100) / 2,
     width: 10,
     height: 100,
     score: 0,
-    color: "#FF3B3B" // قرمز مات
+    color: "#FF3B3B",
 };
 
 // تنظیمات سطح
-let gameLevel = 'medium'; // پیش‌فرض: متوسط
+let gameLevel = 'medium'; // سطح پیش فرض متوسط
 
 // تغییر سطح بازی
 function chooseLevel() {
     gameLevel = document.getElementById("levelSelect").value;
-    document.getElementById("levelForm").style.display = "none"; // مخفی کردن فرم انتخاب سطح
+    document.getElementById("levelForm").style.display = "none";
     startGame();
 }
 
@@ -64,26 +53,35 @@ function startGame() {
 function configureGameLevel() {
     if (gameLevel === 'easy') {
         ball.speed = 4;
-        com.height = 100;
+        com.height = 120;
         com.y = (canvas.height - com.height) / 2;
+        // قدرت‌های ویژه برای سطح آسان
+        user.width = 10;
+        user.height = 100;
     } else if (gameLevel === 'medium') {
         ball.speed = 6;
         com.height = 100;
         com.y = (canvas.height - com.height) / 2;
+        // قدرت‌های ویژه برای سطح متوسط
+        user.width = 10;
+        user.height = 100;
     } else if (gameLevel === 'hard') {
         ball.speed = 8;
-        com.height = 70;
+        com.height = 80;
         com.y = (canvas.height - com.height) / 2;
+        // قدرت‌های ویژه برای سطح سخت
+        user.width = 10;
+        user.height = 100;
     }
 }
 
-// رسم مستطیل (برای پدل‌ها و پس‌زمینه)
+// رسم مستطیل
 function drawRect(x, y, w, h, color) {
     ctx.fillStyle = color;
     ctx.fillRect(x, y, w, h);
 }
 
-// رسم دایره (برای توپ)
+// رسم دایره
 function drawArc(x, y, r, color) {
     ctx.fillStyle = color;
     ctx.beginPath();
@@ -109,7 +107,7 @@ function resetBall() {
 
 // رسم امتیازها
 function drawText(text, x, y) {
-    ctx.fillStyle = "#FFD700"; // طلایی متالیک
+    ctx.fillStyle = "#FFD700";
     ctx.font = "50px fantasy";
     ctx.fillText(text, x, y);
 }
@@ -128,11 +126,9 @@ function collision(b, p) {
 function update() {
     if (ball.x - ball.radius < 0) {
         com.score++;
-        comScore.play();
         resetBall();
     } else if (ball.x + ball.radius > canvas.width) {
         user.score++;
-        userScore.play();
         resetBall();
     }
 
@@ -140,19 +136,17 @@ function update() {
     ball.y += ball.velocityY;
 
     // حرکت کامپیوتر با کمی خطا
-    let randomError = Math.random() * 0.5 - 0.25; // ایجاد یک خطای تصادفی کوچیک
+    let randomError = Math.random() * 0.5 - 0.25;
     com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
 
     // جلوگیری از خارج شدن توپ از زمین
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
-        wall.play();
     }
 
     let player = (ball.x < canvas.width / 2) ? user : com;
 
     if (collision(ball, player)) {
-        hit.play();
         let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
         let angleRad = (Math.PI / 4) * collidePoint;
         let direction = (ball.x < canvas.width / 2) ? 1 : -1;
@@ -171,7 +165,7 @@ function render() {
     gradient.addColorStop(1, "#2C5364");
     drawRect(0, 0, canvas.width, canvas.height, gradient);
 
-    // داخل میز (زمین بازی)
+    // داخل میز
     drawRect(50, 50, canvas.width - 100, canvas.height - 100, "#1C1C1C");
 
     // امتیازدهی
