@@ -21,6 +21,7 @@ const ball = {
     velocityX: 5,
     velocityY: 5,
     speed: 7,
+    angle: Math.PI / 4, // زاویه اولیه حرکت توپ
     color: "#00FFFF"
 };
 
@@ -99,6 +100,7 @@ function resetBall() {
     ball.y = canvas.height / 2;
     ball.velocityX = -ball.velocityX;
     ball.speed = 7;
+    ball.angle = Math.PI / 4; // بازنشانی زاویه توپ
 }
 
 // رسم امتیازها
@@ -223,11 +225,16 @@ function update() {
     ball.y += ball.velocityY;
 
     let randomError = Math.random() * 0.5 - 0.25;
-    com.y += (ball.y - (com.y + com.height / 2)) * 0.05 + randomError;
+    com.y += (ball.y - (com.y + com.height / 2)) * 0.1 + randomError; // حرکت طبیعی‌تر راکت کامپیوتر
 
     if (ball.y - ball.radius < 50 || ball.y + ball.radius > canvas.height - 50) {
         ball.velocityY = -ball.velocityY;
         wall.play();
+    }
+
+    // حرکت طبیعی‌تر توپ
+    if (ball.velocityX > 0) {
+        ball.velocityX += 0.01; // افزایش تدریجی سرعت در راستای x
     }
 
     if (user.score === 20 || com.score === 20) {
