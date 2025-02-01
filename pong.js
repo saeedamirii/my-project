@@ -1,5 +1,6 @@
 const canvas = document.getElementById("pong");
 const ctx = canvas.getContext('2d');
+let gameMode = ""; // سطح بازی انتخاب شده
 
 // بارگذاری صداها
 let hit = new Audio();
@@ -11,10 +12,6 @@ hit.src = "sounds/hit.mp3";
 wall.src = "sounds/wall.mp3";
 comScore.src = "sounds/comScore.mp3";
 userScore.src = "sounds/userScore.mp3";
-
-// تعریف متغیرها
-let gameMode = ""; // سطح بازی انتخاب شده
-let loop;
 
 // شیء توپ
 const ball = {
@@ -47,50 +44,9 @@ const com = {
     color: "#FF3B3B"
 };
 
-// آیتم سبز (پاورآپ اولیه)
-let greenItem = {
-    x: Math.random() * (canvas.width - 100) + 50,
-    y: Math.random() * (canvas.height - 100) + 50,
-    width: 20,
-    height: 20,
-    color: "#4CAF50",
-    isActive: true
-};
-
-// آیتم طلایی (برای سطح آسان)
-let goldenItem = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#FFD700",
-    isActive: false
-};
-
-// آیتم قرمز (برای سطح سخت)
-let redItem = {
-    x: 0,
-    y: 0,
-    width: 20,
-    height: 20,
-    color: "#FF0000",
-    isActive: false
-};
-
-// رسم مستطیل
-function drawRect(x, y, w, h, color) {
-    ctx.fillStyle = color;
-    ctx.fillRect(x, y, w, h);
-}
-
-// رسم دایره
-function drawArc(x, y, r, color) {
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(x, y, r, 0, Math.PI * 2, true);
-    ctx.closePath();
-    ctx.fill();
-}
+// آیتم‌های جدید
+let goldenItem = { x: 0, y: 0, width: 20, height: 20, color: "#FFD700", isActive: false };
+let redItem = { x: 0, y: 0, width: 20, height: 20, color: "#FF0000", isActive: false };
 
 // نمایش منو هنگام لود صفحه
 window.onload = function () {
@@ -98,30 +54,20 @@ window.onload = function () {
     canvas.style.display = "none";
 };
 
-// تابع شروع بازی بر اساس سطح انتخابی
+// تابع شروع بازی
 function startGame(level) {
     document.getElementById("menu").style.display = "none";
     canvas.style.display = "block";
     gameMode = level;
 
-    if (level === 'easy') {
-        addGoldenItem();
-    } else if (level === 'hard') {
-        addRedItem();
-    }
+    if (level === 'easy') goldenItem.isActive = true;
+    if (level === 'hard') spawnRedItem();
 
     loop = setInterval(game, 1000 / 50);
 }
 
-// اضافه کردن آیتم طلایی برای سطح آسان
-function addGoldenItem() {
-    goldenItem.x = Math.random() * (canvas.width - 100) + 50;
-    goldenItem.y = Math.random() * (canvas.height - 100) + 50;
-    goldenItem.isActive = true;
-}
-
-// اضافه کردن آیتم قرمز برای سطح سخت
-function addRedItem() {
+// تابع اضافه کردن آیتم قرمز (سطح سخت)
+function spawnRedItem() {
     setInterval(() => {
         redItem.x = Math.random() * (canvas.width - 100) + 50;
         redItem.y = Math.random() * (canvas.height - 100) + 50;
@@ -130,6 +76,12 @@ function addRedItem() {
     }, 7000);
 }
 
+// کنترل ماوس
+canvas.addEventListener("mousemove", (evt) => {
+    let rect = canvas.getBoundingClientRect();
+    user.y = evt.clientY - rect.top - user.height / 2;
+});
+
 // بررسی برخورد توپ با آیتم‌ها
 function checkItemCollision() {
     if (goldenItem.isActive &&
@@ -137,7 +89,6 @@ function checkItemCollision() {
         ball.x + ball.radius > goldenItem.x &&
         ball.y - ball.radius < goldenItem.y + goldenItem.height &&
         ball.y + ball.radius > goldenItem.y) {
-        
         user.score++;
         goldenItem.isActive = false;
     }
@@ -147,26 +98,40 @@ function checkItemCollision() {
         ball.x + ball.radius > redItem.x &&
         ball.y - ball.radius < redItem.y + redItem.height &&
         ball.y + ball.radius > redItem.y) {
-        
         reversePaddleControl();
         redItem.isActive = false;
     }
 }
 
-// برعکس کردن کنترل پدل کاربر برای چند ثانیه
+// برعکس کردن کنترل پدل
 function reversePaddleControl() {
-    document.addEventListener("mousemove", reverseControl);
+    canvas.removeEventListener("mousemove", normalControl);
+    canvas.addEventListener("mousemove", reversedControl);
     setTimeout(() => {
-        document.removeEventListener("mousemove", reverseControl);
+        canvas.removeEventListener("mousemove", reversedControl);
+        canvas.addEventListener("mousemove", normalControl);
     }, 3000);
 }
 
-function reverseControl(evt) {
+function normalControl(evt) {
+    let rect = canvas.getBoundingClientRect();
+    user.y = evt.clientY - rect.top - user.height / 2;
+}
+
+function reversedControl(evt) {
     let rect = canvas.getBoundingClientRect();
     user.y = canvas.height - (evt.clientY - rect.top) - user.height;
 }
 
-// تابع آپدیت وضعیت بازی
+// ریست کردن توپ
+function resetBall() {
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.velocityX = -ball.velocityX;
+    ball.speed = 7;
+}
+
+// آپدیت وضعیت بازی
 function update() {
     checkItemCollision();
 
@@ -187,8 +152,13 @@ function update() {
         ball.velocityY = -ball.velocityY;
     }
 
-    if (player.x === user.x && gameMode === 'hard') {
-        ball.velocityX *= -1;
+    if (collision(ball, player)) {
+        let collidePoint = (ball.y - (player.y + player.height / 2)) / (player.height / 2);
+        let angleRad = (Math.PI / 4) * collidePoint;
+        let direction = (ball.x < canvas.width / 2) ? 1 : -1;
+        ball.velocityX = direction * ball.speed * Math.cos(angleRad);
+        ball.velocityY = ball.speed * Math.sin(angleRad);
+        ball.speed += 0.1;
     }
 }
 
@@ -208,3 +178,8 @@ function game() {
     update();
     render();
 }
+
+// رسم اشکال
+function drawRect(x, y, w, h, color) { ctx.fillStyle = color; ctx.fillRect(x, y, w, h); }
+function drawArc(x, y, r, color) { ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fill(); }
+function collision(b, p) { return (b.x - b.radius < p.x + p.width && b.x + b.radius > p.x && b.y - b.radius < p.y + p.height && b.y + b.radius > p.y); }
