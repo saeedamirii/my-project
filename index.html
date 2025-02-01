@@ -74,53 +74,34 @@
             background-color: #45a049;
         }
 
-        #levelMenu {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+        #levelForm {
             text-align: center;
-            color: white;
-            font-family: Arial, sans-serif;
-        }
-
-        #levelMenu button {
-            font-size: 20px;
-            padding: 10px;
-            background-color: #4CAF50;
-            color: white;
-            border: none;
-            cursor: pointer;
-            margin: 10px;
-        }
-
-        #levelMenu button:hover {
-            background-color: #45a049;
+            margin-top: 10px;
         }
     </style>
 </head>
 <body>
-   <canvas id="pong" width="600" height="400"></canvas>
+    <canvas id="pong" width="600" height="400"></canvas>
 
-   <div id="nameForm">
-       <h2>لطفاً نام خود را وارد کنید:</h2>
-       <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
-       <br>
-       <button id="startButton" onclick="showLevelMenu()">شروع بازی</button>
-   </div>
+    <div id="nameForm">
+        <h2>لطفاً نام خود را وارد کنید:</h2>
+        <input type="text" id="playerName" placeholder="نام خود را وارد کنید">
+        <br>
+        <button id="startButton" onclick="showLevelSelection()">شروع بازی</button>
+    </div>
 
-   <div id="levelMenu" style="display:none;">
-       <h2>لطفاً سطح بازی را انتخاب کنید:</h2>
-       <button onclick="startGameWithLevel('easy')">آسان</button>
-       <button onclick="startGameWithLevel('medium')">متوسط</button>
-       <button onclick="startGameWithLevel('hard')">سخت</button>
-   </div>
+    <div id="levelForm" style="display: none;">
+        <h3>لطفاً سطح بازی را انتخاب کنید:</h3>
+        <button onclick="setLevel('easy')">آسان</button>
+        <button onclick="setLevel('medium')">متوسط</button>
+        <button onclick="setLevel('hard')">سخت</button>
+    </div>
 
-   <div id="leaderboard">
-       <h2>🏆 جدول رتبه‌بندی</h2>
-       <ul id="leaderboard-list"></ul>
-   </div>
+    <div id="leaderboard">
+        <h2>🏆 جدول رتبه‌بندی</h2>
+        <ul id="leaderboard-list"></ul>
+    </div>
 
-   <script src="pong.js"></script>
+    <script src="pong.js"></script>
 </body>
 </html>
