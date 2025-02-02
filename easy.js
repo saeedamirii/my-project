@@ -245,10 +245,9 @@ let loop = setInterval(game, 1000 / framePerSecond);
 
 
 
-
 function checkGameEnd() {
     if (user.score === 30) {
-        clearInterval(loop); // جلوگیری از اجرای چندباره بازی
+        clearInterval(loop);
         setTimeout(() => {
             alert("🎉 آفرین! ولی سطح آسان بود، برو سطح بالا! 😉");
             resetGame();
@@ -262,9 +261,24 @@ function checkGameEnd() {
     }
 }
 
+
 function resetGame() {
     user.score = 0;
     com.score = 0;
     resetBall();
-    loop = setInterval(game, 1000 / framePerSecond); // بازی را دوباره راه‌اندازی می‌کند
+    loop = setInterval(game, 1000 / framePerSecond);
 }
+
+if (ball.x - ball.radius < 0) {
+    com.score++;
+    comScore.play();
+    resetBall();
+    checkGameEnd(); // بررسی پایان بازی
+} else if (ball.x + ball.radius > canvas.width) {
+    user.score++;
+    userScore.play();
+    resetBall();
+    checkGameEnd(); // بررسی پایان بازی
+}
+
+
