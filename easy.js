@@ -245,40 +245,37 @@ let loop = setInterval(game, 1000 / framePerSecond);
 
 
 
-function checkGameEnd() {
-    if (user.score === 30) {
-        clearInterval(loop);
-        setTimeout(() => {
-            alert("🎉 آفرین! ولی سطح آسان بود، برو سطح بالا! 😉");
-            resetGame();
-        }, 500);
-    } else if (com.score === 30) {
-        clearInterval(loop);
-        setTimeout(() => {
-            alert("😢 داداش زشت نیست تو این سطح ببازی؟!");
-            resetGame();
-        }, 500);
-    }
-}
-
 
 function resetGame() {
     user.score = 0;
     com.score = 0;
-    resetBall();
-    loop = setInterval(game, 1000 / framePerSecond);
+    ball.x = canvas.width / 2;
+    ball.y = canvas.height / 2;
+    ball.velocityX = 5;
+    ball.velocityY = 5;
+    ball.speed = 7;
 }
 
-if (ball.x - ball.radius < 0) {
-    com.score++;
-    comScore.play();
-    resetBall();
-    checkGameEnd(); // بررسی پایان بازی
-} else if (ball.x + ball.radius > canvas.width) {
-    user.score++;
-    userScore.play();
-    resetBall();
-    checkGameEnd(); // بررسی پایان بازی
+function checkGameEnd() {
+    if (user.score >= 30) {
+        setTimeout(() => {
+            alert("🎉 آفرین! ولی سطح آسان بود، برو سطح بالاتر! 😉");
+            resetGame();
+        }, 100);
+    } else if (com.score >= 30) {
+        setTimeout(() => {
+            alert("😢 داداش ضعیف نیست تو این سطح ببازی؟!");
+            resetGame();
+        }, 100);
+    }
+}
+
+// بررسی پایان بازی بعد از تغییر امتیاز
+let originalUpdate = update;
+update = function () {
+    originalUpdate();
+    checkGameEnd();
+};
 }
 
 
