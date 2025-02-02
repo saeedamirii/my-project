@@ -246,28 +246,25 @@ let loop = setInterval(game, 1000 / framePerSecond);
 
 
 
-function resetGame() {
-    user.score = 0;
-    com.score = 0;
-    resetBall();
-}
-
-// بررسی پایان بازی بعد از هر به‌روزرسانی امتیاز
 function checkGameEnd() {
     if (user.score >= 30) {
         setTimeout(() => {
             alert("🎉 آفرین! ولی سطح آسان بود، برو سطح بالاتر! 😉");
-            resetGame();
+            user.score = 0;
+            com.score = 0;
+            resetBall();
         }, 100);
     } else if (com.score >= 30) {
         setTimeout(() => {
             alert("😢 داداش ضعیف نیست تو این سطح ببازی؟!");
-            resetGame();
+            user.score = 0;
+            com.score = 0;
+            resetBall();
         }, 100);
     }
 }
 
-// اطمینان از اجرای بررسی پایان بازی در هر بار به‌روزرسانی
+// اجرای بررسی پایان بازی در هر فریم
 const originalUpdate = update;
 update = function () {
     originalUpdate();
