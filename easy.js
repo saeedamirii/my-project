@@ -262,9 +262,11 @@ function checkGameEnd() {
 
 // تابعی برای ریست بازی بدون نیاز به چندبار کلیک روی OK
 function restartGame() {
-    user.score = 0;
-    com.score = 0;
-    resetBall();
+    setTimeout(() => { // این قسمت زمان می‌ده که پیام قبل نمایش داده بشه
+        user.score = 0;
+        com.score = 0;
+        resetBall();
+    }, 500);
 }
 
 // اجرای بررسی پایان بازی در هر فریم
