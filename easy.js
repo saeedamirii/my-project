@@ -250,18 +250,21 @@ function checkGameEnd() {
     if (user.score >= 30) {
         setTimeout(() => {
             alert("🎉 آفرین! ولی سطح آسان بود، برو سطح بالاتر! 😉");
-            user.score = 0;
-            com.score = 0;
-            resetBall();
+            restartGame();
         }, 100);
     } else if (com.score >= 30) {
         setTimeout(() => {
-            alert("😢 داداش ضعیف نیست تو این سطح ببازی؟!");
-            user.score = 0;
-            com.score = 0;
-            resetBall();
+            alert("😢 داداش زشت نیست تو این سطح ببازی؟ یکبار دیگه شروع کن ببینم! 💪");
+            restartGame();
         }, 100);
     }
+}
+
+// تابعی برای ریست بازی بدون نیاز به چندبار کلیک روی OK
+function restartGame() {
+    user.score = 0;
+    com.score = 0;
+    resetBall();
 }
 
 // اجرای بررسی پایان بازی در هر فریم
@@ -270,5 +273,3 @@ update = function () {
     originalUpdate();
     checkGameEnd();
 };
-
-
