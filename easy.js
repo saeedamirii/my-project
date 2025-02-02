@@ -249,13 +249,10 @@ let loop = setInterval(game, 1000 / framePerSecond);
 function resetGame() {
     user.score = 0;
     com.score = 0;
-    ball.x = canvas.width / 2;
-    ball.y = canvas.height / 2;
-    ball.velocityX = 5;
-    ball.velocityY = 5;
-    ball.speed = 7;
+    resetBall();
 }
 
+// بررسی پایان بازی بعد از هر به‌روزرسانی امتیاز
 function checkGameEnd() {
     if (user.score >= 30) {
         setTimeout(() => {
@@ -270,12 +267,11 @@ function checkGameEnd() {
     }
 }
 
-// بررسی پایان بازی بعد از تغییر امتیاز
-let originalUpdate = update;
+// اطمینان از اجرای بررسی پایان بازی در هر بار به‌روزرسانی
+const originalUpdate = update;
 update = function () {
     originalUpdate();
     checkGameEnd();
 };
-}
 
 
