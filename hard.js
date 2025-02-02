@@ -152,16 +152,19 @@ function checkRedItemCollision() {
         
         redItem.isActive = false;
         canvas.addEventListener("mousemove", reverseControl);
+
+        // مدت زمان بیشتر برای معکوس شدن کنترل (مثلاً 5 ثانیه)
         setTimeout(() => {
             canvas.removeEventListener("mousemove", reverseControl);
-        }, 3000);
+        }, 5000);  // زمان بیشتری برای تأثیر بیشتر
     }
 }
 
-// معکوس کردن کنترل
+// معکوس کردن کنترل با شدت بیشتر
 function reverseControl(evt) {
     let rect = canvas.getBoundingClientRect();
-    user.y = canvas.height - (evt.clientY - rect.top) - user.height / 2;
+    // تغییر شدت معکوس شدن (می‌توانید مقدار 1.5 را تغییر دهید تا شدت بیشتر یا کمتر شود)
+    user.y = canvas.height - (evt.clientY - rect.top) - user.height / 2 * 1.5;
 }
 
 // بروزرسانی وضعیت بازی
