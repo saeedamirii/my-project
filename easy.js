@@ -246,24 +246,25 @@ let loop = setInterval(game, 1000 / framePerSecond);
 
 
 
-setInterval(() => {
+function checkGameEnd() {
     if (user.score === 30) {
-        clearInterval(loop);
+        clearInterval(loop); // جلوگیری از اجرای چندباره بازی
         setTimeout(() => {
-            alert("🎉 آفرین! ولی سطح آسون بود، راست میگی برو سطح بالاتر! 😉");
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);
+            alert("🎉 آفرین! ولی سطح آسان بود، برو سطح بالا! 😉");
+            resetGame();
         }, 500);
     } else if (com.score === 30) {
         clearInterval(loop);
         setTimeout(() => {
-            alert("😆 دادش زشت نیست تو این سطح ببازی؟ بزن دوباره ببینیم چی میشی! 🎮");
-            user.score = 0;
-            com.score = 0;
-            resetBall();
-            loop = setInterval(game, 1000 / framePerSecond);
+            alert("😢 داداش زشت نیست تو این سطح ببازی؟!");
+            resetGame();
         }, 500);
     }
-}, 100);
+}
+
+function resetGame() {
+    user.score = 0;
+    com.score = 0;
+    resetBall();
+    loop = setInterval(game, 1000 / framePerSecond); // بازی را دوباره راه‌اندازی می‌کند
+}
