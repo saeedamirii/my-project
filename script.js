@@ -15,11 +15,12 @@ let missed = 0;
 let trail = [];
 
 const fruitImages = [
-  "https://i.imgur.com/QYp3B9F.png", // apple
-  "https://i.imgur.com/WJ8gxqN.png", // banana
-  "https://i.imgur.com/T0XnLne.png", // kiwi
-  "https://i.imgur.com/VcJwKiS.png", // strawberry
+  "https://cdn-icons-png.flaticon.com/512/590/590685.png", // apple
+  "https://cdn-icons-png.flaticon.com/512/590/590682.png", // banana
+  "https://cdn-icons-png.flaticon.com/512/590/590686.png", // orange
+  "https://cdn-icons-png.flaticon.com/512/590/590688.png", // strawberry
 ];
+
 
 startBtn.onclick = () => {
   resetGame();
