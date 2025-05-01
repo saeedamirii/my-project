@@ -83,17 +83,20 @@ function animate() {
       continue;
     }
 
-    const fruitEl = document.createElement("img");
-    fruitEl.src = f.img.src;
-    fruitEl.className = "fruit";
-    fruitEl.style.left = `${f.x}px`;
-    fruitEl.style.top = `${f.y}px`;
-    gameArea.appendChild(fruitEl);
+    // رسم میوه‌ها روی canvas
+    drawFruit(f);
   }
 
   drawTrail();
   checkSlice();
   requestAnimationFrame(animate);
+}
+
+function drawFruit(fruit) {
+  if (fruit.sliced) return;
+  const img = new Image();
+  img.src = fruit.img.src;
+  ctx.drawImage(img, fruit.x, fruit.y, 60, 60);
 }
 
 function drawTrail() {
@@ -137,7 +140,14 @@ function splash(x, y) {
 
 function endGame() {
   isRunning = false;
-  alert(`بازی تمام شد! امتیاز شما: ${score}`);
+  ctx.clearRect(0, 0, canvas.width, canvas.height); // پاک کردن canvas
+  ctx.fillStyle = "rgba(0, 0, 0, 0.7)"; // پس‌زمینه نیمه شفاف
+  ctx.fillRect(0, canvas.height / 2 - 50, canvas.width, 100); // پس‌زمینه متن
+  ctx.fillStyle = "white"; 
+  ctx.font = "48px Arial";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(`بازی تمام شد! امتیاز شما: ${score}`, canvas.width / 2, canvas.height / 2);
 }
 
 canvas.addEventListener("mousemove", (e) => {
