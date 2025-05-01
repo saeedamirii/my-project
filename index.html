@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>بازی برش میوه حرفه‌ای</title>
   <style>
-    /* استایل‌های قبلی بدون تغییر */
     * {
       margin: 0;
       padding: 0;
@@ -189,7 +188,7 @@
   </div>
 
   <script>
-    // تنظیمات بازی
+    // تنظیمات بازی با میوه‌های واقعی
     const config = {
       fruitSize: 70,
       spawnInterval: 1500,
@@ -202,17 +201,17 @@
       specialItemChance: 0.05,
       bombImage: "https://cdn-icons-png.flaticon.com/512/921/921490.png",
       fruitImages: [
-        {img: "https://cdn-icons-png.flaticon.com/512/2909/2909899.png", color: "#ff5252"}, // سیب
-        {img: "https://cdn-icons-png.flaticon.com/512/415/415682.png", color: "#ff9800"},   // پرتقال
-        {img: "https://cdn-icons-png.flaticon.com/512/794/794781.png", color: "#4caf50"},   // هندوانه
-        {img: "https://cdn-icons-png.flaticon.com/512/2674/2674482.png", color: "#ffeb3b"}, // آناناس
-        {img: "https://cdn-icons-png.flaticon.com/512/135/135728.png", color: "#ffd54f"},    // موز
-        {img: "https://cdn-icons-png.flaticon.com/512/3227/3227078.png", color: "#9C27B0"}, // انگور
-        {img: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png", color: "#FF5722"}   // انار
+        {img: "https://cdn-icons-png.flaticon.com/512/2909/2909899.png", color: "#ff5252", name: "سیب"}, 
+        {img: "https://cdn-icons-png.flaticon.com/512/415/415682.png", color: "#ff9800", name: "پرتقال"},
+        {img: "https://cdn-icons-png.flaticon.com/512/794/794781.png", color: "#4caf50", name: "هندوانه"},
+        {img: "https://cdn-icons-png.flaticon.com/512/2674/2674482.png", color: "#ffeb3b", name: "آناناس"},
+        {img: "https://cdn-icons-png.flaticon.com/512/135/135728.png", color: "#ffd54f", name: "موز"},
+        {img: "https://cdn-icons-png.flaticon.com/512/4066/4066436.png", color: "#9C27B0", name: "انگور"},
+        {img: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png", color: "#FF5722", name: "انار"}
       ],
       specialItems: [
-        {img: "https://cdn-icons-png.flaticon.com/512/3527/3527709.png", type: "shield", color: "#2196F3"},
-        {img: "https://cdn-icons-png.flaticon.com/512/2534/2534360.png", type: "bonus", color: "#FFC107"}
+        {img: "https://cdn-icons-png.flaticon.com/512/3527/3527709.png", type: "shield", color: "#2196F3", name: "سپر"},
+        {img: "https://cdn-icons-png.flaticon.com/512/3132/3132693.png", type: "bonus", color: "#FFC107", name: "جایزه"}
       ]
     };
 
@@ -277,7 +276,7 @@
       if (rand < config.specialItemChance) {
         item = config.specialItems[Math.floor(Math.random() * config.specialItems.length)];
       } else if (rand < config.bombChance + config.specialItemChance) {
-        item = {img: config.bombImage, type: "bomb", color: "#F44336"};
+        item = {img: config.bombImage, type: "bomb", color: "#F44336", name: "بمب"};
       } else {
         item = config.fruitImages[Math.floor(Math.random() * config.fruitImages.length)];
         item.type = "fruit";
@@ -294,6 +293,7 @@
         isCut: false,
         type: item.type,
         color: item.color,
+        name: item.name,
         rotation: Math.random() * 20 - 10
       };
 
@@ -302,6 +302,7 @@
       obj.element.style.left = `${obj.x}px`;
       obj.element.style.top = `${obj.y}px`;
       obj.element.style.transform = `rotate(${obj.rotation}deg)`;
+      obj.element.alt = obj.name; // افزودن نام برای دسترسی‌پذیری
       gameArea.appendChild(obj.element);
       fruits.push(obj);
     }
@@ -356,29 +357,30 @@
           if (hasShield) {
             hasShield = false;
             shieldIndicator.style.display = "none";
-            showMessage("سپر شما یک بمب را خنثی کرد!", "#2196F3");
+            showMessage(`سپر شما ${fruit.name} را خنثی کرد!`, "#2196F3");
             fruit.element.remove();
             fruits.splice(index, 1);
             return;
           }
           createExplosion(fruit);
-          endGame("انفجار! بمب را منفجر کردید!");
+          endGame(`انفجار! ${fruit.name} را منفجر کردید!`);
           return;
           
         case "shield":
           hasShield = true;
           shieldIndicator.style.display = "block";
-          showMessage("سپر فعال شد! در برابر یک بمب محافظت می‌شوید!", "#2196F3");
+          showMessage(`${fruit.name} فعال شد! در برابر یک بمب محافظت می‌شوید!`, "#2196F3");
           score += 2;
           break;
           
         case "bonus":
           score += 5;
-          showMessage("+5 امتیاز! جایزه دریافت کردید!", "#FFC107");
+          showMessage(`+5 امتیاز! ${fruit.name} دریافت کردید!`, "#FFC107");
           break;
           
         default:
           score++;
+          showMessage(`+1 امتیاز! ${fruit.name} را بریدید!`, fruit.color);
       }
       
       scoreEl.textContent = score;
@@ -482,6 +484,7 @@
       msg.style.borderRadius = "10px";
       msg.style.zIndex = "300";
       msg.style.fontWeight = "bold";
+      msg.style.textShadow = "0 1px 3px rgba(0,0,0,0.5)";
       gameArea.appendChild(msg);
       
       setTimeout(() => {
