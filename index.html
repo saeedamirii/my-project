@@ -3,8 +3,9 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بازی برش میوه پیشرفته</title>
+  <title>بازی برش میوه حرفه‌ای</title>
   <style>
+    /* استایل‌های قبلی بدون تغییر */
     * {
       margin: 0;
       padding: 0;
@@ -142,6 +143,16 @@
       display: none;
       z-index: 300;
     }
+    #high-score {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.5);
+      color: white;
+      padding: 5px 10px;
+      border-radius: 5px;
+      font-size: 14px;
+    }
     @keyframes half-fall {
       0% { transform: translate(0, 0) rotate(0); }
       100% { transform: translate(var(--fall-x), 200px) rotate(var(--fall-rot)); opacity: 0; }
@@ -174,27 +185,30 @@
     <div id="game-area"></div>
     <div id="message"></div>
     <div id="shield-indicator"></div>
+    <div id="high-score">رکورد: <span id="high-score-value">0</span></div>
   </div>
 
   <script>
-    // تنظیمات متعادل شده بازی
+    // تنظیمات بازی
     const config = {
       fruitSize: 70,
-      spawnInterval: 1500, // کاهش سرعت ظهور آیتم‌ها
+      spawnInterval: 1500,
       gravity: 0.4,
       initialForce: -15,
-      maxMissed: 5, // افزایش فرصت برای بازیکن
+      maxMissed: 5,
       cutSensitivity: 40,
       juiceParticles: 8,
-      bombChance: 0.1, // کاهش احتمال بمب
-      specialItemChance: 0.05, // 5% chance for special items
+      bombChance: 0.1,
+      specialItemChance: 0.05,
       bombImage: "https://cdn-icons-png.flaticon.com/512/921/921490.png",
       fruitImages: [
-        {img: "https://cdn-icons-png.flaticon.com/512/2909/2909899.png", color: "#ff5252"},
-        {img: "https://cdn-icons-png.flaticon.com/512/415/415682.png", color: "#ff9800"},
-        {img: "https://cdn-icons-png.flaticon.com/512/794/794781.png", color: "#4caf50"},
-        {img: "https://cdn-icons-png.flaticon.com/512/2674/2674482.png", color: "#ffeb3b"},
-        {img: "https://cdn-icons-png.flaticon.com/512/135/135728.png", color: "#ffd54f"}
+        {img: "https://cdn-icons-png.flaticon.com/512/2909/2909899.png", color: "#ff5252"}, // سیب
+        {img: "https://cdn-icons-png.flaticon.com/512/415/415682.png", color: "#ff9800"},   // پرتقال
+        {img: "https://cdn-icons-png.flaticon.com/512/794/794781.png", color: "#4caf50"},   // هندوانه
+        {img: "https://cdn-icons-png.flaticon.com/512/2674/2674482.png", color: "#ffeb3b"}, // آناناس
+        {img: "https://cdn-icons-png.flaticon.com/512/135/135728.png", color: "#ffd54f"},    // موز
+        {img: "https://cdn-icons-png.flaticon.com/512/3227/3227078.png", color: "#9C27B0"}, // انگور
+        {img: "https://cdn-icons-png.flaticon.com/512/3069/3069172.png", color: "#FF5722"}   // انار
       ],
       specialItems: [
         {img: "https://cdn-icons-png.flaticon.com/512/3527/3527709.png", type: "shield", color: "#2196F3"},
@@ -209,6 +223,7 @@
     const startBtn = document.getElementById("startBtn");
     const messageEl = document.getElementById("message");
     const shieldIndicator = document.getElementById("shield-indicator");
+    const highScoreEl = document.getElementById("high-score-value");
 
     // متغیرهای بازی
     let fruits = [];
@@ -218,6 +233,8 @@
     let gameRect;
     let hasShield = false;
     let lastSpawnTime = 0;
+    let highScore = localStorage.getItem('fruitNinjaHighScore') || 0;
+    highScoreEl.textContent = highScore;
 
     // شروع بازی
     startBtn.addEventListener("click", startGame);
@@ -270,7 +287,7 @@
         element: document.createElement("img"),
         x: Math.random() * (gameArea.clientWidth - config.fruitSize),
         y: gameArea.clientHeight,
-        vx: (Math.random() - 0.5) * 4, // کاهش سرعت حرکت جانبی
+        vx: (Math.random() - 0.5) * 4,
         vy: config.initialForce - Math.random() * 3,
         width: config.fruitSize,
         height: config.fruitSize,
@@ -292,7 +309,7 @@
     function animate() {
       if (!isRunning) return;
       
-      spawnFruit(); // کنترل شده با زمان‌بندی
+      spawnFruit();
 
       fruits.forEach((fruit, index) => {
         if (fruit.isCut) return;
@@ -300,7 +317,7 @@
         fruit.x += fruit.vx;
         fruit.y += fruit.vy;
         fruit.vy += config.gravity;
-        fruit.rotation += fruit.vx * 0.3; // کاهش سرعت چرخش
+        fruit.rotation += fruit.vx * 0.3;
 
         if (fruit.x < 0 || fruit.x > gameArea.clientWidth - fruit.width) {
           fruit.vx *= -0.7;
@@ -465,7 +482,6 @@
       msg.style.borderRadius = "10px";
       msg.style.zIndex = "300";
       msg.style.fontWeight = "bold";
-      msg.style.textShadow = "0 1px 3px rgba(0,0,0,0.5)";
       gameArea.appendChild(msg);
       
       setTimeout(() => {
@@ -475,15 +491,24 @@
 
     function endGame(message) {
       isRunning = false;
+      
+      // ذخیره رکورد
+      if (score > highScore) {
+        highScore = score;
+        localStorage.setItem('fruitNinjaHighScore', highScore);
+        highScoreEl.textContent = highScore;
+      }
+      
       messageEl.innerHTML = `
         <h3 style="color:#ff5252; margin-bottom:10px;">${message}</h3>
-        <p style="font-size:18px;">امتیاز نهایی: <span style="color:#4caf50;">${score}</span></p>
+        <p style="font-size:18px;">امتیاز شما: <span style="color:#4caf50;">${score}</span></p>
+        <p style="font-size:16px; margin:10px 0;">رکورد شما: <span style="color:#FFC107;">${highScore}</span></p>
         <button onclick="startGame()" style="
           background: linear-gradient(135deg, #4caf50, #2e7d32);
           color: white;
           border: none;
           padding: 10px 20px;
-          margin-top: 15px;
+          margin-top: 10px;
           border-radius: 5px;
           cursor: pointer;
           font-size: 16px;
@@ -512,8 +537,6 @@
       e.preventDefault();
       const touch = e.touches[0];
       checkCut(touch.clientX, touch.clientY);
-      
-      // ایجاد اثر خط برش
       createSlashLine(lastTouch.x, lastTouch.y, touch.clientX, touch.clientY);
       lastTouch = {x: touch.clientX, y: touch.clientY};
     }
