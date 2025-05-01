@@ -1,21 +1,20 @@
 <!DOCTYPE html>
 <html lang="fa">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>برش میوه</title>
-  <link rel="stylesheet" href="styles.css" />
+  <meta charset="UTF-8">
+  <title>بازی برش میوه</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <div class="game-container">
-    <div class="header">
-      <p>امتیاز: <span id="score">0</span></p>
-      <p>از دست رفته: <span id="missed">0</span></p>
-      <button id="startBtn">شروع بازی</button>
-    </div>
-    <div id="game-area"></div>
+  <div id="score-board">
+    <p>امتیاز: <span id="score">0</span></p>
+    <p>میوه‌های از دست رفته: <span id="missed">0</span></p>
+  </div>
+  <div id="game-area">
     <canvas id="slash-canvas"></canvas>
   </div>
+  <button id="start-btn">شروع بازی</button>
+
   <script src="script.js"></script>
 </body>
 </html>
