@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بازی برش میوه - نسخه نهایی</title>
+  <title>بازی برش میوه - نسخه حرفه‌ای</title>
   <style>
     * {
       margin: 0;
@@ -11,10 +11,11 @@
       box-sizing: border-box;
     }
     body {
-      font-family: sans-serif;
+      font-family: 'Arial', sans-serif;
       background-color: #d7f0f7;
       touch-action: manipulation;
       overflow: hidden;
+      user-select: none;
     }
     .game-container {
       max-width: 600px;
@@ -25,72 +26,101 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
-      padding: 10px;
+      padding: 12px 15px;
       background-color: #4caf50;
       color: white;
+      border-radius: 8px 8px 0 0;
     }
     #game-area {
       position: relative;
       height: 500px;
-      background: url("https://images.unsplash.com/photo-1570197781548-6b4e6bb1fb42") center/cover no-repeat;
+      background: linear-gradient(rgba(0,0,0,0.1), rgba(0,0,0,0.1)), 
+                  url("https://images.unsplash.com/photo-1570197781548-6b4e6bb1fb42") center/cover no-repeat;
       overflow: hidden;
       border: 2px solid #333;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     }
     .fruit {
       position: absolute;
-      width: 60px;
-      height: 60px;
-      user-select: none;
+      width: 65px;
+      height: 65px;
       pointer-events: none;
-      transition: transform 0.1s;
+      transition: transform 0.1s ease-out;
+      z-index: 10;
     }
-    .fruit-cut {
+    .fruit-half {
       position: absolute;
-      width: 30px;
-      height: 60px;
-      animation: fall 1s ease forwards;
+      width: 35px;
+      height: 65px;
+      pointer-events: none;
+      z-index: 20;
+      filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.3));
     }
-    @keyframes fall {
-      to {
-        transform: translateY(150px) rotate(45deg);
-        opacity: 0;
-      }
+    .fruit-juice {
+      position: absolute;
+      width: 15px;
+      height: 15px;
+      background-color: rgba(255, 165, 0, 0.7);
+      border-radius: 50%;
+      pointer-events: none;
+      z-index: 5;
+      animation: juice-fade 1s forwards;
+    }
+    @keyframes juice-fade {
+      0% { transform: scale(1); opacity: 1; }
+      100% { transform: scale(2); opacity: 0; }
+    }
+    @keyframes half-fall {
+      0% { transform: translateY(0) rotate(0); }
+      100% { transform: translateY(200px) rotate(90deg); opacity: 0; }
     }
     #startBtn {
       background: #1b5e20;
       color: white;
       border: none;
-      padding: 6px 12px;
+      padding: 8px 16px;
       cursor: pointer;
-      font-size: 14px;
+      font-size: 16px;
+      border-radius: 4px;
+      transition: all 0.2s;
+    }
+    #startBtn:hover {
+      background: #2e7d32;
+      transform: scale(1.05);
+    }
+    .score-display {
+      font-weight: bold;
+      font-size: 18px;
     }
   </style>
 </head>
 <body>
   <div class="game-container">
     <div class="header">
-      <p>امتیاز: <span id="score">0</span></p>
-      <p>از دست رفته: <span id="missed">0</span></p>
+      <p class="score-display">امتیاز: <span id="score">0</span></p>
+      <p class="score-display">از دست رفته: <span id="missed">0</span></p>
       <button id="startBtn">شروع بازی</button>
     </div>
     <div id="game-area"></div>
   </div>
 
   <script>
+    // تنظیمات پیشرفته بازی
+    const config = {
+      fruitSize: 65,
+      spawnInterval: 800,
+      gravity: 0.4,
+      initialForce: -14,
+      maxMissed: 3,
+      cutSensitivity: 35, // حساسیت تشخیص برش
+      juiceParticles: 8 // تعداد ذرات آبمیوه
+    };
+
     // عناصر اصلی
     const gameArea = document.getElementById("game-area");
     const scoreEl = document.getElementById("score");
     const missedEl = document.getElementById("missed");
     const startBtn = document.getElementById("startBtn");
-
-    // تنظیمات بازی
-    const config = {
-      fruitSize: 60,
-      spawnInterval: 800,
-      gravity: 0.4,
-      initialForce: -12,
-      maxMissed: 3
-    };
 
     // متغیرهای بازی
     let fruits = [];
@@ -98,6 +128,7 @@
     let score = 0;
     let missed = 0;
     let gameRect = gameArea.getBoundingClientRect();
+    let lastTouchTime = 0;
 
     // تصاویر میوه‌ها
     const fruitImages = [
@@ -109,6 +140,7 @@
 
     // شروع بازی
     startBtn.addEventListener("click", startGame);
+    window.addEventListener("resize", updateGameRect);
 
     function startGame() {
       resetGame();
@@ -138,14 +170,15 @@
         element: document.createElement("img"),
         x: Math.random() * (gameArea.clientWidth - config.fruitSize),
         y: gameArea.clientHeight,
-        vx: (Math.random() - 0.5) * 4,
-        vy: config.initialForce - Math.random() * 3,
+        vx: (Math.random() - 0.5) * 5,
+        vy: config.initialForce - Math.random() * 4,
         width: config.fruitSize,
         height: config.fruitSize,
-        isCut: false
+        isCut: false,
+        type: Math.floor(Math.random() * fruitImages.length)
       };
 
-      fruit.element.src = fruitImages[Math.floor(Math.random() * fruitImages.length)];
+      fruit.element.src = fruitImages[fruit.type];
       fruit.element.className = "fruit";
       fruit.element.style.left = `${fruit.x}px`;
       fruit.element.style.top = `${fruit.y}px`;
@@ -166,6 +199,11 @@
         fruit.x += fruit.vx;
         fruit.y += fruit.vy;
         fruit.vy += config.gravity;
+
+        // محدودیت حرکتی در حاشیه‌ها
+        if (fruit.x < 0 || fruit.x > gameArea.clientWidth - fruit.width) {
+          fruit.vx *= -0.8;
+        }
 
         fruit.element.style.left = `${fruit.x}px`;
         fruit.element.style.top = `${fruit.y}px`;
@@ -193,67 +231,127 @@
       score++;
       scoreEl.textContent = score;
 
-      // ایجاد نیمه‌ها
+      // ایجاد افکت آبمیوه
+      createJuiceEffect(fruit);
+      
+      // ایجاد نیمه‌ها با انیمیشن
       createFruitHalf(fruit, true); // نیمه چپ
       createFruitHalf(fruit, false); // نیمه راست
 
-      // حذف میوه اصلی
+      // حذف میوه اصلی با افکت
+      fruit.element.style.transform = "scale(0)";
+      fruit.element.style.opacity = "0";
       setTimeout(() => {
         fruit.element.remove();
-      }, 50);
+      }, 300);
 
       fruits.splice(index, 1);
     }
 
+    function createJuiceEffect(fruit) {
+      for (let i = 0; i < config.juiceParticles; i++) {
+        const juice = document.createElement("div");
+        juice.className = "fruit-juice";
+        juice.style.left = `${fruit.x + fruit.width/2 - 7 + (Math.random() * 20 - 10)}px`;
+        juice.style.top = `${fruit.y + fruit.height/2 - 7 + (Math.random() * 20 - 10)}px`;
+        juice.style.background = getJuiceColor(fruit.type);
+        juice.style.animationDuration = `${0.5 + Math.random()}s`;
+        gameArea.appendChild(juice);
+
+        setTimeout(() => {
+          juice.remove();
+        }, 1000);
+      }
+    }
+
+    function getJuiceColor(type) {
+      const colors = [
+        "rgba(255, 165, 0, 0.7)",  // نارنجی
+        "rgba(255, 215, 0, 0.7)",   // طلایی
+        "rgba(255, 69, 0, 0.7)",    // قرمز-نارنجی
+        "rgba(255, 99, 71, 0.7)"    // گوجه‌ای
+      ];
+      return colors[type] || colors[0];
+    }
+
     function createFruitHalf(fruit, isLeft) {
       const half = document.createElement("img");
-      half.src = fruit.element.src;
-      half.className = "fruit-cut";
+      half.src = fruitImages[fruit.type];
+      half.className = "fruit-half";
       half.style.left = isLeft ? `${fruit.x}px` : `${fruit.x + 30}px`;
       half.style.top = `${fruit.y}px`;
-      half.style.clipPath = isLeft ? "inset(0 30px 0 0)" : "inset(0 0 0 30px)";
+      half.style.clipPath = isLeft ? "inset(0 35px 0 0)" : "inset(0 0 0 35px)";
       half.style.transform = isLeft 
-        ? "rotate(-25deg) translate(-10px, 0)" 
-        : "rotate(25deg) translate(10px, 0)";
+        ? "rotate(-15deg) translate(-15px, 0)" 
+        : "rotate(15deg) translate(15px, 0)";
+      half.style.animation = "half-fall 1.2s ease-out forwards";
+      
+      // اعمال نیروی فیزیکی به نیمه‌ها
+      half.vx = isLeft ? -2 - Math.random() * 3 : 2 + Math.random() * 3;
+      half.vy = -5 - Math.random() * 5;
+      half.gravity = 0.3;
+      half.x = parseFloat(half.style.left);
+      half.y = parseFloat(half.style.top);
       
       gameArea.appendChild(half);
 
+      // انیمیشن فیزیکی نیمه‌ها
+      const fallInterval = setInterval(() => {
+        half.x += half.vx;
+        half.y += half.vy;
+        half.vy += half.gravity;
+        
+        half.style.left = `${half.x}px`;
+        half.style.top = `${half.y}px`;
+      }, 16);
+
       setTimeout(() => {
+        clearInterval(fallInterval);
         half.remove();
-      }, 1000);
+      }, 1200);
     }
 
     function endGame() {
       isRunning = false;
-      alert(`بازی تمام شد! امتیاز شما: ${score}`);
+      setTimeout(() => {
+        alert(`بازی تمام شد! امتیاز شما: ${score}`);
+      }, 300);
     }
 
-    // سیستم تشخیص برخورد بهبود یافته
+    // سیستم تشخیص برخورد پیشرفته
     function handleInteraction(x, y) {
       if (!isRunning) return;
       
-      updateGameRect();
+      const now = Date.now();
+      if (now - lastTouchTime < 50) return; // محدودیت سرعت تشخیص
+      lastTouchTime = now;
+      
       const gameX = x - gameRect.left;
       const gameY = y - gameRect.top;
 
       fruits.forEach((fruit, index) => {
         if (fruit.isCut) return;
         
+        // تشخیص برخورد دایره‌ای
         const centerX = fruit.x + fruit.width/2;
         const centerY = fruit.y + fruit.height/2;
         const distance = Math.sqrt((gameX - centerX) ** 2 + (gameY - centerY) ** 2);
         
-        if (distance < fruit.width/2) {
-          fruit.element.style.transform = "scale(1.1)";
+        if (distance < config.cutSensitivity) {
+          // افکت لمسی
+          fruit.element.style.transform = "scale(1.1) rotate(10deg)";
           setTimeout(() => {
-            fruit.element.style.transform = "scale(1)";
+            if (fruit.element) {
+              fruit.element.style.transform = "scale(1) rotate(0)";
+            }
           }, 100);
+          
           cutFruit(fruit, index);
         }
       });
     }
 
-    // رویدادهای لمسی/موس با تشخیص بهتر
+    // رویدادهای لمسی/موس با بهینه‌سازی
     gameArea.addEventListener("mousemove", (e) => {
       handleInteraction(e.clientX, e.clientY);
     });
@@ -270,7 +368,12 @@
       handleInteraction(touch.clientX, touch.clientY);
     }, { passive: false });
 
-    window.addEventListener("resize", updateGameRect);
+    // بهبود عملکرد روی دستگاه‌های لمسی
+    document.addEventListener("touchstart", (e) => {
+      if (e.target === gameArea) {
+        e.preventDefault();
+      }
+    }, { passive: false });
   </script>
 </body>
 </html>
