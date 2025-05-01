@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بازی برش میوه</title>
+  <title>بازی برش میوه - نسخه نهایی</title>
   <style>
     * {
       margin: 0;
@@ -42,8 +42,9 @@
       height: 60px;
       user-select: none;
       pointer-events: none;
+      transition: transform 0.1s;
     }
-    .fruit-half {
+    .fruit-cut {
       position: absolute;
       width: 30px;
       height: 60px;
@@ -82,12 +83,20 @@
     const missedEl = document.getElementById("missed");
     const startBtn = document.getElementById("startBtn");
 
+    // تنظیمات بازی
+    const config = {
+      fruitSize: 60,
+      spawnInterval: 800,
+      gravity: 0.4,
+      initialForce: -12,
+      maxMissed: 3
+    };
+
     // متغیرهای بازی
     let fruits = [];
     let isRunning = false;
     let score = 0;
     let missed = 0;
-    let lastPosition = null;
     let gameRect = gameArea.getBoundingClientRect();
 
     // تصاویر میوه‌ها
@@ -106,6 +115,7 @@
       isRunning = true;
       spawnFruit();
       animate();
+      updateGameRect();
     }
 
     function resetGame() {
@@ -115,6 +125,9 @@
       missed = 0;
       scoreEl.textContent = "0";
       missedEl.textContent = "0";
+    }
+
+    function updateGameRect() {
       gameRect = gameArea.getBoundingClientRect();
     }
 
@@ -123,23 +136,24 @@
 
       const fruit = {
         element: document.createElement("img"),
-        x: Math.random() * (gameArea.clientWidth - 60),
+        x: Math.random() * (gameArea.clientWidth - config.fruitSize),
         y: gameArea.clientHeight,
-        vx: (Math.random() - 0.5) * 6,
-        vy: -12 - Math.random() * 5,
-        gravity: 0.4,
-        width: 60,
-        height: 60,
-        sliced: false
+        vx: (Math.random() - 0.5) * 4,
+        vy: config.initialForce - Math.random() * 3,
+        width: config.fruitSize,
+        height: config.fruitSize,
+        isCut: false
       };
 
       fruit.element.src = fruitImages[Math.floor(Math.random() * fruitImages.length)];
       fruit.element.className = "fruit";
+      fruit.element.style.left = `${fruit.x}px`;
+      fruit.element.style.top = `${fruit.y}px`;
       gameArea.appendChild(fruit.element);
       fruits.push(fruit);
 
       if (isRunning) {
-        setTimeout(spawnFruit, 1000);
+        setTimeout(spawnFruit, config.spawnInterval);
       }
     }
 
@@ -147,11 +161,11 @@
       if (!isRunning) return;
 
       fruits.forEach((fruit, index) => {
-        if (fruit.sliced) return;
+        if (fruit.isCut) return;
 
         fruit.x += fruit.vx;
         fruit.y += fruit.vy;
-        fruit.vy += fruit.gravity;
+        fruit.vy += config.gravity;
 
         fruit.element.style.left = `${fruit.x}px`;
         fruit.element.style.top = `${fruit.y}px`;
@@ -163,7 +177,7 @@
           missed++;
           missedEl.textContent = missed;
           
-          if (missed >= 3) {
+          if (missed >= config.maxMissed) {
             endGame();
           }
         }
@@ -172,53 +186,41 @@
       requestAnimationFrame(animate);
     }
 
-    // تشخیص برخورد ساده‌تر
-    function checkCut(x, y) {
-      fruits.forEach((fruit, index) => {
-        if (fruit.sliced) return;
-
-        const centerX = fruit.x + fruit.width/2;
-        const centerY = fruit.y + fruit.height/2;
-        const distance = Math.sqrt((x - centerX) ** 2 + (y - centerY) ** 2);
-
-        if (distance < fruit.width/2) {
-          cutFruit(fruit, index);
-        }
-      });
-    }
-
     function cutFruit(fruit, index) {
-      fruit.sliced = true;
+      if (fruit.isCut) return;
+      
+      fruit.isCut = true;
       score++;
       scoreEl.textContent = score;
-      
+
       // ایجاد نیمه‌ها
-      const leftHalf = document.createElement("img");
-      leftHalf.src = fruit.element.src;
-      leftHalf.className = "fruit-half";
-      leftHalf.style.left = `${fruit.x}px`;
-      leftHalf.style.top = `${fruit.y}px`;
-      leftHalf.style.clipPath = "inset(0 30px 0 0)";
-      leftHalf.style.transform = "rotate(-25deg) translate(-10px, 0)";
-      gameArea.appendChild(leftHalf);
+      createFruitHalf(fruit, true); // نیمه چپ
+      createFruitHalf(fruit, false); // نیمه راست
 
-      const rightHalf = document.createElement("img");
-      rightHalf.src = fruit.element.src;
-      rightHalf.className = "fruit-half";
-      rightHalf.style.left = `${fruit.x + 30}px`;
-      rightHalf.style.top = `${fruit.y}px`;
-      rightHalf.style.clipPath = "inset(0 0 0 30px)";
-      rightHalf.style.transform = "rotate(25deg) translate(10px, 0)";
-      gameArea.appendChild(rightHalf);
-
-      // حذف عناصر بعد از انیمیشن
+      // حذف میوه اصلی
       setTimeout(() => {
-        leftHalf.remove();
-        rightHalf.remove();
-      }, 1000);
+        fruit.element.remove();
+      }, 50);
 
-      fruit.element.remove();
       fruits.splice(index, 1);
+    }
+
+    function createFruitHalf(fruit, isLeft) {
+      const half = document.createElement("img");
+      half.src = fruit.element.src;
+      half.className = "fruit-cut";
+      half.style.left = isLeft ? `${fruit.x}px` : `${fruit.x + 30}px`;
+      half.style.top = `${fruit.y}px`;
+      half.style.clipPath = isLeft ? "inset(0 30px 0 0)" : "inset(0 0 0 30px)";
+      half.style.transform = isLeft 
+        ? "rotate(-25deg) translate(-10px, 0)" 
+        : "rotate(25deg) translate(10px, 0)";
+      
+      gameArea.appendChild(half);
+
+      setTimeout(() => {
+        half.remove();
+      }, 1000);
     }
 
     function endGame() {
@@ -226,23 +228,49 @@
       alert(`بازی تمام شد! امتیاز شما: ${score}`);
     }
 
-    // رویدادهای لمسی/موس
-    gameArea.addEventListener("mousemove", (e) => {
+    // سیستم تشخیص برخورد بهبود یافته
+    function handleInteraction(x, y) {
       if (!isRunning) return;
-      checkCut(e.clientX - gameRect.left, e.clientY - gameRect.top);
+      
+      updateGameRect();
+      const gameX = x - gameRect.left;
+      const gameY = y - gameRect.top;
+
+      fruits.forEach((fruit, index) => {
+        if (fruit.isCut) return;
+        
+        const centerX = fruit.x + fruit.width/2;
+        const centerY = fruit.y + fruit.height/2;
+        const distance = Math.sqrt((gameX - centerX) ** 2 + (gameY - centerY) ** 2);
+        
+        if (distance < fruit.width/2) {
+          fruit.element.style.transform = "scale(1.1)";
+          setTimeout(() => {
+            fruit.element.style.transform = "scale(1)";
+          }, 100);
+          cutFruit(fruit, index);
+        }
+      });
+    }
+
+    // رویدادهای لمسی/موس با تشخیص بهتر
+    gameArea.addEventListener("mousemove", (e) => {
+      handleInteraction(e.clientX, e.clientY);
     });
 
     gameArea.addEventListener("touchmove", (e) => {
-      if (!isRunning) return;
       e.preventDefault();
       const touch = e.touches[0];
-      checkCut(touch.clientX - gameRect.left, touch.clientY - gameRect.top);
+      handleInteraction(touch.clientX, touch.clientY);
     }, { passive: false });
 
-    // برای تغییر سایز پنجره
-    window.addEventListener("resize", () => {
-      gameRect = gameArea.getBoundingClientRect();
-    });
+    gameArea.addEventListener("touchstart", (e) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      handleInteraction(touch.clientX, touch.clientY);
+    }, { passive: false });
+
+    window.addEventListener("resize", updateGameRect);
   </script>
 </body>
 </html>
