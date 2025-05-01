@@ -1,21 +1,168 @@
-<!DOCTYPE html>
-<html lang="fa">
+<!DOCTYPE html><html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>برش میوه</title>
-  <link rel="stylesheet" href="styles.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { font-family: sans-serif; background: #c0f0ff; overflow: hidden; }
+    .header {
+      position: absolute;
+      top: 0;
+      width: 100%;
+      display: flex;
+      justify-content: space-around;
+      align-items: center;
+      padding: 10px;
+      background-color: #4caf50;
+      color: white;
+      z-index: 10;
+    }
+    #gameCanvas {
+      display: block;
+    }
+    #startBtn {
+      background: #1b5e20;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+  </style>
 </head>
 <body>
-  <div class="game-container">
-    <div class="header">
-      <p>امتیاز: <span id="score">0</span></p>
-      <p>از دست رفته: <span id="missed">0</span></p>
-      <button id="startBtn">شروع بازی</button>
-    </div>
-    <div id="game-area"></div>
-    <canvas id="slash-canvas"></canvas>
+  <div class="header">
+    <p>امتیاز: <span id="score">0</span></p>
+    <p>از دست رفته: <span id="missed">0</span></p>
+    <button id="startBtn">شروع بازی</button>
   </div>
-  <script src="script.js"></script>
-</body>
+  <canvas id="gameCanvas"></canvas>  <script>
+    const canvas = document.getElementById("gameCanvas");
+    const ctx = canvas.getContext("2d");
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    const startBtn = document.getElementById("startBtn");
+    const scoreEl = document.getElementById("score");
+    const missedEl = document.getElementById("missed");
+
+    let fruits = [], trail = [], score = 0, missed = 0, isRunning = false;
+    const fruitImgs = [];
+    const fruitSrcs = [
+      "https://cdn-icons-png.flaticon.com/512/590/590685.png",
+      "https://cdn-icons-png.flaticon.com/512/590/590682.png",
+      "https://cdn-icons-png.flaticon.com/512/590/590686.png",
+      "https://cdn-icons-png.flaticon.com/512/590/590688.png"
+    ];
+
+    for (let src of fruitSrcs) {
+      const img = new Image();
+      img.src = src;
+      fruitImgs.push(img);
+    }
+
+    startBtn.onclick = () => {
+      resetGame();
+      isRunning = true;
+      spawnFruit();
+      animate();
+    };
+
+    function resetGame() {
+      fruits = [];
+      trail = [];
+      score = 0;
+      missed = 0;
+      scoreEl.textContent = "0";
+      missedEl.textContent = "0";
+    }
+
+    function spawnFruit() {
+      if (!isRunning) return;
+      const img = fruitImgs[Math.floor(Math.random() * fruitImgs.length)];
+      fruits.push({
+        x: Math.random() * (canvas.width - 60),
+        y: canvas.height,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -12 - Math.random() * 5,
+        gravity: 0.4,
+        img: img,
+        sliced: false
+      });
+      setTimeout(spawnFruit, 1000);
+    }
+
+    function animate() {
+      if (!isRunning) return;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw trail
+      ctx.beginPath();
+      ctx.lineWidth = 4;
+      ctx.strokeStyle = "red";
+      for (let i = 0; i < trail.length; i++) {
+        const p = trail[i];
+        if (i === 0) ctx.moveTo(p.x, p.y);
+        else ctx.lineTo(p.x, p.y);
+      }
+      ctx.stroke();
+      if (trail.length > 10) trail.shift();
+
+      // Update fruits
+      for (let i = 0; i < fruits.length; i++) {
+        const f = fruits[i];
+        if (f.sliced) continue;
+
+        f.x += f.vx;
+        f.y += f.vy;
+        f.vy += f.gravity;
+
+        if (f.y > canvas.height) {
+          fruits.splice(i, 1);
+          i--;
+          missed++;
+          missedEl.textContent = missed;
+          if (missed >= 3) {
+            isRunning = false;
+            alert(`بازی تمام شد! امتیاز شما: ${score}`);
+            return;
+          }
+          continue;
+        }
+
+        ctx.drawImage(f.img, f.x, f.y, 60, 60);
+
+        // Slice detection
+        for (let p of trail) {
+          const insideX = p.x >= f.x && p.x <= f.x + 60;
+          const insideY = p.y >= f.y && p.y <= f.y + 60;
+          if (insideX && insideY) {
+            f.sliced = true;
+            score++;
+            scoreEl.textContent = score;
+            splash(p.x, p.y);
+          }
+        }
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    function splash(x, y) {
+      ctx.beginPath();
+      ctx.fillStyle = "rgba(255,0,0,0.5)";
+      ctx.arc(x, y, 20, 0, Math.PI * 2);
+      ctx.fill();
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+      trail.push({ x: e.clientX, y: e.clientY });
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      trail.push({ x: t.clientX, y: t.clientY });
+    });
+  </script></body>
 </html>
