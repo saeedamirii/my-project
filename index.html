@@ -152,6 +152,7 @@
       missedEl.textContent = "0";
       gameArea.innerHTML = "";
       gameRect = gameArea.getBoundingClientRect();
+      trail = [];
     }
 
     function spawnFruit() {
@@ -185,7 +186,7 @@
       gameArea.innerHTML = "";
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // رسم ردپای برش
+      // رسم ردپای برش (برای دیباگ)
       ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -234,26 +235,57 @@
     }
 
     function checkSlice() {
-      const currentTrail = [...trail];
+      if (trail.length < 2) return;
       
-      fruits.forEach((f, index) => {
-        if (f.sliced) return;
-
-        for (const p of currentTrail) {
-          const relX = p.x - gameRect.left;
-          const relY = p.y - gameRect.top;
-
-          if (relX >= f.x && relX <= f.x + f.width &&
-              relY >= f.y && relY <= f.y + f.height) {
-            f.sliced = true;
+      const currentTrail = [...trail];
+      const gameRect = gameArea.getBoundingClientRect();
+      
+      fruits.forEach((fruit, index) => {
+        if (fruit.sliced) return;
+        
+        for (let i = 0; i < currentTrail.length - 1; i++) {
+          const p1 = currentTrail[i];
+          const p2 = currentTrail[i + 1];
+          
+          // تبدیل مختصات به فضای بازی
+          const p1x = p1.x - gameRect.left;
+          const p1y = p1.y - gameRect.top;
+          const p2x = p2.x - gameRect.left;
+          const p2y = p2.y - gameRect.top;
+          
+          // مرکز میوه
+          const centerX = fruit.x + fruit.width/2;
+          const centerY = fruit.y + fruit.height/2;
+          const radius = fruit.width/2;
+          
+          // تشخیص برخورد خط با دایره
+          if (lineIntersectsCircle(p1x, p1y, p2x, p2y, centerX, centerY, radius)) {
+            fruit.sliced = true;
             score++;
             scoreEl.textContent = score;
-            spawnHalves(f);
+            spawnHalves(fruit);
             fruits.splice(index, 1);
             break;
           }
         }
       });
+    }
+
+    function lineIntersectsCircle(x1, y1, x2, y2, cx, cy, radius) {
+      // تبدیل به مختصات نسبی
+      x1 -= cx;
+      y1 -= cy;
+      x2 -= cx;
+      y2 -= cy;
+      
+      const dx = x2 - x1;
+      const dy = y2 - y1;
+      const dr = Math.sqrt(dx*dx + dy*dy);
+      const D = x1*y2 - x2*y1;
+      
+      const discriminant = radius*radius * dr*dr - D*D;
+      
+      return discriminant >= 0;
     }
 
     function spawnHalves(fruit) {
@@ -284,15 +316,31 @@
 
     // مدیریت رویدادهای لمسی و موس
     function updateTrail(x, y) {
-      trail.push({ x, y });
-      if (trail.length > 10) trail.shift();
+      gameRect = gameArea.getBoundingClientRect();
+      
+      // فقط اگر مختصات داخل بازی باشد ثبت شود
+      if (x >= gameRect.left && x <= gameRect.right &&
+          y >= gameRect.top && y <= gameRect.bottom) {
+        trail.push({ x, y });
+        if (trail.length > 10) trail.shift();
+      }
     }
 
     canvas.addEventListener("mousemove", (e) => {
+      if (!isRunning) return;
       updateTrail(e.clientX, e.clientY);
     });
 
     canvas.addEventListener("touchmove", (e) => {
+      if (!isRunning) return;
+      e.preventDefault();
+      const t = e.touches[0];
+      updateTrail(t.clientX, t.clientY);
+    }, { passive: false });
+
+    // برای دستگاه‌های لمسی
+    canvas.addEventListener("touchstart", (e) => {
+      if (!isRunning) return;
       e.preventDefault();
       const t = e.touches[0];
       updateTrail(t.clientX, t.clientY);
