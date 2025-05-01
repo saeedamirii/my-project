@@ -3,15 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>بازی برش میوه با جلوه‌های ویژه</title>
+  <title>بازی برش میوه حرفه‌ای</title>
   <style>
-    /* استایل‌های پایه */
     * {
       margin: 0;
       padding: 0;
       box-sizing: border-box;
     }
-    
     body {
       font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
       background-color: #e3f2fd;
@@ -19,14 +17,11 @@
       overflow: hidden;
       user-select: none;
     }
-    
     .game-container {
       max-width: 600px;
       margin: 0 auto;
       position: relative;
-      perspective: 1000px;
     }
-    
     .header {
       display: flex;
       justify-content: space-between;
@@ -37,7 +32,6 @@
       border-radius: 10px 10px 0 0;
       box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     }
-    
     #game-area {
       position: relative;
       height: 500px;
@@ -46,10 +40,7 @@
       overflow: hidden;
       border: 3px solid #2e7d32;
       border-top: none;
-      box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
     }
-    
-    /* استایل میوه‌ها */
     .fruit {
       position: absolute;
       width: 70px;
@@ -59,8 +50,6 @@
       z-index: 10;
       filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.2));
     }
-    
-    /* استایل بمب */
     .bomb {
       position: absolute;
       width: 65px;
@@ -70,13 +59,10 @@
       animation: bomb-pulse 1s infinite alternate;
       filter: drop-shadow(0 0 8px rgba(255,50,50,0.6));
     }
-    
     @keyframes bomb-pulse {
       0% { transform: scale(1) rotate(-5deg); }
       100% { transform: scale(1.1) rotate(5deg); }
     }
-    
-    /* استایل نیمه‌های میوه */
     .fruit-half {
       position: absolute;
       width: 40px;
@@ -84,10 +70,7 @@
       pointer-events: none;
       z-index: 20;
       filter: drop-shadow(4px 4px 8px rgba(0,0,0,0.3));
-      transition: transform 0.3s ease-out;
     }
-    
-    /* ذرات آبمیوه */
     .fruit-juice {
       position: absolute;
       width: 8px;
@@ -97,7 +80,6 @@
       z-index: 5;
       animation: juice-spray 1s forwards;
     }
-    
     @keyframes juice-spray {
       0% { 
         transform: translate(0, 0) scale(1); 
@@ -111,46 +93,30 @@
         opacity: 0;
       }
     }
-    
-    /* انفجار بمب */
     .explosion {
       position: absolute;
       width: 200px;
       height: 200px;
-      background: radial-gradient(
-        circle, 
-        rgba(255,230,100,0.9) 0%, 
-        rgba(255,80,0,0.8) 50%, 
-        rgba(255,0,0,0) 100%
-      );
+      background: radial-gradient(circle, rgba(255,230,100,0.9) 0%, rgba(255,80,0,0.8) 50%, rgba(255,0,0,0) 100%);
       border-radius: 50%;
       pointer-events: none;
       z-index: 100;
       animation: explode 0.8s cubic-bezier(0.4, 0, 0.2, 1) forwards;
       filter: drop-shadow(0 0 20px rgba(255,100,0,0.8));
     }
-    
     @keyframes explode {
       0% { transform: scale(0); opacity: 1; }
       50% { opacity: 1; }
       100% { transform: scale(1.5); opacity: 0; }
     }
-    
-    /* دود انفجار */
     .smoke {
       position: absolute;
       width: 100px;
       height: 100px;
-      background: radial-gradient(
-        circle, 
-        rgba(150,150,150,0.6) 0%, 
-        rgba(100,100,100,0.3) 50%, 
-        rgba(50,50,50,0) 100%
-      );
+      background: radial-gradient(circle, rgba(150,150,150,0.6) 0%, rgba(100,100,100,0.3) 50%, rgba(50,50,50,0) 100%);
       border-radius: 50%;
       animation: smoke-float 2s ease-out forwards;
     }
-    
     @keyframes smoke-float {
       0% { transform: translate(0, 0) scale(0.5); opacity: 0.8; }
       100% { transform: translate(
@@ -158,8 +124,6 @@
         calc(var(--smoke-y) * 100px)
       ) scale(2); opacity: 0; }
     }
-    
-    /* دکمه‌ها و متن‌ها */
     #startBtn {
       background: linear-gradient(135deg, #1b5e20, #2e7d32);
       color: white;
@@ -171,18 +135,11 @@
       transition: all 0.3s;
       box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
-    
-    #startBtn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-    }
-    
     .score-display {
       font-weight: bold;
       font-size: 18px;
       text-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
-    
     #message {
       position: absolute;
       top: 50%;
@@ -199,20 +156,7 @@
       max-width: 400px;
       box-shadow: 0 10px 25px rgba(0,0,0,0.5);
       border: 2px solid #ff5252;
-      animation: message-pop 0.5s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    
-    @keyframes message-pop {
-      0% { transform: translate(-50%, -50%) scale(0.8); opacity: 0; }
-      100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-    }
-    
-    /* انیمیشن‌های میوه */
-    @keyframes fruit-bounce {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-10px); }
-    }
-    
     @keyframes half-fall {
       0% { transform: translate(0, 0) rotate(0); }
       100% { 
@@ -237,7 +181,7 @@
   </div>
 
   <script>
-    // تنظیمات پیشرفته بازی
+    // تنظیمات بازی
     const config = {
       fruitSize: 70,
       spawnInterval: 800,
@@ -249,22 +193,19 @@
       bombChance: 0.15,
       bombImage: "https://cdn-icons-png.flaticon.com/512/921/921490.png",
       fruitImages: [
-        "https://cdn-icons-png.flaticon.com/512/2909/2909899.png", // سیب قرمز
-        "https://cdn-icons-png.flaticon.com/512/415/415682.png",  // پرتقال
-        "https://cdn-icons-png.flaticon.com/512/794/794781.png", // هندوانه
-        "https://cdn-icons-png.flaticon.com/512/2674/2674482.png", // آناناس
-        "https://cdn-icons-png.flaticon.com/512/135/135728.png"  // موز
+        {img: "https://cdn-icons-png.flaticon.com/512/2909/2909899.png", color: "#ff5252"}, // سیب
+        {img: "https://cdn-icons-png.flaticon.com/512/415/415682.png", color: "#ff9800"},   // پرتقال
+        {img: "https://cdn-icons-png.flaticon.com/512/794/794781.png", color: "#4caf50"},   // هندوانه
+        {img: "https://cdn-icons-png.flaticon.com/512/2674/2674482.png", color: "#ffeb3b"}, // آناناس
+        {img: "https://cdn-icons-png.flaticon.com/512/135/135728.png", color: "#ffd54f"}    // موز
       ],
-      juiceColors: [
-        "#ff5252", // قرمز (سیب)
-        "#ff9800", // نارنجی (پرتقال)
-        "#4caf50", // سبز (هندوانه)
-        "#ffeb3b", // زرد (آناناس)
-        "#ffd54f"  // زرد روشن (موز)
+      specialItems: [
+        {img: "https://cdn-icons-png.flaticon.com/512/3527/3527709.png", type: "shield"}, // سپر
+        {img: "https://cdn-icons-png.flaticon.com/512/2534/2534360.png", type: "bonus"}    // جایزه
       ]
     };
 
-    // عناصر اصلی
+    // عناصر DOM
     const gameArea = document.getElementById("game-area");
     const scoreEl = document.getElementById("score");
     const missedEl = document.getElementById("missed");
@@ -278,6 +219,7 @@
     let missed = 0;
     let gameRect = gameArea.getBoundingClientRect();
     let lastTouchTime = 0;
+    let hasShield = false;
 
     // شروع بازی
     startBtn.addEventListener("click", startGame);
@@ -296,6 +238,7 @@
       fruits = [];
       score = 0;
       missed = 0;
+      hasShield = false;
       scoreEl.textContent = "0";
       missedEl.textContent = "0";
       messageEl.style.display = "none";
@@ -308,8 +251,19 @@
     function spawnFruit() {
       if (!isRunning) return;
 
-      const isBomb = Math.random() < config.bombChance;
-      const fruit = {
+      const rand = Math.random();
+      let item;
+      
+      if (rand < 0.02) { // 2% chance for special items
+        item = config.specialItems[Math.floor(Math.random() * config.specialItems.length)];
+      } else if (rand < 0.17) { // 15% chance for bomb
+        item = {img: config.bombImage, type: "bomb"};
+      } else { // 83% chance for normal fruit
+        item = config.fruitImages[Math.floor(Math.random() * config.fruitImages.length)];
+        item.type = "fruit";
+      }
+
+      const obj = {
         element: document.createElement("img"),
         x: Math.random() * (gameArea.clientWidth - config.fruitSize),
         y: gameArea.clientHeight,
@@ -318,18 +272,18 @@
         width: config.fruitSize,
         height: config.fruitSize,
         isCut: false,
-        isBomb: isBomb,
-        type: isBomb ? -1 : Math.floor(Math.random() * config.fruitImages.length),
+        type: item.type,
+        color: item.color || "#ff5252",
         rotation: Math.random() * 20 - 10
       };
 
-      fruit.element.src = isBomb ? config.bombImage : config.fruitImages[fruit.type];
-      fruit.element.className = isBomb ? "bomb" : "fruit";
-      fruit.element.style.left = `${fruit.x}px`;
-      fruit.element.style.top = `${fruit.y}px`;
-      fruit.element.style.transform = `rotate(${fruit.rotation}deg)`;
-      gameArea.appendChild(fruit.element);
-      fruits.push(fruit);
+      obj.element.src = item.img;
+      obj.element.className = obj.type === "bomb" ? "bomb" : "fruit";
+      obj.element.style.left = `${obj.x}px`;
+      obj.element.style.top = `${obj.y}px`;
+      obj.element.style.transform = `rotate(${obj.rotation}deg)`;
+      gameArea.appendChild(obj.element);
+      fruits.push(obj);
 
       if (isRunning) {
         setTimeout(spawnFruit, config.spawnInterval);
@@ -347,7 +301,6 @@
         fruit.vy += config.gravity;
         fruit.rotation += fruit.vx * 0.5;
 
-        // محدودیت حرکتی در حاشیه‌ها
         if (fruit.x < 0 || fruit.x > gameArea.clientWidth - fruit.width) {
           fruit.vx *= -0.8;
           fruit.rotation *= -1;
@@ -357,15 +310,14 @@
         fruit.element.style.top = `${fruit.y}px`;
         fruit.element.style.transform = `rotate(${fruit.rotation}deg)`;
 
-        // بررسی خروج از صفحه
         if (fruit.y > gameArea.clientHeight) {
           fruit.element.remove();
           fruits.splice(index, 1);
-          if (!fruit.isBomb) {
+          if (fruit.type === "fruit") {
             missed++;
             missedEl.textContent = missed;
             
-            if (missed >= config.maxMissed) {
+            if (missed >= config.maxMissed && !hasShield) {
               endGame("باختید! میوه‌های زیادی از دست دادید!");
             }
           }
@@ -380,20 +332,42 @@
       
       fruit.isCut = true;
 
-      if (fruit.isBomb) {
-        createExplosion(fruit);
-        endGame("انفجار! بمب را منفجر کردید!");
-        return;
+      // Handle different item types
+      switch(fruit.type) {
+        case "bomb":
+          if (hasShield) {
+            hasShield = false;
+            fruit.element.remove();
+            fruits.splice(index, 1);
+            return;
+          }
+          createExplosion(fruit);
+          endGame("انفجار! بمب را منفجر کردید!");
+          return;
+          
+        case "shield":
+          hasShield = true;
+          showMessage("سپر فعال شد! یک بار در برابر بمب محافظت می‌شوید!");
+          break;
+          
+        case "bonus":
+          score += 5;
+          showMessage("+5 امتیاز! جایزه دریافت کردید!");
+          break;
+          
+        default: // normal fruit
+          score++;
       }
       
-      score++;
       scoreEl.textContent = score;
-      createJuiceEffect(fruit);
-      createFruitHalf(fruit, true);
-      createFruitHalf(fruit, false);
+      
+      if (fruit.type === "fruit") {
+        createJuiceEffect(fruit);
+        createFruitHalf(fruit, true);
+        createFruitHalf(fruit, false);
+      }
 
       fruit.element.style.transform = "scale(0) rotate(180deg)";
-      fruit.element.style.opacity = "0";
       setTimeout(() => {
         fruit.element.remove();
       }, 300);
@@ -402,17 +376,14 @@
     }
 
     function createJuiceEffect(fruit) {
-      const juiceColor = config.juiceColors[fruit.type % config.juiceColors.length];
-      
       for (let i = 0; i < config.juiceParticles; i++) {
         const juice = document.createElement("div");
         juice.className = "fruit-juice";
         juice.style.left = `${fruit.x + fruit.width/2 - 4}px`;
         juice.style.top = `${fruit.y + fruit.height/2 - 4}px`;
-        juice.style.background = juiceColor;
+        juice.style.background = fruit.color;
         juice.style.setProperty('--tx', Math.random() * 2 - 1);
         juice.style.setProperty('--ty', Math.random() * 2 - 1);
-        juice.style.animationDuration = `${0.5 + Math.random() * 0.5}s`;
         gameArea.appendChild(juice);
 
         setTimeout(() => {
@@ -423,13 +394,12 @@
 
     function createFruitHalf(fruit, isLeft) {
       const half = document.createElement("img");
-      half.src = config.fruitImages[fruit.type];
+      half.src = fruit.element.src;
       half.className = "fruit-half";
       half.style.left = isLeft ? `${fruit.x}px` : `${fruit.x + 30}px`;
       half.style.top = `${fruit.y}px`;
       half.style.clipPath = isLeft ? "inset(0 40px 0 0)" : "inset(0 0 0 40px)";
       
-      // تنظیمات فیزیکی نیمه‌ها
       const fallX = (isLeft ? -1 : 1) * (1 + Math.random() * 2);
       const rotation = (isLeft ? -1 : 1) * (15 + Math.random() * 30);
       
@@ -445,14 +415,12 @@
     }
 
     function createExplosion(fruit) {
-      // انفجار اصلی
       const explosion = document.createElement("div");
       explosion.className = "explosion";
       explosion.style.left = `${fruit.x + fruit.width/2 - 100}px`;
       explosion.style.top = `${fruit.y + fruit.height/2 - 100}px`;
       gameArea.appendChild(explosion);
 
-      // دود انفجار
       for (let i = 0; i < 8; i++) {
         const smoke = document.createElement("div");
         smoke.className = "smoke";
@@ -463,16 +431,32 @@
         gameArea.appendChild(smoke);
       }
 
-      // پاک کردن همه میوه‌ها از صفحه
-      fruits.forEach(f => {
-        f.element.remove();
-      });
+      fruits.forEach(f => f.element.remove());
       fruits = [];
 
       setTimeout(() => {
         explosion.remove();
         document.querySelectorAll('.smoke').forEach(smoke => smoke.remove());
       }, 800);
+    }
+
+    function showMessage(text) {
+      const msg = document.createElement("div");
+      msg.textContent = text;
+      msg.style.position = "absolute";
+      msg.style.top = "50%";
+      msg.style.left = "50%";
+      msg.style.transform = "translate(-50%, -50%)";
+      msg.style.background = "rgba(0,0,0,0.7)";
+      msg.style.color = "white";
+      msg.style.padding = "10px 20px";
+      msg.style.borderRadius = "10px";
+      msg.style.zIndex = "300";
+      gameArea.appendChild(msg);
+      
+      setTimeout(() => {
+        msg.remove();
+      }, 1500);
     }
 
     function endGame(message) {
@@ -494,16 +478,25 @@
       messageEl.style.display = "block";
     }
 
-    // سیستم تشخیص برخورد پیشرفته
+    // سیستم تشخیص برخورد بهبود یافته
     function handleInteraction(x, y) {
       if (!isRunning) return;
       
       const now = Date.now();
-      if (now - lastTouchTime < 50) return;
+      if (now - lastTouchTime < 30) return;
       lastTouchTime = now;
       
       const gameX = x - gameRect.left;
       const gameY = y - gameRect.top;
+
+      // ایجاد یک خط برش
+      ctx.clearRect(0, 0, gameRect.width, gameRect.height);
+      ctx.beginPath();
+      ctx.moveTo(gameX - 20, gameY - 20);
+      ctx.lineTo(gameX + 20, gameY + 20);
+      ctx.strokeStyle = "rgba(255,255,255,0.5)";
+      ctx.lineWidth = 3;
+      ctx.stroke();
 
       fruits.forEach((fruit, index) => {
         if (fruit.isCut) return;
@@ -513,7 +506,7 @@
         const distance = Math.sqrt((gameX - centerX) ** 2 + (gameY - centerY) ** 2);
         
         if (distance < config.cutSensitivity) {
-          if (!fruit.isBomb) {
+          if (fruit.type === "fruit") {
             fruit.element.style.transform = `rotate(${fruit.rotation}deg) scale(1.2)`;
             setTimeout(() => {
               if (fruit.element) {
@@ -527,28 +520,74 @@
       });
     }
 
-    // رویدادهای کنترل
-    gameArea.addEventListener("mousemove", (e) => {
-      handleInteraction(e.clientX, e.clientY);
-    });
+    // رویدادهای کنترل با تشخیص دقیق
+    const canvas = document.createElement("canvas");
+    canvas.style.position = "absolute";
+    canvas.style.top = "0";
+    canvas.style.left = "0";
+    canvas.style.zIndex = "50";
+    canvas.style.pointerEvents = "none";
+    gameArea.appendChild(canvas);
+    const ctx = canvas.getContext("2d");
+    canvas.width = gameRect.width;
+    canvas.height = gameRect.height;
 
-    gameArea.addEventListener("touchmove", (e) => {
+    gameArea.addEventListener("mousedown", startSwipe);
+    gameArea.addEventListener("mousemove", swipe);
+    gameArea.addEventListener("mouseup", endSwipe);
+    gameArea.addEventListener("touchstart", startSwipe);
+    gameArea.addEventListener("touchmove", swipe);
+    gameArea.addEventListener("touchend", endSwipe);
+
+    let isSwiping = false;
+    let lastX, lastY;
+
+    function startSwipe(e) {
+      isSwiping = true;
+      const pos = getPosition(e);
+      lastX = pos.x;
+      lastY = pos.y;
       e.preventDefault();
-      const touch = e.touches[0];
-      handleInteraction(touch.clientX, touch.clientY);
-    }, { passive: false });
+    }
 
-    gameArea.addEventListener("touchstart", (e) => {
+    function swipe(e) {
+      if (!isSwiping || !isRunning) return;
+      
+      const pos = getPosition(e);
+      handleInteraction(pos.x, pos.y);
+      
+      // رسم خط برش
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.beginPath();
+      ctx.moveTo(lastX - gameRect.left, lastY - gameRect.top);
+      ctx.lineTo(pos.x - gameRect.left, pos.y - gameRect.top);
+      ctx.strokeStyle = "rgba(255,255,255,0.7)";
+      ctx.lineWidth = 4;
+      ctx.stroke();
+      
+      lastX = pos.x;
+      lastY = pos.y;
       e.preventDefault();
-      const touch = e.touches[0];
-      handleInteraction(touch.clientX, touch.clientY);
-    }, { passive: false });
+    }
 
-    document.addEventListener("touchstart", (e) => {
-      if (e.target === gameArea) {
-        e.preventDefault();
+    function endSwipe() {
+      isSwiping = false;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function getPosition(e) {
+      if (e.touches) {
+        return {
+          x: e.touches[0].clientX,
+          y: e.touches[0].clientY
+        };
+      } else {
+        return {
+          x: e.clientX,
+          y: e.clientY
+        };
       }
-    }, { passive: false });
+    }
   </script>
 </body>
 </html>
