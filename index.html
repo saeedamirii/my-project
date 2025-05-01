@@ -42,14 +42,28 @@
   height: 60px;
   user-select: none;
   pointer-events: none;
-  transition: transform 0.6s ease, top 1s ease;
 }
 
-.fruit-half.left {
-  transform: rotate(-45deg) translateX(-20px);
+.fruit-half {
+  animation: fall 1.2s ease forwards;
+  opacity: 1;
 }
-.fruit-half.right {
-  transform: rotate(45deg) translateX(20px);
+
+.left-half {
+  clip-path: inset(0 30px 0 0);
+  transform: rotate(-25deg) translate(-10px, 0);
+}
+
+.right-half {
+  clip-path: inset(0 0 0 30px);
+  transform: rotate(25deg) translate(10px, 0);
+}
+
+@keyframes fall {
+  to {
+    transform: translateY(150px) rotate(45deg);
+    opacity: 0;
+  }
 }
 
 #startBtn {
@@ -179,7 +193,6 @@ function animate() {
 function checkSlice() {
   fruits.forEach((f, i) => {
     if (f.sliced) return;
-
     for (const p of trail) {
       const insideX = p.x >= f.x && p.x <= f.x + 60;
       const insideY = p.y >= f.y && p.y <= f.y + 60;
@@ -187,7 +200,7 @@ function checkSlice() {
         f.sliced = true;
         score++;
         scoreEl.textContent = score;
-        createFruitHalves(f);
+        spawnHalves(f);
         fruits.splice(i, 1);
         break;
       }
@@ -195,18 +208,14 @@ function checkSlice() {
   });
 }
 
-function createFruitHalves(fruit) {
-  ["left", "right"].forEach((side, index) => {
+function spawnHalves(fruit) {
+  ["left-half", "right-half"].forEach((className) => {
     const half = document.createElement("img");
     half.src = fruit.img.src;
-    half.className = `fruit-half ${side}`;
+    half.className = `fruit-half ${className}`;
     half.style.left = `${fruit.x}px`;
     half.style.top = `${fruit.y}px`;
     gameArea.appendChild(half);
-    setTimeout(() => {
-      half.style.top = `${fruit.y + 150}px`;
-      half.style.opacity = 0;
-    }, 50);
     setTimeout(() => gameArea.removeChild(half), 1500);
   });
 }
