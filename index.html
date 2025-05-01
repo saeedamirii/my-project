@@ -47,7 +47,7 @@
     }
 
     .fruit-half {
-      animation: fall 1.2s ease forwards;
+      animation: fall 1s ease forwards;
     }
 
     .left-half {
@@ -213,7 +213,7 @@
     }
 
     function spawnHalves(fruit) {
-      // نصفه سمت چپ
+      // نصفه چپ
       const leftHalf = document.createElement("img");
       leftHalf.src = fruit.img.src;
       leftHalf.className = "fruit-half left-half";
@@ -221,7 +221,7 @@
       leftHalf.style.top = `${fruit.y}px`;
       gameArea.appendChild(leftHalf);
 
-      // نصفه سمت راست
+      // نصفه راست
       const rightHalf = document.createElement("img");
       rightHalf.src = fruit.img.src;
       rightHalf.className = "fruit-half right-half";
