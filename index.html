@@ -1,9 +1,9 @@
 <!DOCTYPE html>
 <html lang="fa" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>برش میوه</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بازی برش میوه</title>
   <style>
     * {
       margin: 0;
@@ -14,12 +14,12 @@
     body {
       font-family: sans-serif;
       background-color: #d7f0f7;
-      touch-action: manipulation; /* بهبود واکنش لمسی */
+      touch-action: manipulation;
     }
 
     .game-container {
       max-width: 600px;
-      margin: auto;
+      margin: 0 auto;
       position: relative;
     }
 
@@ -45,7 +45,7 @@
       width: 60px;
       height: 60px;
       user-select: none;
-      pointer-events: none; /* جلوگیری از تداخل رویدادها */
+      pointer-events: none;
     }
 
     .fruit-half {
@@ -99,7 +99,9 @@
     <div id="game-area"></div>
     <canvas id="slash-canvas"></canvas>
   </div>
+
   <script>
+    // عناصر DOM
     const gameArea = document.getElementById("game-area");
     const scoreEl = document.getElementById("score");
     const missedEl = document.getElementById("missed");
@@ -116,6 +118,7 @@
     resizeCanvas();
     window.addEventListener('resize', resizeCanvas);
 
+    // متغیرهای بازی
     let fruits = [];
     let isRunning = false;
     let score = 0;
@@ -123,6 +126,7 @@
     let trail = [];
     let gameRect = gameArea.getBoundingClientRect();
 
+    // تصاویر میوه‌ها
     const fruitImages = [
       "https://cdn-icons-png.flaticon.com/512/590/590685.png",
       "https://cdn-icons-png.flaticon.com/512/590/590682.png",
@@ -130,12 +134,15 @@
       "https://cdn-icons-png.flaticon.com/512/590/590688.png",
     ];
 
-    startBtn.onclick = () => {
+    // شروع بازی
+    startBtn.addEventListener("click", startGame);
+
+    function startGame() {
       resetGame();
       isRunning = true;
-      spawnFruits();
+      spawnFruit();
       animate();
-    };
+    }
 
     function resetGame() {
       fruits = [];
@@ -147,7 +154,7 @@
       gameRect = gameArea.getBoundingClientRect();
     }
 
-    function spawnFruits() {
+    function spawnFruit() {
       if (!isRunning) return;
 
       const fruit = {
@@ -163,9 +170,13 @@
       };
 
       fruit.img.src = fruitImages[Math.floor(Math.random() * fruitImages.length)];
-      fruits.push(fruit);
-
-      setTimeout(spawnFruits, 1000);
+      
+      fruit.img.onload = () => {
+        fruits.push(fruit);
+        if (isRunning) {
+          setTimeout(spawnFruit, 1000);
+        }
+      };
     }
 
     function animate() {
@@ -174,7 +185,7 @@
       gameArea.innerHTML = "";
       ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-      // رسم ردپای برش (برای دیباگ)
+      // رسم ردپای برش
       ctx.strokeStyle = "rgba(255, 0, 0, 0.5)";
       ctx.lineWidth = 3;
       ctx.beginPath();
@@ -186,6 +197,7 @@
       }
       ctx.stroke();
 
+      // بروزرسانی موقعیت میوه‌ها
       for (let i = 0; i < fruits.length; i++) {
         const f = fruits[i];
         if (f.sliced) continue;
@@ -194,11 +206,13 @@
         f.y += f.vy;
         f.vy += f.gravity;
 
+        // بررسی خروج میوه از صفحه
         if (f.y > gameArea.clientHeight) {
           fruits.splice(i, 1);
           i--;
           missed++;
           missedEl.textContent = missed;
+          
           if (missed >= 3) {
             endGame();
             return;
@@ -206,6 +220,7 @@
           continue;
         }
 
+        // نمایش میوه
         const fruitEl = document.createElement("img");
         fruitEl.src = f.img.src;
         fruitEl.className = "fruit";
@@ -219,19 +234,17 @@
     }
 
     function checkSlice() {
+      const currentTrail = [...trail];
+      
       fruits.forEach((f, index) => {
         if (f.sliced) return;
 
-        for (const p of trail) {
-          // تبدیل مختصات به فضای نسبی gameArea
+        for (const p of currentTrail) {
           const relX = p.x - gameRect.left;
           const relY = p.y - gameRect.top;
 
-          // تشخیص برخورد با میوه
-          const insideX = relX >= f.x && relX <= f.x + f.width;
-          const insideY = relY >= f.y && relY <= f.y + f.height;
-          
-          if (insideX && insideY) {
+          if (relX >= f.x && relX <= f.x + f.width &&
+              relY >= f.y && relY <= f.y + f.height) {
             f.sliced = true;
             score++;
             scoreEl.textContent = score;
@@ -254,8 +267,8 @@
       const rightHalf = document.createElement("img");
       rightHalf.src = fruit.img.src;
       rightHalf.className = "fruit-half right-half";
-      rightHalf.style.left = `${fruit.x + fruit.width / 2}px`;
-      rightHalf.style.top = `${fruit.y}px";
+      rightHalf.style.left = `${fruit.x + fruit.width/2}px`;
+      rightHalf.style.top = `${fruit.y}px`;
       gameArea.appendChild(rightHalf);
 
       setTimeout(() => {
@@ -269,7 +282,7 @@
       alert(`بازی تمام شد! امتیاز شما: ${score}`);
     }
 
-    // ثبت حرکت موس/انگشت
+    // مدیریت رویدادهای لمسی و موس
     function updateTrail(x, y) {
       trail.push({ x, y });
       if (trail.length > 10) trail.shift();
