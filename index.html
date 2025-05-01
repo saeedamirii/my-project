@@ -241,6 +241,7 @@
       alert(`بازی تمام شد! امتیاز شما: ${score}`);
     }
 
+    // هنگام حرکت موس یا لمس صفحه، مسیر برش رو ذخیره می‌کنیم
     canvas.addEventListener("mousemove", (e) => {
       trail.push({ x: e.clientX - gameArea.offsetLeft, y: e.clientY - gameArea.offsetTop });
       if (trail.length > 5) trail.shift();
