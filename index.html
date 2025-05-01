@@ -1,25 +1,41 @@
 <!DOCTYPE html><html lang="fa">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>برش میوه</title>
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: sans-serif; background: #c0f0ff; overflow: hidden; }
+    * {margin: 0; padding: 0; box-sizing: border-box;}
+    body {font-family: sans-serif; background-color: #d7f0f7;}
+    .game-container {max-width: 600px; margin: auto; position: relative;}
     .header {
-      position: absolute;
-      top: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-around;
-      align-items: center;
-      padding: 10px;
-      background-color: #4caf50;
-      color: white;
-      z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+      padding: 10px; background-color: #4caf50; color: white;
     }
-    #gameCanvas {
-      display: block;
+    #game-area {
+      position: relative;
+      height: 500px;
+      background: url("https://i.imgur.com/fYVovjZ.jpg") center/cover no-repeat;
+      overflow: hidden;
+      border: 2px solid #333;
+    }
+    .fruit {
+      position: absolute;
+      width: 60px; height: 60px;
+      user-select: none;
+      pointer-events: none;
+      transition: transform 0.3s ease-out;
+    }
+    .fruit-half {
+      position: absolute;
+      width: 30px; height: 60px;
+      pointer-events: none;
+      animation: fallRotate 0.6s ease-in forwards;
+    }
+    @keyframes fallRotate {
+      to {
+        transform: translateY(100px) rotate(360deg);
+        opacity: 0;
+      }
     }
     #startBtn {
       background: #1b5e20;
@@ -29,140 +45,158 @@
       cursor: pointer;
       font-size: 14px;
     }
+    #slash-canvas { display: none; }
   </style>
 </head>
 <body>
-  <div class="header">
-    <p>امتیاز: <span id="score">0</span></p>
-    <p>از دست رفته: <span id="missed">0</span></p>
-    <button id="startBtn">شروع بازی</button>
+  <div class="game-container">
+    <div class="header">
+      <p>امتیاز: <span id="score">0</span></p>
+      <p>از دست رفته: <span id="missed">0</span></p>
+      <button id="startBtn">شروع بازی</button>
+    </div>
+    <div id="game-area"></div>
+    <canvas id="slash-canvas"></canvas>
   </div>
-  <canvas id="gameCanvas"></canvas>  <script>
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-
-    const startBtn = document.getElementById("startBtn");
+  <script>
+    const gameArea = document.getElementById("game-area");
     const scoreEl = document.getElementById("score");
     const missedEl = document.getElementById("missed");
+    const startBtn = document.getElementById("startBtn");let fruits = [];
+let isRunning = false;
+let score = 0;
+let missed = 0;
 
-    let fruits = [], trail = [], score = 0, missed = 0, isRunning = false;
-    const fruitImgs = [];
-    const fruitSrcs = [
-      "https://cdn-icons-png.flaticon.com/512/590/590685.png",
-      "https://cdn-icons-png.flaticon.com/512/590/590682.png",
-      "https://cdn-icons-png.flaticon.com/512/590/590686.png",
-      "https://cdn-icons-png.flaticon.com/512/590/590688.png"
-    ];
+const fruitImages = [
+  "https://cdn-icons-png.flaticon.com/512/590/590685.png",
+  "https://cdn-icons-png.flaticon.com/512/590/590682.png",
+  "https://cdn-icons-png.flaticon.com/512/590/590686.png",
+  "https://cdn-icons-png.flaticon.com/512/590/590688.png"
+];
 
-    for (let src of fruitSrcs) {
-      const img = new Image();
-      img.src = src;
-      fruitImgs.push(img);
-    }
+startBtn.onclick = () => {
+  resetGame();
+  isRunning = true;
+  spawnFruits();
+  animate();
+};
 
-    startBtn.onclick = () => {
-      resetGame();
-      isRunning = true;
-      spawnFruit();
-      animate();
-    };
+function resetGame() {
+  fruits = [];
+  score = 0;
+  missed = 0;
+  gameArea.innerHTML = "";
+  scoreEl.textContent = "0";
+  missedEl.textContent = "0";
+}
 
-    function resetGame() {
-      fruits = [];
-      trail = [];
-      score = 0;
-      missed = 0;
-      scoreEl.textContent = "0";
-      missedEl.textContent = "0";
-    }
+function spawnFruits() {
+  if (!isRunning) return;
 
-    function spawnFruit() {
-      if (!isRunning) return;
-      const img = fruitImgs[Math.floor(Math.random() * fruitImgs.length)];
-      fruits.push({
-        x: Math.random() * (canvas.width - 60),
-        y: canvas.height,
-        vx: (Math.random() - 0.5) * 6,
-        vy: -12 - Math.random() * 5,
-        gravity: 0.4,
-        img: img,
-        sliced: false
-      });
-      setTimeout(spawnFruit, 1000);
-    }
+  const fruit = {
+    x: Math.random() * (gameArea.clientWidth - 60),
+    y: gameArea.clientHeight,
+    vx: (Math.random() - 0.5) * 4,
+    vy: -10 - Math.random() * 4,
+    gravity: 0.35,
+    imgSrc: fruitImages[Math.floor(Math.random() * fruitImages.length)],
+    sliced: false
+  };
 
-    function animate() {
-      if (!isRunning) return;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
+  fruits.push(fruit);
+  setTimeout(spawnFruits, 1000);
+}
 
-      // Draw trail
-      ctx.beginPath();
-      ctx.lineWidth = 4;
-      ctx.strokeStyle = "red";
-      for (let i = 0; i < trail.length; i++) {
-        const p = trail[i];
-        if (i === 0) ctx.moveTo(p.x, p.y);
-        else ctx.lineTo(p.x, p.y);
+function animate() {
+  if (!isRunning) return;
+
+  gameArea.innerHTML = "";
+  for (let i = 0; i < fruits.length; i++) {
+    const f = fruits[i];
+    if (f.sliced) continue;
+
+    f.x += f.vx;
+    f.y += f.vy;
+    f.vy += f.gravity;
+
+    if (f.y > gameArea.clientHeight) {
+      fruits.splice(i, 1);
+      i--;
+      missed++;
+      missedEl.textContent = missed;
+      if (missed >= 3) {
+        endGame();
+        return;
       }
-      ctx.stroke();
-      if (trail.length > 10) trail.shift();
-
-      // Update fruits
-      for (let i = 0; i < fruits.length; i++) {
-        const f = fruits[i];
-        if (f.sliced) continue;
-
-        f.x += f.vx;
-        f.y += f.vy;
-        f.vy += f.gravity;
-
-        if (f.y > canvas.height) {
-          fruits.splice(i, 1);
-          i--;
-          missed++;
-          missedEl.textContent = missed;
-          if (missed >= 3) {
-            isRunning = false;
-            alert(`بازی تمام شد! امتیاز شما: ${score}`);
-            return;
-          }
-          continue;
-        }
-
-        ctx.drawImage(f.img, f.x, f.y, 60, 60);
-
-        // Slice detection
-        for (let p of trail) {
-          const insideX = p.x >= f.x && p.x <= f.x + 60;
-          const insideY = p.y >= f.y && p.y <= f.y + 60;
-          if (insideX && insideY) {
-            f.sliced = true;
-            score++;
-            scoreEl.textContent = score;
-            splash(p.x, p.y);
-          }
-        }
-      }
-
-      requestAnimationFrame(animate);
+      continue;
     }
 
-    function splash(x, y) {
-      ctx.beginPath();
-      ctx.fillStyle = "rgba(255,0,0,0.5)";
-      ctx.arc(x, y, 20, 0, Math.PI * 2);
-      ctx.fill();
+    const fruitEl = document.createElement("img");
+    fruitEl.src = f.imgSrc;
+    fruitEl.className = "fruit";
+    fruitEl.style.left = `${f.x}px`;
+    fruitEl.style.top = `${f.y}px`;
+    gameArea.appendChild(fruitEl);
+  }
+
+  requestAnimationFrame(animate);
+}
+
+gameArea.addEventListener("mousemove", (e) => {
+  sliceAt(e.offsetX, e.offsetY);
+});
+gameArea.addEventListener("touchmove", (e) => {
+  const t = e.touches[0];
+  const rect = gameArea.getBoundingClientRect();
+  sliceAt(t.clientX - rect.left, t.clientY - rect.top);
+});
+
+function sliceAt(x, y) {
+  fruits.forEach((f) => {
+    if (f.sliced) return;
+    const insideX = x >= f.x && x <= f.x + 60;
+    const insideY = y >= f.y && y <= f.y + 60;
+    if (insideX && insideY) {
+      f.sliced = true;
+      score++;
+      scoreEl.textContent = score;
+      showFruitHalves(f);
     }
+  });
+}
 
-    canvas.addEventListener("mousemove", (e) => {
-      trail.push({ x: e.clientX, y: e.clientY });
-    });
+function showFruitHalves(fruit) {
+  const leftHalf = document.createElement("img");
+  const rightHalf = document.createElement("img");
 
-    canvas.addEventListener("touchmove", (e) => {
-      const t = e.touches[0];
-      trail.push({ x: t.clientX, y: t.clientY });
-    });
-  </script></body>
+  leftHalf.src = fruit.imgSrc;
+  rightHalf.src = fruit.imgSrc;
+
+  leftHalf.className = "fruit-half";
+  rightHalf.className = "fruit-half";
+
+  leftHalf.style.left = `${fruit.x}px`;
+  leftHalf.style.top = `${fruit.y}px`;
+  leftHalf.style.clipPath = "inset(0 30px 0 0)";
+
+  rightHalf.style.left = `${fruit.x + 30}px`;
+  rightHalf.style.top = `${fruit.y}px`;
+  rightHalf.style.clipPath = "inset(0 0 0 30px)";
+
+  gameArea.appendChild(leftHalf);
+  gameArea.appendChild(rightHalf);
+
+  setTimeout(() => {
+    leftHalf.remove();
+    rightHalf.remove();
+  }, 600);
+}
+
+function endGame() {
+  isRunning = false;
+  alert(`بازی تمام شد! امتیاز شما: ${score}`);
+}
+
+  </script>
+</body>
 </html>
