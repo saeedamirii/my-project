@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fa">
+<!DOCTYPE html>
+<html lang="fa">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
@@ -8,81 +9,80 @@
       margin: 0;
       padding: 0;
       box-sizing: border-box;
-    }body {
-  font-family: sans-serif;
-  background-color: #d7f0f7;
-}
+    }
 
-.game-container {
-  max-width: 600px;
-  margin: auto;
-  position: relative;
-}
+    body {
+      font-family: sans-serif;
+      background-color: #d7f0f7;
+    }
 
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px;
-  background-color: #4caf50;
-  color: white;
-}
+    .game-container {
+      max-width: 600px;
+      margin: auto;
+      position: relative;
+    }
 
-#game-area {
-  position: relative;
-  height: 500px;
-  background: url("https://images.unsplash.com/photo-1570197781548-6b4e6bb1fb42") center/cover no-repeat;
-  overflow: hidden;
-  border: 2px solid #333;
-}
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 10px;
+      background-color: #4caf50;
+      color: white;
+    }
 
-.fruit, .fruit-half {
-  position: absolute;
-  width: 60px;
-  height: 60px;
-  user-select: none;
-  pointer-events: none;
-}
+    #game-area {
+      position: relative;
+      height: 500px;
+      background: url("https://images.unsplash.com/photo-1570197781548-6b4e6bb1fb42") center/cover no-repeat;
+      overflow: hidden;
+      border: 2px solid #333;
+    }
 
-.fruit-half {
-  animation: fall 1.2s ease forwards;
-  opacity: 1;
-}
+    .fruit, .fruit-half {
+      position: absolute;
+      width: 60px;
+      height: 60px;
+      user-select: none;
+    }
 
-.left-half {
-  clip-path: inset(0 30px 0 0);
-  transform: rotate(-25deg) translate(-10px, 0);
-}
+    .fruit-half {
+      animation: fall 1.2s ease forwards;
+    }
 
-.right-half {
-  clip-path: inset(0 0 0 30px);
-  transform: rotate(25deg) translate(10px, 0);
-}
+    .left-half {
+      clip-path: inset(0 30px 0 0);
+      transform: rotate(-25deg) translate(-10px, 0);
+    }
 
-@keyframes fall {
-  to {
-    transform: translateY(150px) rotate(45deg);
-    opacity: 0;
-  }
-}
+    .right-half {
+      clip-path: inset(0 0 0 30px);
+      transform: rotate(25deg) translate(10px, 0);
+    }
 
-#startBtn {
-  background: #1b5e20;
-  color: white;
-  border: none;
-  padding: 6px 12px;
-  cursor: pointer;
-  font-size: 14px;
-}
+    @keyframes fall {
+      to {
+        transform: translateY(150px) rotate(45deg);
+        opacity: 0;
+      }
+    }
 
-#slash-canvas {
-  position: absolute;
-  top: 0;
-  left: 0;
-  z-index: 5;
-  pointer-events: none;
-}
+    #startBtn {
+      background: #1b5e20;
+      color: white;
+      border: none;
+      padding: 6px 12px;
+      cursor: pointer;
+      font-size: 14px;
+    }
 
+    #slash-canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      z-index: 10;
+      pointer-events: none;
+    }
   </style>
 </head>
 <body>
@@ -101,141 +101,156 @@
     const missedEl = document.getElementById("missed");
     const startBtn = document.getElementById("startBtn");
     const canvas = document.getElementById("slash-canvas");
-    const ctx = canvas.getContext("2d");canvas.width = window.innerWidth;
-canvas.height = window.innerHeight;
+    const ctx = canvas.getContext("2d");
 
-let fruits = [];
-let isRunning = false;
-let score = 0;
-let missed = 0;
-let trail = [];
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-const fruitImages = [
-  "https://cdn-icons-png.flaticon.com/512/590/590685.png",
-  "https://cdn-icons-png.flaticon.com/512/590/590682.png",
-  "https://cdn-icons-png.flaticon.com/512/590/590686.png",
-  "https://cdn-icons-png.flaticon.com/512/590/590688.png",
-];
+    let fruits = [];
+    let isRunning = false;
+    let score = 0;
+    let missed = 0;
+    let trail = [];
 
-startBtn.onclick = () => {
-  resetGame();
-  isRunning = true;
-  spawnFruits();
-  animate();
-};
+    const fruitImages = [
+      "https://cdn-icons-png.flaticon.com/512/590/590685.png",
+      "https://cdn-icons-png.flaticon.com/512/590/590682.png",
+      "https://cdn-icons-png.flaticon.com/512/590/590686.png",
+      "https://cdn-icons-png.flaticon.com/512/590/590688.png",
+    ];
 
-function resetGame() {
-  fruits = [];
-  score = 0;
-  missed = 0;
-  scoreEl.textContent = "0";
-  missedEl.textContent = "0";
-  gameArea.innerHTML = "";
-}
+    startBtn.onclick = () => {
+      resetGame();
+      isRunning = true;
+      spawnFruits();
+      animate();
+    };
 
-function spawnFruits() {
-  if (!isRunning) return;
-
-  const fruit = {
-    x: Math.random() * (gameArea.clientWidth - 60),
-    y: gameArea.clientHeight,
-    vx: (Math.random() - 0.5) * 6,
-    vy: -12 - Math.random() * 5,
-    gravity: 0.4,
-    img: new Image(),
-    sliced: false,
-  };
-
-  fruit.img.src = fruitImages[Math.floor(Math.random() * fruitImages.length)];
-  fruits.push(fruit);
-
-  setTimeout(spawnFruits, 1000);
-}
-
-function animate() {
-  if (!isRunning) return;
-
-  gameArea.innerHTML = "";
-  ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-  for (let i = 0; i < fruits.length; i++) {
-    const f = fruits[i];
-    if (f.sliced) continue;
-
-    f.x += f.vx;
-    f.y += f.vy;
-    f.vy += f.gravity;
-
-    if (f.y > gameArea.clientHeight) {
-      fruits.splice(i, 1);
-      i--;
-      missed++;
-      missedEl.textContent = missed;
-      if (missed >= 3) {
-        endGame();
-        return;
-      }
-      continue;
+    function resetGame() {
+      fruits = [];
+      score = 0;
+      missed = 0;
+      scoreEl.textContent = "0";
+      missedEl.textContent = "0";
+      gameArea.innerHTML = "";
     }
 
-    const fruitEl = document.createElement("img");
-    fruitEl.src = f.img.src;
-    fruitEl.className = "fruit";
-    fruitEl.style.left = `${f.x}px`;
-    fruitEl.style.top = `${f.y}px`;
-    gameArea.appendChild(fruitEl);
-  }
+    function spawnFruits() {
+      if (!isRunning) return;
 
-  checkSlice();
-  requestAnimationFrame(animate);
-}
+      const fruit = {
+        x: Math.random() * (gameArea.clientWidth - 60),
+        y: gameArea.clientHeight,
+        vx: (Math.random() - 0.5) * 6,
+        vy: -12 - Math.random() * 5,
+        gravity: 0.4,
+        img: new Image(),
+        sliced: false,
+        width: 60,
+        height: 60,
+      };
 
-function checkSlice() {
-  fruits.forEach((f, i) => {
-    if (f.sliced) return;
-    for (const p of trail) {
-      const insideX = p.x >= f.x && p.x <= f.x + 60;
-      const insideY = p.y >= f.y && p.y <= f.y + 60;
-      if (insideX && insideY) {
-        f.sliced = true;
-        score++;
-        scoreEl.textContent = score;
-        spawnHalves(f);
-        fruits.splice(i, 1);
-        break;
-      }
+      fruit.img.src = fruitImages[Math.floor(Math.random() * fruitImages.length)];
+      fruits.push(fruit);
+
+      setTimeout(spawnFruits, 1000);
     }
-  });
-}
 
-function spawnHalves(fruit) {
-  ["left-half", "right-half"].forEach((className) => {
-    const half = document.createElement("img");
-    half.src = fruit.img.src;
-    half.className = `fruit-half ${className}`;
-    half.style.left = `${fruit.x}px`;
-    half.style.top = `${fruit.y}px`;
-    gameArea.appendChild(half);
-    setTimeout(() => gameArea.removeChild(half), 1500);
-  });
-}
+    function animate() {
+      if (!isRunning) return;
 
-function endGame() {
-  isRunning = false;
-  alert(`بازی تمام شد! امتیاز شما: ${score}`);
-}
+      gameArea.innerHTML = "";
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-canvas.addEventListener("mousemove", (e) => {
-  trail.push({ x: e.clientX, y: e.clientY });
-  if (trail.length > 10) trail.shift();
-});
+      for (let i = 0; i < fruits.length; i++) {
+        const f = fruits[i];
+        if (f.sliced) continue;
 
-canvas.addEventListener("touchmove", (e) => {
-  const t = e.touches[0];
-  trail.push({ x: t.clientX, y: t.clientY });
-  if (trail.length > 10) trail.shift();
-});
+        f.x += f.vx;
+        f.y += f.vy;
+        f.vy += f.gravity;
 
+        if (f.y > gameArea.clientHeight) {
+          fruits.splice(i, 1);
+          i--;
+          missed++;
+          missedEl.textContent = missed;
+          if (missed >= 3) {
+            endGame();
+            return;
+          }
+          continue;
+        }
+
+        const fruitEl = document.createElement("img");
+        fruitEl.src = f.img.src;
+        fruitEl.className = "fruit";
+        fruitEl.style.left = `${f.x}px`;
+        fruitEl.style.top = `${f.y}px`;
+        gameArea.appendChild(fruitEl);
+      }
+
+      checkSlice();
+      requestAnimationFrame(animate);
+    }
+
+    function checkSlice() {
+      fruits.forEach((f, index) => {
+        if (f.sliced) return;
+        for (const p of trail) {
+          const insideX = p.x >= f.x && p.x <= f.x + f.width;
+          const insideY = p.y >= f.y && p.y <= f.y + f.height;
+          if (insideX && insideY) {
+            f.sliced = true;
+            score++;
+            scoreEl.textContent = score;
+            spawnHalves(f);
+            fruits.splice(index, 1);
+            break;
+          }
+        }
+      });
+    }
+
+    function spawnHalves(fruit) {
+      // نصفه سمت چپ
+      const leftHalf = document.createElement("img");
+      leftHalf.src = fruit.img.src;
+      leftHalf.className = "fruit-half left-half";
+      leftHalf.style.left = `${fruit.x}px`;
+      leftHalf.style.top = `${fruit.y}px`;
+      gameArea.appendChild(leftHalf);
+
+      // نصفه سمت راست
+      const rightHalf = document.createElement("img");
+      rightHalf.src = fruit.img.src;
+      rightHalf.className = "fruit-half right-half";
+      rightHalf.style.left = `${fruit.x + fruit.width / 2}px`;
+      rightHalf.style.top = `${fruit.y}px`;
+      gameArea.appendChild(rightHalf);
+
+      // حذف دو نصفه بعد از 1.5 ثانیه
+      setTimeout(() => {
+        gameArea.removeChild(leftHalf);
+        gameArea.removeChild(rightHalf);
+      }, 1500);
+    }
+
+    function endGame() {
+      isRunning = false;
+      alert(`بازی تمام شد! امتیاز شما: ${score}`);
+    }
+
+    canvas.addEventListener("mousemove", (e) => {
+      trail.push({ x: e.clientX - gameArea.offsetLeft, y: e.clientY - gameArea.offsetTop });
+      if (trail.length > 5) trail.shift();
+    });
+
+    canvas.addEventListener("touchmove", (e) => {
+      const t = e.touches[0];
+      trail.push({ x: t.clientX - gameArea.offsetLeft, y: t.clientY - gameArea.offsetTop });
+      if (trail.length > 5) trail.shift();
+    });
   </script>
 </body>
 </html>
