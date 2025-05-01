@@ -9,10 +9,10 @@ let interval;
 let isPlaying = false;
 
 const fruitImages = [
-  "https://cdn-icons-png.flaticon.com/512/590/590685.png", // apple
-  "https://cdn-icons-png.flaticon.com/512/590/590682.png", // banana
-  "https://cdn-icons-png.flaticon.com/512/590/590686.png", // orange
-  "https://cdn-icons-png.flaticon.com/512/590/590688.png", // strawberry
+  "https://cdn-icons-png.flaticon.com/512/590/590685.png",
+  "https://cdn-icons-png.flaticon.com/512/590/590682.png",
+  "https://cdn-icons-png.flaticon.com/512/590/590686.png",
+  "https://cdn-icons-png.flaticon.com/512/590/590688.png"
 ];
 
 const canvas = document.getElementById("slash-canvas");
@@ -27,10 +27,12 @@ function createFruit() {
   fruit.src = fruitImages[Math.floor(Math.random() * fruitImages.length)];
   fruit.classList.add("fruit");
   fruit.style.left = Math.random() * (gameArea.clientWidth - 60) + "px";
+  
+  let posY = gameArea.clientHeight;
+  fruit.style.top = posY + "px"; // حتما اضافه باشه
+
   gameArea.appendChild(fruit);
 
-  let posY = gameArea.clientHeight;
-  const speed = Math.random() * 2 + 2;
   const gravity = 0.4;
   let velocity = -10 - Math.random() * 5;
 
