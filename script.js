@@ -1,69 +1,164 @@
+const gameArea = document.getElementById("game-area");
+const scoreEl = document.getElementById("score");
+const missedEl = document.getElementById("missed");
+const startBtn = document.getElementById("start-btn");
+const canvas = document.getElementById("slash-canvas");
+const ctx = canvas.getContext("2d");
+
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
+
+let fruits = [];
 let score = 0;
 let missed = 0;
-let gameInterval;
-let fruitInterval;
 let maxMissed = 3;
 let isGameRunning = false;
+let lastTimestamp = 0;
+let mouseTrail = [];
 
-document.getElementById('start-btn').addEventListener('click', startGame);
+startBtn.addEventListener("click", startGame);
 
 function startGame() {
-    if (isGameRunning) return;
-    isGameRunning = true;
-    score = 0;
-    missed = 0;
-    document.getElementById('score').textContent = score;
-    document.getElementById('missed').textContent = missed;
-
-    document.getElementById('start-btn').disabled = true;
-    gameInterval = setInterval(generateFruit, 1000); // میوه‌ها هر یک ثانیه بیایند
+  isGameRunning = true;
+  score = 0;
+  missed = 0;
+  fruits = [];
+  scoreEl.textContent = score;
+  missedEl.textContent = missed;
+  startBtn.disabled = true;
+  spawnFruitLoop();
+  animate();
 }
 
-function generateFruit() {
-    const gameArea = document.getElementById('game-area');
-    const fruit = document.createElement('div');
-    fruit.classList.add('fruit');
-    fruit.style.backgroundColor = getRandomFruitColor();
-    fruit.style.left = `${Math.random() * (gameArea.offsetWidth - 60)}px`; // موقعیت تصادفی
-    fruit.style.top = '0px'; // شروع از بالای صفحه
+function spawnFruitLoop() {
+  if (!isGameRunning) return;
+  spawnFruit();
+  setTimeout(spawnFruitLoop, 1000 + Math.random() * 500);
+}
 
-    gameArea.appendChild(fruit);
+function spawnFruit() {
+  const fruit = {
+    x: Math.random() * (gameArea.clientWidth - 60),
+    y: gameArea.clientHeight,
+    speedY: -7 - Math.random() * 3,
+    speedX: (Math.random() - 0.5) * 5,
+    img: new Image(),
+    width: 60,
+    height: 60,
+    sliced: false,
+  };
 
-    // انیمیشن حرکت میوه به پایین
-    let fruitTop = 0;
-    let fruitFallInterval = setInterval(() => {
-        fruitTop += 5;
-        fruit.style.top = `${fruitTop}px`;
+  const fruitImgs = [
+    'https://i.imgur.com/QYp3B9F.png', // apple
+    'https://i.imgur.com/WJ8gxqN.png', // banana
+    'https://i.imgur.com/T0XnLne.png', // kiwi
+    'https://i.imgur.com/VcJwKiS.png', // strawberry
+  ];
 
-        // اگر میوه به پایین رسید
-        if (fruitTop >= gameArea.offsetHeight) {
-            missed++;
-            document.getElementById('missed').textContent = missed;
-            gameArea.removeChild(fruit);
-            clearInterval(fruitFallInterval);
+  fruit.img.src = fruitImgs[Math.floor(Math.random() * fruitImgs.length)];
+  fruits.push(fruit);
+}
 
-            if (missed >= maxMissed) {
-                gameOver();
-            }
-        }
-    }, 20);
+function animate(timestamp) {
+  if (!isGameRunning) return;
 
-    fruit.addEventListener('click', () => {
+  const dt = timestamp - lastTimestamp;
+  lastTimestamp = timestamp;
+
+  gameArea.innerHTML = '';
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  // به‌روزرسانی میوه‌ها
+  for (let i = 0; i < fruits.length; i++) {
+    const fruit = fruits[i];
+
+    fruit.x += fruit.speedX;
+    fruit.y += fruit.speedY;
+    fruit.speedY += 0.3; // gravity
+
+    if (fruit.y > gameArea.clientHeight && !fruit.sliced) {
+      missed++;
+      missedEl.textContent = missed;
+      fruits.splice(i, 1);
+      i--;
+      if (missed >= maxMissed) {
+        endGame();
+        return;
+      }
+      continue;
+    }
+
+    const fruitEl = document.createElement("img");
+    fruitEl.className = "fruit";
+    fruitEl.src = fruit.img.src;
+    fruitEl.style.left = fruit.x + "px";
+    fruitEl.style.top = fruit.y + "px";
+    fruitEl.style.transform = fruit.sliced ? "scale(0.6) rotate(45deg)" : "";
+    gameArea.appendChild(fruitEl);
+  }
+
+  drawSlash();
+  checkFruitSlash();
+  requestAnimationFrame(animate);
+}
+
+function drawSlash() {
+  ctx.strokeStyle = "red";
+  ctx.lineWidth = 5;
+  ctx.beginPath();
+  for (let i = 0; i < mouseTrail.length; i++) {
+    const point = mouseTrail[i];
+    if (i === 0) ctx.moveTo(point.x, point.y);
+    else ctx.lineTo(point.x, point.y);
+  }
+  ctx.stroke();
+
+  // کاهش طول trail
+  while (mouseTrail.length > 10) {
+    mouseTrail.shift();
+  }
+}
+
+function checkFruitSlash() {
+  fruits.forEach(fruit => {
+    if (fruit.sliced) return;
+
+    for (let i = 0; i < mouseTrail.length; i++) {
+      const point = mouseTrail[i];
+      if (
+        point.x >= fruit.x &&
+        point.x <= fruit.x + fruit.width &&
+        point.y >= fruit.y &&
+        point.y <= fruit.y + fruit.height
+      ) {
+        fruit.sliced = true;
         score++;
-        document.getElementById('score').textContent = score;
-        gameArea.removeChild(fruit);
-        clearInterval(fruitFallInterval);
-    });
+        scoreEl.textContent = score;
+        showJuiceSplash(fruit.x + 30, fruit.y + 30);
+        break;
+      }
+    }
+  });
 }
 
-function gameOver() {
-    clearInterval(gameInterval);
-    isGameRunning = false;
-    alert(`بازی تمام شد! امتیاز شما: ${score}`);
-    document.getElementById('start-btn').disabled = false;
+function showJuiceSplash(x, y) {
+  ctx.beginPath();
+  ctx.arc(x, y, 25, 0, 2 * Math.PI);
+  ctx.fillStyle = 'rgba(255, 0, 0, 0.5)';
+  ctx.fill();
 }
-  
-function getRandomFruitColor() {
-    const fruits = ['#FF6347', '#FFD700', '#32CD32', '#FF69B4', '#98FB98'];
-    return fruits[Math.floor(Math.random() * fruits.length)];
+
+// ثبت حرکت موس یا انگشت
+canvas.addEventListener("mousemove", e => {
+  mouseTrail.push({ x: e.clientX, y: e.clientY });
+});
+canvas.addEventListener("touchmove", e => {
+  const touch = e.touches[0];
+  mouseTrail.push({ x: touch.clientX, y: touch.clientY });
+});
+
+function endGame() {
+  isGameRunning = false;
+  alert(`بازی تمام شد! امتیاز شما: ${score}`);
+  startBtn.disabled = false;
 }
