@@ -1,4 +1,5 @@
-@import url("https://fonts.googleapis.com/css?family=Comfortaa");
+@import url("https://fonts.googleapis.com/css?family=Comfortaa&display=swap");
+
 html,
 body {
   margin: 0;
@@ -8,10 +9,16 @@ body {
   position: relative;
   font-family: "Comfortaa", cursive;
 }
+
 #container {
   width: 100%;
   height: 100%;
+  background: #f0f0f0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
+
 #container #score {
   position: absolute;
   top: 20px;
@@ -20,8 +27,9 @@ body {
   font-size: 10vh;
   transition: transform 0.5s ease;
   color: #334;
-  transform: translatey(-200px) scale(1);
+  transform: translateY(-200px) scale(1);
 }
+
 #container #game {
   position: absolute;
   top: 0;
@@ -29,28 +37,8 @@ body {
   bottom: 0;
   left: 0;
 }
-#container .game-over {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 85%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-}
-#container .game-over * {
-  transition: opacity 0.5s ease, transform 0.5s ease;
-  opacity: 0;
-  transform: translatey(-50px);
-  color: #334;
-}
-#container .game-over h2 {
-  margin: 0;
-  padding: 0;
-  font-size: 40px;
-}
+
+#container .game-over,
 #container .game-ready {
   position: absolute;
   top: 0;
@@ -60,18 +48,36 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: space-around;
+  justify-content: center;
 }
+
+#container .game-over *,
+#container .game-ready * {
+  transition: opacity 0.5s ease, transform 0.5s ease;
+  opacity: 0;
+  transform: translateY(-50px);
+  color: #334;
+}
+
+#container .game-over h2,
+#container .game-ready h2 {
+  margin: 0;
+  padding: 0;
+  font-size: 40px;
+}
+
 #container .game-ready #start-button {
   transition: opacity 0.5s ease, transform 0.5s ease;
   opacity: 0;
-  transform: translatey(-50px);
+  transform: translateY(-50px);
   border: 3px solid #334;
   padding: 10px 20px;
   background-color: transparent;
   color: #334;
   font-size: 30px;
+  cursor: pointer;
 }
+
 #container #instructions {
   position: absolute;
   width: 100%;
@@ -81,27 +87,34 @@ body {
   transition: opacity 0.5s ease, transform 0.5s ease;
   opacity: 0;
 }
+
 #container #instructions.hide {
   opacity: 0 !important;
 }
+
 #container.playing #score,
 #container.resetting #score {
-  transform: translatey(0px) scale(1);
+  transform: translateY(0px) scale(1);
 }
+
 #container.playing #instructions {
   opacity: 1;
 }
+
 #container.ready .game-ready #start-button {
   opacity: 1;
-  transform: translatey(0);
+  transform: translateY(0);
 }
+
 #container.ended #score {
-  transform: translatey(6vh) scale(1.5);
+  transform: translateY(6vh) scale(1.5);
 }
+
 #container.ended .game-over * {
   opacity: 1;
-  transform: translatey(0);
+  transform: translateY(0);
 }
+
 #container.ended .game-over p {
   transition-delay: 0.3s;
 }
