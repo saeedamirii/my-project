@@ -8,21 +8,28 @@
 </head>
 <body>
   <div id="container" class="ready">
-    <div id="score">۰</div>
-    <div id="instructions" class="hide">برای شروع بازی روی دکمه زیر کلیک کنید.</div>
-    <div id="game">
-      <!-- محتویات بازی در اینجا بارگذاری می‌شود -->
-    </div>
+    <div id="score">0</div>
+    <div id="game"></div>
+    
+    <!-- نمایش صفحه شروع بازی -->
     <div class="game-ready">
       <button id="start-button">شروع بازی</button>
     </div>
+
+    <!-- نمایش صفحه پایان بازی -->
     <div class="game-over">
-      <h2>بازی تمام شد!</h2>
-      <p>امتیاز شما: <span id="final-score">۰</span></p>
-      <p>رکورد: <span id="best-score">۰</span></p>
-      <button onclick="game.restartGame()">شروع دوباره</button>
+      <h2>بازی تمام شد</h2>
+      <p>امتیاز شما: <span id="final-score"></span></p>
+    </div>
+
+    <!-- دستورالعمل‌های بازی -->
+    <div id="instructions">
+      راهنمای بازی: بلوک‌ها رو به درستی روی هم قرار بده.
     </div>
   </div>
-  <script src="script.js"></script>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.0/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+  <script src="game.js"></script>
 </body>
 </html>
