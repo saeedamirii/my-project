@@ -1,162 +1,185 @@
-var Game = /** @class */ (function () {
-  function Game() {
-    var _this = this;
-    this.STATES = {
-      LOADING: "loading",
-      PLAYING: "playing",
-      READY: "ready",
-      ENDED: "ended",
-      RESETTING: "resetting",
+class Stage {
+  constructor() {
+    this.render = () => {
+      this.renderer.render(this.scene, this.camera);
     };
-    this.blocks = [];
-    this.state = this.STATES.LOADING;
-    this.stage = new Stage();
-    this.mainContainer = document.getElementById("container");
-    this.scoreContainer = document.getElementById("score");
-    this.startButton = document.getElementById("start-button");
-    this.instructions = document.getElementById("instructions");
-    this.scoreContainer.innerHTML = "0";
-    this.newBlocks = new THREE.Group();
-    this.placedBlocks = new THREE.Group();
-    this.choppedBlocks = new THREE.Group();
-    this.stage.add(this.newBlocks);
-    this.stage.add(this.placedBlocks);
-    this.stage.add(this.choppedBlocks);
-    this.addBlock();
-    this.tick();
-    this.updateState(this.STATES.READY);
-    
-    // load best score from localStorage
-    var bestScore = localStorage.getItem("bestScore");
-    if (bestScore) {
-      this.bestScore = parseInt(bestScore, 10);
-    } else {
-      this.bestScore = 0;
-    }
-    
-    document.addEventListener("keydown", function (e) {
-      if (e.keyCode == 32) _this.onAction();
+
+    this.add = (elem) => {
+      this.scene.add(elem);
+    };
+
+    this.remove = (elem) => {
+      this.scene.remove(elem);
+    };
+
+    this.container = document.getElementById("game");
+
+    this.renderer = new THREE.WebGLRenderer({
+      antialias: true,
+      alpha: false,
     });
-    document.addEventListener("click", function (e) {
-      _this.onAction();
-    });
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.renderer.setClearColor("#D0CBC7", 1);
+    this.container.appendChild(this.renderer.domElement);
+
+    this.scene = new THREE.Scene();
+
+    const aspect = window.innerWidth / window.innerHeight;
+    const d = 20;
+    this.camera = new THREE.OrthographicCamera(
+      -d * aspect,
+      d * aspect,
+      d,
+      -d,
+      -100,
+      1000
+    );
+    this.camera.position.set(2, 2, 2);
+    this.camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    this.light = new THREE.DirectionalLight(0xffffff, 0.5);
+    this.light.position.set(0, 499, 0);
+    this.scene.add(this.light);
+
+    this.softLight = new THREE.AmbientLight(0xffffff, 0.4);
+    this.scene.add(this.softLight);
+
+    window.addEventListener("resize", () => this.onResize());
+    this.onResize();
   }
 
-  Game.prototype.updateState = function (newState) {
-    for (var key in this.STATES)
-      this.mainContainer.classList.remove(this.STATES[key]);
-    this.mainContainer.classList.add(newState);
-    this.state = newState;
-  };
-
-  Game.prototype.onAction = function () {
-    switch (this.state) {
-      case this.STATES.READY:
-        this.startGame();
-        break;
-      case this.STATES.PLAYING:
-        this.placeBlock();
-        break;
-      case this.STATES.ENDED:
-        this.restartGame();
-        break;
-    }
-  };
-
-  Game.prototype.startGame = function () {
-    if (this.state != this.STATES.PLAYING) {
-      this.scoreContainer.innerHTML = "0";
-      this.updateState(this.STATES.PLAYING);
-      this.addBlock();
-    }
-  };
-
-  Game.prototype.restartGame = function () {
-    var _this = this;
-    this.updateState(this.STATES.RESETTING);
-    var oldBlocks = this.placedBlocks.children;
-    var removeSpeed = 0.2;
-    var delayAmount = 0.02;
-    var _loop_1 = function (i) {
-      TweenLite.to(oldBlocks[i].scale, removeSpeed, {
-        x: 0,
-        y: 0,
-        z: 0,
-        delay: (oldBlocks.length - i) * delayAmount,
-        ease: Power1.easeIn,
-        onComplete: function () {
-          return _this.placedBlocks.remove(oldBlocks[i]);
-        },
-      });
-      TweenLite.to(oldBlocks[i].rotation, removeSpeed, {
-        y: 0.5,
-        delay: (oldBlocks.length - i) * delayAmount,
-        ease: Power1.easeIn,
-      });
-    };
-    for (var i = 0; i < oldBlocks.length; i++) {
-      _loop_1(i);
-    }
-    var cameraMoveSpeed = removeSpeed * 2 + oldBlocks.length * delayAmount;
-    this.stage.setCamera(2, cameraMoveSpeed);
-    var countdown = { value: this.blocks.length - 1 };
-    TweenLite.to(countdown, cameraMoveSpeed, {
-      value: 0,
-      onUpdate: function () {
-        _this.scoreContainer.innerHTML = String(Math.round(countdown.value));
-      },
+  setCamera(y, speed = 0.3) {
+    TweenLite.to(this.camera.position, speed, {
+      y: y + 4,
+      ease: Power1.easeInOut,
     });
-    this.blocks = this.blocks.slice(0, 1);
-    setTimeout(function () {
-      _this.startGame();
-    }, cameraMoveSpeed * 1000);
-  };
+    TweenLite.to(this.camera.lookAt, speed, { y: y, ease: Power1.easeInOut });
+  }
 
-  Game.prototype.placeBlock = function () {
-    var _this = this;
-    var currentBlock = this.blocks[this.blocks.length - 1];
-    var newBlocks = currentBlock.place();
-    this.newBlocks.remove(currentBlock.mesh);
-    if (newBlocks.placed) this.placedBlocks.add(newBlocks.placed);
-    if (newBlocks.chopped) {
-      this.choppedBlocks.add(newBlocks.chopped);
+  onResize() {
+    const viewSize = 30;
+    this.renderer.setSize(window.innerWidth, window.innerHeight);
+    this.camera.left = window.innerWidth / -viewSize;
+    this.camera.right = window.innerWidth / viewSize;
+    this.camera.top = window.innerHeight / viewSize;
+    this.camera.bottom = window.innerHeight / -viewSize;
+    this.camera.updateProjectionMatrix();
+  }
+}
+
+class Block {
+  constructor(block) {
+    this.STATES = { ACTIVE: "active", STOPPED: "stopped", MISSED: "missed" };
+    this.MOVE_AMOUNT = 12;
+    this.dimension = { width: 0, height: 0, depth: 0 };
+    this.position = { x: 0, y: 0, z: 0 };
+    this.targetBlock = block;
+    this.index = (this.targetBlock ? this.targetBlock.index : 0) + 1;
+    this.workingPlane = this.index % 2 ? "x" : "z";
+    this.workingDimension = this.index % 2 ? "width" : "depth";
+
+    this.dimension.width = this.targetBlock ? this.targetBlock.dimension.width : 10;
+    this.dimension.height = this.targetBlock ? this.targetBlock.dimension.height : 2;
+    this.dimension.depth = this.targetBlock ? this.targetBlock.dimension.depth : 10;
+
+    this.position.x = this.targetBlock ? this.targetBlock.position.x : 0;
+    this.position.y = this.dimension.height * this.index;
+    this.position.z = this.targetBlock ? this.targetBlock.position.z : 0;
+
+    this.colorOffset = this.targetBlock ? this.targetBlock.colorOffset : Math.round(Math.random() * 100);
+
+    if (!this.targetBlock) {
+      this.color = 0x333344;
+    } else {
+      let offset = this.index + this.colorOffset;
+      let r = Math.sin(0.3 * offset) * 55 + 200;
+      let g = Math.sin(0.3 * offset + 2) * 55 + 200;
+      let b = Math.sin(0.3 * offset + 4) * 55 + 200;
+      this.color = new THREE.Color(r / 255, g / 255, b / 255);
     }
-    this.addBlock();
-  };
 
-  Game.prototype.addBlock = function () {
-    var lastBlock = this.blocks[this.blocks.length - 1];
-    if (lastBlock && lastBlock.state == lastBlock.STATES.MISSED) {
-      return this.endGame();
-    }
-    this.scoreContainer.innerHTML = String(this.blocks.length - 1);
-    var newKidOnTheBlock = new Block(lastBlock);
-    this.newBlocks.add(newKidOnTheBlock.mesh);
-    this.blocks.push(newKidOnTheBlock);
-    this.stage.setCamera(this.blocks.length * 2);
+    this.state = this.index > 1 ? this.STATES.ACTIVE : this.STATES.STOPPED;
+    this.speed = -0.1 - this.index * 0.005;
+    if (this.speed < -4) this.speed = -4;
+    this.direction = this.speed;
 
-    // Update best score if necessary
-    if (this.blocks.length - 1 > this.bestScore) {
-      this.bestScore = this.blocks.length - 1;
-      localStorage.setItem("bestScore", String(this.bestScore));
-    }
-  };
+    const geometry = new THREE.BoxGeometry(
+      this.dimension.width,
+      this.dimension.height,
+      this.dimension.depth
+    );
+    geometry.applyMatrix(new THREE.Matrix4().makeTranslation(
+      this.dimension.width / 2,
+      this.dimension.height / 2,
+      this.dimension.depth / 2
+    ));
 
-  Game.prototype.endGame = function () {
-    this.updateState(this.STATES.ENDED);
-    alert(`بازی تمام شد! رکورد شما: ${this.bestScore}`);
-  };
-
-  Game.prototype.tick = function () {
-    var _this = this;
-    this.blocks[this.blocks.length - 1].tick();
-    this.stage.render();
-    requestAnimationFrame(function () {
-      _this.tick();
+    this.material = new THREE.MeshToonMaterial({
+      color: this.color,
+      shading: THREE.FlatShading,
     });
-  };
+    this.mesh = new THREE.Mesh(geometry, this.material);
+    this.mesh.position.set(this.position.x, this.position.y, this.position.z);
+  }
 
-  return Game;
-})();
+  move() {
+    this[this.workingPlane] += this.direction;
 
-var game = new Game();
+    if (this[this.workingPlane] <= -15) {
+      this.state = this.STATES.MISSED;
+    }
+
+    if (this[this.workingPlane] >= this.dimension[this.workingDimension]) {
+      this[this.workingPlane] = this.dimension[this.workingDimension];
+      this.state = this.STATES.STOPPED;
+    }
+  }
+
+  reset() {
+    this.state = this.STATES.ACTIVE;
+    this.position = { x: 0, y: 0, z: 0 };
+    this.speed = -0.1;
+    this.mesh.position.set(this.position.x, this.position.y, this.position.z);
+  }
+}
+
+let stage;
+let blocks = [];
+let currentBlock = null;
+let score = 0;
+
+function startGame() {
+  stage = new Stage();
+  createNewBlock();
+  document.getElementById("start-button").style.display = 'none';
+  document.getElementById("instructions").style.display = 'block';
+
+  function createNewBlock() {
+    if (currentBlock) {
+      blocks.push(currentBlock);
+    }
+    currentBlock = new Block(blocks[blocks.length - 1]);
+    stage.add(currentBlock.mesh);
+  }
+
+  function gameLoop() {
+    if (currentBlock) {
+      currentBlock.move();
+      if (currentBlock.state === currentBlock.STATES.MISSED) {
+        endGame();
+      }
+    }
+    requestAnimationFrame(gameLoop);
+    stage.render();
+  }
+
+  gameLoop();
+}
+
+function endGame() {
+  document.getElementById("final-score").innerText = score;
+  document.getElementById("container").classList.add('ended');
+  document.getElementById("score").innerText = "بازی تمام شد";
+}
+
+document.getElementById("start-button").addEventListener("click", startGame);
