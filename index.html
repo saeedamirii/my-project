@@ -1,43 +1,28 @@
 <!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-    <meta name="viewport" content="width=device-width,user-scalable=no" />
-    <script src="https://codepen.io/steveg3003/pen/zBVakw"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r83/three.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/latest/TweenMax.min.js"></script>
-    <title>Talha - Tower Blocks</title>
-    <link rel="icon" href="https://i.ibb.co/M6KTWnf/pic.jpg" />
-
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- Also uploaded the demo of this code in a gif : https://c.tenor.com/x8v1oNUOmg4AAAAd/tenor.gif-->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
-
-    <!-- 👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻👇🏻-->
-    <!-- More html-css-js Games Calculators Games Cards Elements Projects on https://www.github.com/he-is-talha -->
-    <!-- 👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻👆🏻-->
-
-    <link rel="stylesheet" href="style.css" />
-  </head>
-  <body>
-    <script src="script.js" async></script>
-    <div id="container">
-      <div id="game"></div>
-      <div id="score">0</div>
-      <div id="instructions">
-        Click (or press the spacebar) to place the block
-      </div>
-      <div class="game-over">
-        <h2>Game Over</h2>
-        <p>You did great, you're the best.</p>
-        <p>Click or spacebar to start again</p>
-      </div>
-      <div class="game-ready">
-        <div id="start-button">Start</div>
-        <div></div>
-      </div>
+<html lang="fa">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>بازی</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <div id="container" class="ready">
+    <div id="score">۰</div>
+    <div id="instructions" class="hide">برای شروع بازی روی دکمه زیر کلیک کنید.</div>
+    <div id="game">
+      <!-- محتویات بازی در اینجا بارگذاری می‌شود -->
     </div>
-    <footer>Project By -: TANAY PADAR</footer>
-  </body>
+    <div class="game-ready">
+      <button id="start-button">شروع بازی</button>
+    </div>
+    <div class="game-over">
+      <h2>بازی تمام شد!</h2>
+      <p>امتیاز شما: <span id="final-score">۰</span></p>
+      <p>رکورد: <span id="best-score">۰</span></p>
+      <button onclick="game.restartGame()">شروع دوباره</button>
+    </div>
+  </div>
+  <script src="script.js"></script>
+</body>
 </html>
