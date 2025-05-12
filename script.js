@@ -1,3 +1,19 @@
+// ذخیره رکورد بازی در LocalStorage
+function saveHighScore(score) {
+  const savedScore = localStorage.getItem("highScore");
+  if (!savedScore || score > parseInt(savedScore)) {
+    localStorage.setItem("highScore", score);
+  }
+}
+
+// دریافت رکورد قبلی از LocalStorage
+function getHighScore() {
+  const savedScore = localStorage.getItem("highScore");
+  return savedScore ? parseInt(savedScore) : 0;
+}
+
+
+
 console.clear();
 var Stage = /** @class */ (function () {
   function Stage() {
@@ -403,9 +419,24 @@ var Game = /** @class */ (function () {
     this.stage.setCamera(this.blocks.length * 2);
     if (this.blocks.length >= 5) this.instructions.classList.add("hide");
   };
-  Game.prototype.endGame = function () {
-    this.updateState(this.STATES.ENDED);
-  };
+  
+
+
+Game.prototype.endGame = function () {
+  // دریافت امتیاز نهایی بازی
+  const finalScore = this.blocks.length - 1; // امتیاز نهایی بازی
+
+  // ذخیره رکورد جدید
+  saveHighScore(finalScore);
+
+  // نمایش رکورد قبلی در کنسول (اختیاری)
+  console.log("رکورد قبلی: " + getHighScore());
+
+  this.updateState(this.STATES.ENDED);
+};
+
+  
+  
   Game.prototype.tick = function () {
     var _this = this;
     this.blocks[this.blocks.length - 1].tick();
