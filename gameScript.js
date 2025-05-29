@@ -25,9 +25,13 @@ $(document).ready(function() {
         'explorer_4x4': { id: 'explorer_4x4', name: 'کاشف باتجربه',     description: 'حالت بازی 4x4 را کامل کنید.',                              icon: '🗺️', unlocked: false, check: (mode) => mode === '4x4' },
         'master_6x6':   { id: 'master_6x6',   name: 'استاد بزرگ حافظه',  description: 'حالت بازی 6x6 را کامل کنید.',                              icon: '🏆', unlocked: false, check: (mode) => mode === '6x6' },
         'combo_3':      { id: 'combo_3',      name: 'ضربات متوالی',      description: '۳ جفت کارت را پشت سر هم و بدون اشتباه پیدا کنید.',        icon: '⚡', unlocked: false, check: () => consecutiveMatches >= 3 },
-        'efficient_4x4':{ id: 'efficient_4x4',name: 'حرکات حساب‌شده',   description: 'حالت بازی 4x4 را با حداکثر ۱۰ حرکت کامل کنید.',          icon: '✨', unlocked: false, check: (mode, mvs) => mode === '4x4' && mvs <= 10 },
         'loyal_player': { id: 'loyal_player', name: 'بازیکن وفادار',      description: 'در مجموع ۵ بازی کامل انجام دهید (برنده شوید).',             icon: '💪', unlocked: false, check: () => totalGamesWon >= 5 },
-        'collector_50': { id: 'collector_50', name: 'کلکسیونر کارت',     description: 'در تمام بازی‌های خود مجموعاً ۵۰ جفت کارت صحیح پیدا کنید.', icon: '🃏', unlocked: false, check: () => totalPairsEverFound >= 50 }
+        'collector_50': { id: 'collector_50', name: 'کلکسیونر کارت',     description: 'در تمام بازی‌های خود مجموعاً ۵۰ جفت کارت صحیح پیدا کنید.', icon: '🃏', unlocked: false, check: () => totalPairsEverFound >= 50 },
+        // New move-based achievements
+        'flawless_3x4': { id: 'flawless_3x4', name: 'بازی بی‌نقص (کوچک)', description: 'حالت 3x4 را با حداکثر ۶ حرکت (بدون خطا) کامل کنید.', icon: '💎', unlocked: false, check: (mode, mvs) => mode === '3x4' && mvs <= 6 },
+        'golden_4x4':   { id: 'golden_4x4',   name: 'حرکات طلایی (متوسط)',description: 'حالت 4x4 را با حداکثر ۹ حرکت (تا ۱ خطا) کامل کنید.', icon: '🌟', unlocked: false, check: (mode, mvs) => mode === '4x4' && mvs <= 9 },
+        'strategist_5x6':{ id: 'strategist_5x6',name: 'استراتژیست برتر (بزرگ)', description: 'حالت 5x6 را با حداکثر ۱۸ حرکت (تا ۳ خطا) کامل کنید.', icon: '🧭', unlocked: false, check: (mode, mvs) => mode === '5x6' && mvs <= 18 },
+        'precision_6x6':{ id: 'precision_6x6', name: 'چالش دقت (حرفه‌ای)',description: 'حالت 6x6 را با حداکثر ۲۲ حرکت (تا ۴ خطا) کامل کنید.', icon: '🎯', unlocked: false, check: (mode, mvs) => mode === '6x6' && mvs <= 22 }
     };
 
     let consecutiveMatches = 0;
@@ -38,7 +42,7 @@ $(document).ready(function() {
         const savedAchievements = JSON.parse(localStorage.getItem('memoryGameAchievementsStatus'));
         if (savedAchievements) {
             for (const id in achievements) {
-                if (savedAchievements[id] !== undefined) {
+                if (achievements.hasOwnProperty(id) && savedAchievements[id] !== undefined) {
                     achievements[id].unlocked = savedAchievements[id];
                 }
             }
@@ -50,7 +54,9 @@ $(document).ready(function() {
     function saveStatsAndAchievements() {
         let statuses = {};
         for (const id in achievements) {
-            statuses[id] = achievements[id].unlocked;
+            if (achievements.hasOwnProperty(id)) {
+                statuses[id] = achievements[id].unlocked;
+            }
         }
         localStorage.setItem('memoryGameAchievementsStatus', JSON.stringify(statuses));
         localStorage.setItem('memoryGameTotalGamesWon', totalGamesWon);
@@ -70,7 +76,6 @@ $(document).ready(function() {
             achievements[id].unlocked = true;
             showToast(`مدال "${achievements[id].name}" کسب شد! ${achievements[id].icon}`);
             saveStatsAndAchievements(); 
-            // If achievements modal is open, refresh it
             if (overlay.is(':visible') && $('#achievements-list-container').length) {
                  displayAchievements();
             }
@@ -78,18 +83,18 @@ $(document).ready(function() {
     }
 
     function checkAllAchievements(checkTime, param1, param2) {
-        // checkTime can be 'gameEnd', 'pairFound', 'gameStart'
         for (const id in achievements) {
-            if (!achievements[id].unlocked) {
+            if (achievements.hasOwnProperty(id) && !achievements[id].unlocked) {
                 let conditionMet = false;
-                if (checkTime === 'gameEnd' && (id === 'first_win' || id === 'explorer_4x4' || id === 'master_6x6' || id === 'efficient_4x4' || id === 'loyal_player')) {
-                    // param1 is mode, param2 is moves
-                    conditionMet = achievements[id].check(param1, param2);
-                } else if (checkTime === 'pairFound' && (id === 'combo_3' || id === 'collector_50')) {
-                    conditionMet = achievements[id].check();
+                try {
+                    if (checkTime === 'gameEnd' && (achievements[id].check.length === 0 || achievements[id].check.length === 1 || achievements[id].check.length === 2) ) { // For achievements checked at game end
+                        conditionMet = achievements[id].check(param1, param2); // param1 is mode, param2 is moves
+                    } else if (checkTime === 'pairFound' && achievements[id].check.length === 0) { // For achievements checked on pair found
+                        conditionMet = achievements[id].check();
+                    }
+                } catch (e) {
+                    console.error("Error checking achievement:", id, e);
                 }
-                // Add other checkTimes if needed
-
                 if (conditionMet) {
                     unlockAchievement(id);
                 }
@@ -100,15 +105,17 @@ $(document).ready(function() {
     function displayAchievements() {
         let listHTML = '<div id="achievements-list-container"><ul id="achievements-list">';
         for (const id in achievements) {
-            const ach = achievements[id];
-            listHTML += `
-                <li class="achievement-item ${ach.unlocked ? 'unlocked' : 'locked'}">
-                    <span class="icon">${ach.icon}</span>
-                    <div class="details">
-                        <h4>${ach.name}</h4>
-                        <p>${ach.description}</p>
-                    </div>
-                </li>`;
+            if (achievements.hasOwnProperty(id)) {
+                const ach = achievements[id];
+                listHTML += `
+                    <li class="achievement-item ${ach.unlocked ? 'unlocked' : 'locked'}">
+                        <span class="icon">${ach.icon}</span>
+                        <div class="details">
+                            <h4>${ach.name}</h4>
+                            <p>${ach.description}</p>
+                        </div>
+                    </li>`;
+            }
         }
         listHTML += '</ul></div>';
         
@@ -117,8 +124,7 @@ $(document).ready(function() {
     }
     
     achievementsButton.on('click', displayAchievements);
-    // Use event delegation for close button inside modal, as content is dynamic
-    modalContent.on('click', '#close-modal-button', function() {
+    modalContent.on('click', '#close-modal-button', function() { // Event delegation for close button
         overlay.fadeOut(300);
     });
 
@@ -162,17 +168,12 @@ $(document).ready(function() {
         }
     }
     const savedTheme = localStorage.getItem('memoryGameTheme');
-    applyTheme(savedTheme || 'night'); // Apply saved theme or default to night
+    applyTheme(savedTheme || 'night');
 
     themeToggleButton.on('click', function() {
         let currentTheme = bodyElement.hasClass('day-mode') ? 'day' : 'night';
-        if (currentTheme === 'day') {
-            applyTheme('night');
-            localStorage.setItem('memoryGameTheme', 'night');
-        } else {
-            applyTheme('day');
-            localStorage.setItem('memoryGameTheme', 'day');
-        }
+        applyTheme(currentTheme === 'day' ? 'night' : 'day');
+        localStorage.setItem('memoryGameTheme', bodyElement.hasClass('day-mode') ? 'day' : 'night');
     });
 
     // --- Game Logic ---
@@ -183,21 +184,18 @@ $(document).ready(function() {
                 <ul>
                     <li>با برگرداندن بلوک‌ها، جفت‌های مشابه را پیدا کنید.</li>
                     <li>برای برگرداندن یک بلوک، روی آن کلیک کنید.</li>
-                    <li>اگر دو بلوک انتخاب شده مشابه نباشند، به حالت اول برمی‌گردند.</li>
+                    <li>اگر دو بلوک انتخاب شده مشابه نباشند، به حالت اول برمی‌گردند و ۲ حرکت برای شما ثبت می‌شود. انتخاب درست ۱ حرکت هزینه دارد.</li>
                 </ul>
                 <p style="font-size:1.1em; margin-top: 20px; margin-bottom: 15px;">برای شروع، یکی از حالت‌های زیر را انتخاب کنید:</p>
             </div>
             <div id="mode-selection">
-                <button data-mode="3x4">3 x 4</button>
-                <button data-mode="4x4">4 x 4</button>
-                <button data-mode="4x5">4 x 5</button>
-                <button data-mode="5x6">5 x 6</button>
+                <button data-mode="3x4">3 x 4</button> <button data-mode="4x4">4 x 4</button>
+                <button data-mode="4x5">4 x 5</button> <button data-mode="5x6">5 x 6</button>
                 <button data-mode="6x6">6 x 6</button>
             </div>`;
-        modalContent.html(modalHTML); // Set content
+        modalContent.html(modalHTML);
         overlay.fadeIn(300);
     }
-    // Use event delegation for mode selection buttons as they are added dynamically
     modalContent.on('click', '#mode-selection button', function() {
         const modeParts = $(this).data('mode').split('x');
         const r = parseInt(modeParts[0]);
@@ -206,49 +204,33 @@ $(document).ready(function() {
         startGame(r, l);
     });
 
-
     function resetGameStats() {
-        moves = 0;
-        matchesFound = 0;
-        seconds = 0;
-        minutes = 0;
-        currentGameTimeInSeconds = 0;
-        consecutiveMatches = 0; // Reset for new game
+        moves = 0; matchesFound = 0; seconds = 0; minutes = 0; currentGameTimeInSeconds = 0;
+        consecutiveMatches = 0;
         $('#moves-display').text("حرکت‌ها: ۰");
         $('#time-display').text("زمان: ۰۰:۰۰");
         if (timerInterval) clearInterval(timerInterval);
-        lockBoard = false;
-        firstCard = null;
-        secondCard = null;
+        lockBoard = false; firstCard = null; secondCard = null;
     }
 
     function startTimer() {
         timerInterval = setInterval(function() {
-            seconds++;
-            currentGameTimeInSeconds++;
-            if (seconds === 60) {
-                minutes++;
-                seconds = 0;
-            }
+            seconds++; currentGameTimeInSeconds++;
+            if (seconds === 60) { minutes++; seconds = 0; }
             $('#time-display').text(`زمان: ${formatTime(currentGameTimeInSeconds)}`);
         }, 1000);
     }
 
     function createBoard(rows, cols) {
         gameBoardElement.html('');
-        gameBoardElement.attr('data-cols', cols);
+        gameBoardElement.attr('data-cols', cols); // For responsive CSS
         let itemIndex = 0;
         for (let i = 0; i < rows; i++) {
             const tr = $('<tr></tr>');
             for (let j = 0; j < cols; j++) {
                 const td = $('<td></td>');
-                td.html(`
-                    <div class="card-inner" data-emoji="${currentEmojis[itemIndex]}">
-                        <div class="card-front"></div>
-                        <div class="card-back"><p>${currentEmojis[itemIndex]}</p></div>
-                    </div>`);
-                tr.append(td);
-                itemIndex++;
+                td.html(`<div class="card-inner" data-emoji="${currentEmojis[itemIndex]}"><div class="card-front"></div><div class="card-back"><p>${currentEmojis[itemIndex]}</p></div></div>`);
+                tr.append(td); itemIndex++;
             }
             gameBoardElement.append(tr);
         }
@@ -259,26 +241,31 @@ $(document).ready(function() {
         resetGameStats();
         totalPairs = (r * l) / 2;
         let availableEmojis = [...em]; 
-        for (let i = availableEmojis.length - 1; i > 0; i--) {
+        for (let i = availableEmojis.length - 1; i > 0; i--) { // Shuffle available emojis
             const j = Math.floor(Math.random() * (i + 1));
             [availableEmojis[i], availableEmojis[j]] = [availableEmojis[j], availableEmojis[i]];
         }
         const selectedBaseEmojis = availableEmojis.slice(0, totalPairs);
-        if (selectedBaseEmojis.length < totalPairs) {
-            console.error("Not enough unique emojis!");
+        if (selectedBaseEmojis.length < totalPairs) { // Fallback if not enough unique emojis
+            console.warn("Not enough unique emojis for the selected grid size. Repeating some.");
             let tempEmojis = [];
             for(let i = 0; i < totalPairs; i++) tempEmojis.push(availableEmojis[i % availableEmojis.length]);
             currentEmojis = [...tempEmojis, ...tempEmojis];
         } else {
             currentEmojis = [...selectedBaseEmojis, ...selectedBaseEmojis];
         }
-        for (let i = currentEmojis.length - 1; i > 0; i--) {
+        for (let i = currentEmojis.length - 1; i > 0; i--) { // Shuffle the game deck
             const j = Math.floor(Math.random() * (i + 1));
             [currentEmojis[i], currentEmojis[j]] = [currentEmojis[j], currentEmojis[i]];
         }
         createBoard(r, l);
         startTimer();
         overlay.fadeOut(300);
+    }
+    
+    function incrementMoves(count = 1) { // Now takes a count argument
+        moves += count;
+        $('#moves-display').text(`حرکت‌ها: ${String(moves).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d])}`);
     }
 
     function handleCardClick() {
@@ -290,20 +277,17 @@ $(document).ready(function() {
         }
         secondCard = $(this);
         lockBoard = true;
-        incrementMoves();
+        // Moves are now incremented in checkForMatch
         checkForMatch();
     }
 
-    function incrementMoves() {
-        moves++;
-        $('#moves-display').text(`حرکت‌ها: ${String(moves).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d])}`);
-    }
-
     function checkForMatch() {
-        emojisMatch = firstCard.data('emoji') === secondCard.data('emoji');
+        const emojisMatch = firstCard.data('emoji') === secondCard.data('emoji');
         if (emojisMatch) {
+            incrementMoves(1); // Correct match costs 1 move
             disableCards();
         } else {
+            incrementMoves(2); // Incorrect match costs 2 moves (1 attempt + 1 penalty)
             unflipCards();
         }
     }
@@ -314,8 +298,8 @@ $(document).ready(function() {
         matchesFound++;
         consecutiveMatches++;
         totalPairsEverFound++;
-        saveStatsAndAchievements(); // Save progress for achievements like collector
-        checkAllAchievements('pairFound'); // Check for combo or collector achievements
+        saveStatsAndAchievements(); // Save progress for achievements
+        checkAllAchievements('pairFound');
         resetTurn();
         if (matchesFound === totalPairs) {
             endGame();
@@ -323,7 +307,7 @@ $(document).ready(function() {
     }
 
     function unflipCards() {
-        consecutiveMatches = 0; // Reset combo
+        consecutiveMatches = 0; // Reset combo on mismatch
         setTimeout(() => {
             if (firstCard) firstCard.removeClass('is-flipped');
             if (secondCard) secondCard.removeClass('is-flipped');
@@ -338,8 +322,8 @@ $(document).ready(function() {
 
     function endGame() {
         clearInterval(timerInterval);
-        totalGamesWon++; // Increment games won
-        saveStatsAndAchievements(); // Save this stat before checking achievements
+        totalGamesWon++; 
+        saveStatsAndAchievements(); 
 
         const timeTakenDisplayString = formatTime(currentGameTimeInSeconds);
         const newRecordMessage = updateHighScore(gameMode, moves, currentGameTimeInSeconds);
@@ -351,7 +335,6 @@ $(document).ready(function() {
         }
         const movesDisplayString = String(moves).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
-        // Check achievements related to game end
         checkAllAchievements('gameEnd', gameMode, moves); 
 
         const modalHTML = `
@@ -375,4 +358,3 @@ $(document).ready(function() {
     loadStatsAndAchievements();
     showInitialModal();
 });
-            
