@@ -13,11 +13,31 @@ $(document).ready(function() {
 
     const themeToggleButton = $('#theme-toggle-button');
     const achievementsButton = $('#achievements-button');
+    const musicToggleButton = $('#music-toggle-button');
     const bodyElement = $('body');
     const gameBoardElement = $('#game-board');
     const toastNotification = $('#toast-notification');
     const modalContent = $('#modal-content');
     const overlay = $('#overlay');
+    const backgroundMusic = document.getElementById('background-music');
+
+    // --- Music Toggle Logic ---
+    if (musicToggleButton.length && backgroundMusic) {
+        musicToggleButton.on('click', function() {
+            if (backgroundMusic.paused) {
+                backgroundMusic.play()
+                    .then(() => {
+                        musicToggleButton.text('⏸️');
+                        musicToggleButton.attr('title', 'قطع موزیک');
+                    })
+                    .catch(error => console.error("Error playing music:", error));
+            } else {
+                backgroundMusic.pause();
+                musicToggleButton.text('🎵');
+                musicToggleButton.attr('title', 'پخش موزیک');
+            }
+        });
+    }
 
     // --- Achievements Logic ---
     let achievements = {
@@ -27,7 +47,6 @@ $(document).ready(function() {
         'combo_3':      { id: 'combo_3',      name: 'ضربات متوالی',      description: '۳ جفت کارت را پشت سر هم و بدون اشتباه پیدا کنید.',        icon: '⚡', unlocked: false, check: () => consecutiveMatches >= 3 },
         'loyal_player': { id: 'loyal_player', name: 'بازیکن وفادار',      description: 'در مجموع ۵ بازی کامل انجام دهید (برنده شوید).',             icon: '💪', unlocked: false, check: () => totalGamesWon >= 5 },
         'collector_50': { id: 'collector_50', name: 'کلکسیونر کارت',     description: 'در تمام بازی‌های خود مجموعاً ۵۰ جفت کارت صحیح پیدا کنید.', icon: '🃏', unlocked: false, check: () => totalPairsEverFound >= 50 },
-        // New move-based achievements
         'flawless_3x4': { id: 'flawless_3x4', name: 'بازی بی‌نقص (کوچک)', description: 'حالت 3x4 را با حداکثر ۶ حرکت (بدون خطا) کامل کنید.', icon: '💎', unlocked: false, check: (mode, mvs) => mode === '3x4' && mvs <= 6 },
         'golden_4x4':   { id: 'golden_4x4',   name: 'حرکات طلایی (متوسط)',description: 'حالت 4x4 را با حداکثر ۹ حرکت (تا ۱ خطا) کامل کنید.', icon: '🌟', unlocked: false, check: (mode, mvs) => mode === '4x4' && mvs <= 9 },
         'strategist_5x6':{ id: 'strategist_5x6',name: 'استراتژیست برتر (بزرگ)', description: 'حالت 5x6 را با حداکثر ۱۸ حرکت (تا ۳ خطا) کامل کنید.', icon: '🧭', unlocked: false, check: (mode, mvs) => mode === '5x6' && mvs <= 18 },
@@ -76,7 +95,7 @@ $(document).ready(function() {
             achievements[id].unlocked = true;
             showToast(`مدال "${achievements[id].name}" کسب شد! ${achievements[id].icon}`);
             saveStatsAndAchievements(); 
-            if (overlay.is(':visible') && $('#achievements-list-container').length) {
+            if (overlay.is(':visible') && $('#achievements-list-container').length) { // Check if achievements modal is open
                  displayAchievements();
             }
         }
@@ -86,14 +105,14 @@ $(document).ready(function() {
         for (const id in achievements) {
             if (achievements.hasOwnProperty(id) && !achievements[id].unlocked) {
                 let conditionMet = false;
-                try {
-                    if (checkTime === 'gameEnd' && (achievements[id].check.length === 0 || achievements[id].check.length === 1 || achievements[id].check.length === 2) ) { // For achievements checked at game end
+                try { // Added try-catch for safety if a check function is malformed
+                    if (checkTime === 'gameEnd') { 
                         conditionMet = achievements[id].check(param1, param2); // param1 is mode, param2 is moves
-                    } else if (checkTime === 'pairFound' && achievements[id].check.length === 0) { // For achievements checked on pair found
-                        conditionMet = achievements[id].check();
+                    } else if (checkTime === 'pairFound') { 
+                        conditionMet = achievements[id].check(); // For achievements like combo or total pairs
                     }
                 } catch (e) {
-                    console.error("Error checking achievement:", id, e);
+                    console.error("Error checking achievement:", id, e, "Check function:", achievements[id].check);
                 }
                 if (conditionMet) {
                     unlockAchievement(id);
@@ -124,7 +143,7 @@ $(document).ready(function() {
     }
     
     achievementsButton.on('click', displayAchievements);
-    modalContent.on('click', '#close-modal-button', function() { // Event delegation for close button
+    modalContent.on('click', '#close-modal-button', function() { 
         overlay.fadeOut(300);
     });
 
@@ -167,13 +186,14 @@ $(document).ready(function() {
             themeToggleButton.attr('title', 'تغییر به تم روز');
         }
     }
-    const savedTheme = localStorage.getItem('memoryGameTheme');
-    applyTheme(savedTheme || 'night');
+    const initialTheme = localStorage.getItem('memoryGameTheme') || 'night'; // Default to night if nothing saved
+    applyTheme(initialTheme); 
 
     themeToggleButton.on('click', function() {
         let currentTheme = bodyElement.hasClass('day-mode') ? 'day' : 'night';
-        applyTheme(currentTheme === 'day' ? 'night' : 'day');
-        localStorage.setItem('memoryGameTheme', bodyElement.hasClass('day-mode') ? 'day' : 'night');
+        const newTheme = (currentTheme === 'day' ? 'night' : 'day');
+        applyTheme(newTheme);
+        localStorage.setItem('memoryGameTheme', newTheme);
     });
 
     // --- Game Logic ---
@@ -184,7 +204,7 @@ $(document).ready(function() {
                 <ul>
                     <li>با برگرداندن بلوک‌ها، جفت‌های مشابه را پیدا کنید.</li>
                     <li>برای برگرداندن یک بلوک، روی آن کلیک کنید.</li>
-                    <li>اگر دو بلوک انتخاب شده مشابه نباشند، به حالت اول برمی‌گردند و ۲ حرکت برای شما ثبت می‌شود. انتخاب درست ۱ حرکت هزینه دارد.</li>
+                    <li>انتخاب درست ۱ حرکت و انتخاب اشتباه ۲ حرکت برای شما ثبت می‌کند.</li>
                 </ul>
                 <p style="font-size:1.1em; margin-top: 20px; margin-bottom: 15px;">برای شروع، یکی از حالت‌های زیر را انتخاب کنید:</p>
             </div>
@@ -193,10 +213,10 @@ $(document).ready(function() {
                 <button data-mode="4x5">4 x 5</button> <button data-mode="5x6">5 x 6</button>
                 <button data-mode="6x6">6 x 6</button>
             </div>`;
-        modalContent.html(modalHTML);
+        modalContent.html(modalHTML); 
         overlay.fadeIn(300);
     }
-    modalContent.on('click', '#mode-selection button', function() {
+    modalContent.on('click', '#mode-selection button', function() { // Event delegation
         const modeParts = $(this).data('mode').split('x');
         const r = parseInt(modeParts[0]);
         const l = parseInt(modeParts[1]);
@@ -206,7 +226,7 @@ $(document).ready(function() {
 
     function resetGameStats() {
         moves = 0; matchesFound = 0; seconds = 0; minutes = 0; currentGameTimeInSeconds = 0;
-        consecutiveMatches = 0;
+        consecutiveMatches = 0; 
         $('#moves-display').text("حرکت‌ها: ۰");
         $('#time-display').text("زمان: ۰۰:۰۰");
         if (timerInterval) clearInterval(timerInterval);
@@ -223,7 +243,7 @@ $(document).ready(function() {
 
     function createBoard(rows, cols) {
         gameBoardElement.html('');
-        gameBoardElement.attr('data-cols', cols); // For responsive CSS
+        gameBoardElement.attr('data-cols', cols); 
         let itemIndex = 0;
         for (let i = 0; i < rows; i++) {
             const tr = $('<tr></tr>');
@@ -241,20 +261,20 @@ $(document).ready(function() {
         resetGameStats();
         totalPairs = (r * l) / 2;
         let availableEmojis = [...em]; 
-        for (let i = availableEmojis.length - 1; i > 0; i--) { // Shuffle available emojis
+        for (let i = availableEmojis.length - 1; i > 0; i--) { 
             const j = Math.floor(Math.random() * (i + 1));
             [availableEmojis[i], availableEmojis[j]] = [availableEmojis[j], availableEmojis[i]];
         }
         const selectedBaseEmojis = availableEmojis.slice(0, totalPairs);
-        if (selectedBaseEmojis.length < totalPairs) { // Fallback if not enough unique emojis
-            console.warn("Not enough unique emojis for the selected grid size. Repeating some.");
+        if (selectedBaseEmojis.length < totalPairs) { 
+            console.warn("Emoji کم است، برخی تکرار می‌شوند.");
             let tempEmojis = [];
             for(let i = 0; i < totalPairs; i++) tempEmojis.push(availableEmojis[i % availableEmojis.length]);
             currentEmojis = [...tempEmojis, ...tempEmojis];
         } else {
             currentEmojis = [...selectedBaseEmojis, ...selectedBaseEmojis];
         }
-        for (let i = currentEmojis.length - 1; i > 0; i--) { // Shuffle the game deck
+        for (let i = currentEmojis.length - 1; i > 0; i--) { 
             const j = Math.floor(Math.random() * (i + 1));
             [currentEmojis[i], currentEmojis[j]] = [currentEmojis[j], currentEmojis[i]];
         }
@@ -263,7 +283,7 @@ $(document).ready(function() {
         overlay.fadeOut(300);
     }
     
-    function incrementMoves(count = 1) { // Now takes a count argument
+    function incrementMoves(count = 1) { 
         moves += count;
         $('#moves-display').text(`حرکت‌ها: ${String(moves).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d])}`);
     }
@@ -277,17 +297,16 @@ $(document).ready(function() {
         }
         secondCard = $(this);
         lockBoard = true;
-        // Moves are now incremented in checkForMatch
         checkForMatch();
     }
 
     function checkForMatch() {
         const emojisMatch = firstCard.data('emoji') === secondCard.data('emoji');
         if (emojisMatch) {
-            incrementMoves(1); // Correct match costs 1 move
+            incrementMoves(1); 
             disableCards();
         } else {
-            incrementMoves(2); // Incorrect match costs 2 moves (1 attempt + 1 penalty)
+            incrementMoves(2); 
             unflipCards();
         }
     }
@@ -298,7 +317,7 @@ $(document).ready(function() {
         matchesFound++;
         consecutiveMatches++;
         totalPairsEverFound++;
-        saveStatsAndAchievements(); // Save progress for achievements
+        saveStatsAndAchievements(); 
         checkAllAchievements('pairFound');
         resetTurn();
         if (matchesFound === totalPairs) {
@@ -307,7 +326,7 @@ $(document).ready(function() {
     }
 
     function unflipCards() {
-        consecutiveMatches = 0; // Reset combo on mismatch
+        consecutiveMatches = 0; 
         setTimeout(() => {
             if (firstCard) firstCard.removeClass('is-flipped');
             if (secondCard) secondCard.removeClass('is-flipped');
@@ -356,5 +375,7 @@ $(document).ready(function() {
 
     // --- Initial Load ---
     loadStatsAndAchievements();
+    applyTheme(initialTheme); // Apply theme after loading stats in case achievements modal is shown first somehow
     showInitialModal();
 });
+             
