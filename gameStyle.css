@@ -1,19 +1,19 @@
 /* General Reset and Base Styles */
 :root {
-    --bg-color: #2c3e50; /* پس‌زمینه اصلی */
-    --text-color: #ecf0f1; /* رنگ متن اصلی */
-    --header-bg: #34495e; /* پس‌زمینه هدر */
-    --stats-bg: #2c3e50; /* پس‌زمینه آمار */
-    --logo-color: #e74c3c; /* رنگ لوگو */
+    --bg-color: #2c3e50;
+    --text-color: #ecf0f1;
+    --header-bg: #34495e;
+    --stats-bg: #2c3e50;
+    --logo-color: #e74c3c;
     --card-front-gradient-start: #e74c3c;
     --card-front-gradient-end: #c0392b;
     --card-back-bg: #ecf0f1;
     --card-back-emoji-color: #2c3e50;
     --modal-bg: #34495e;
     --modal-text-color: #ecf0f1;
-    --modal-title-color: #e74c3c; /* برای عنوان اصلی مودال مثل "تبریک" */
-    --modal-record-message-color: #2ecc71; /* رنگ سبز برای پیام رکورد جدید */
-    --modal-secondary-text-color: #a0aec0; /* برای متن بهترین رکورد فعلی */
+    --modal-title-color: #e74c3c;
+    --modal-record-message-color: #2ecc71;
+    --modal-secondary-text-color: #a0aec0;
     --button-bg: #e74c3c;
     --button-text-color: #fff;
     --button-hover-bg: #c0392b;
@@ -25,6 +25,10 @@
     --card-shadow-color: rgba(0, 0, 0, 0.25);
     --modal-shadow-color: rgba(0, 0, 0, 0.3);
     --modal-list-border-color: #4a6179;
+    --achievement-item-bg: rgba(0,0,0,0.1);
+    --achievement-locked-border: var(--modal-secondary-text-color);
+    --achievement-unlocked-border: var(--modal-record-message-color);
+    --toast-bg-color: var(--modal-record-message-color);
 }
 
 body.day-mode {
@@ -40,7 +44,7 @@ body.day-mode {
     --modal-bg: #ffffff;
     --modal-text-color: #2d3748;
     --modal-title-color: #d65d4d;
-    --modal-record-message-color: #27ae60; /* سبز کمی تیره‌تر برای تم روشن */
+    --modal-record-message-color: #27ae60;
     --modal-secondary-text-color: #6c757d;
     --button-bg: #5ea5e2;
     --button-text-color: #ffffff;
@@ -53,6 +57,8 @@ body.day-mode {
     --card-shadow-color: rgba(0, 0, 0, 0.15);
     --modal-shadow-color: rgba(0, 0, 0, 0.15);
     --modal-list-border-color: #dee2e6;
+    --achievement-item-bg: rgba(0,0,0,0.05);
+    --toast-bg-color: var(--modal-record-message-color);
 }
 
 * {
@@ -60,7 +66,7 @@ body.day-mode {
     padding: 0;
     box-sizing: border-box;
     font-family: 'Vazirmatn', Arial, sans-serif;
-    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, opacity 0.3s ease;
 }
 
 html, body {
@@ -76,7 +82,7 @@ body {
     flex-direction: column;
     align-items: center;
     padding-top: 20px;
-    min-height: 100vh; /* برای اینکه فوتر (اگر باشد) پایین بماند */
+    min-height: 100vh;
 }
 
 /* Header Styles */
@@ -94,12 +100,15 @@ body {
     position: relative;
 }
 
-#theme-switcher-container {
+#header-buttons-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
     order: -1; 
-    margin-right: 15px; 
+    margin-right: 15px;
 }
 
-#theme-toggle-button {
+#theme-toggle-button, #achievements-button {
     background: none;
     border: 1px solid var(--theme-toggle-border);
     color: var(--theme-toggle-color);
@@ -110,7 +119,7 @@ body {
     line-height: 1; 
     transition: transform 0.2s ease, color 0.3s ease, border-color 0.3s ease;
 }
-#theme-toggle-button:hover {
+#theme-toggle-button:hover, #achievements-button:hover {
     transform: scale(1.1);
     color: var(--theme-toggle-hover-color); 
     border-color: var(--theme-toggle-hover-color);
@@ -142,7 +151,7 @@ main {
     justify-content: center;
     align-items: center;
     flex-grow: 1;
-    padding: 0 10px; /* کمی پدینگ برای جلوگیری از چسبیدن به لبه ها در صفحات خیلی کوچک */
+    padding: 0 10px;
 }
 
 #game-board {
@@ -192,7 +201,7 @@ td {
 .card-back p {
     font-size: 2.8em; 
     color: var(--card-back-emoji-color);
-    margin: 0; /* برای اطمینان از وسط بودن اموجی */
+    margin: 0;
 }
 
 .card-inner.is-flipped {
@@ -231,30 +240,37 @@ body.day-mode #overlay {
     text-align: center;
     width: 90%;
     max-width: 550px; 
+    max-height: 90vh; /* برای جلوگیری از بلندتر شدن مودال از صفحه */
+    display: flex;
+    flex-direction: column;
+}
+#modal-content > div, #modal-content > ul, #modal-content > h2, #modal-content > h3, #modal-content > p { /* برای محتوای اصلی مودال */
+    flex-shrink: 0; /* جلوگیری از کوچک شدن محتوا */
 }
 
-#modal-content h2 { /* برای عنوان اصلی مودال */
+
+#modal-content h2 { 
     font-size: 2em;
     color: var(--modal-title-color);
     margin-bottom: 15px;
 }
-#modal-content h2.record-message { /* برای پیام "رکورد جدید" */
+#modal-content h2.record-message { 
     color: var(--modal-record-message-color);
 }
 
-#modal-content h3 { /* برای "راهنمای بازی" */
+#modal-content h3 { 
     font-size: 1.5em;
     margin-bottom: 20px;
-    color: var(--modal-text-color); /* اطمینان از رنگ مناسب */
+    color: var(--modal-text-color); 
 }
 
 #modal-content p {
     font-size: 1.1em;
     line-height: 1.7;
-    margin-bottom: 15px; /* کمی کاهش برای تراکم بهتر */
+    margin-bottom: 15px; 
     color: var(--modal-text-color);
 }
-#modal-content p.best-score-text { /* برای متن بهترین رکورد فعلی */
+#modal-content p.best-score-text { 
     font-size: 1em;
     color: var(--modal-secondary-text-color);
     margin-top: 5px;
@@ -262,7 +278,8 @@ body.day-mode #overlay {
 }
 
 #modal-content ul {
-    padding-right: 0; /* حذف پدینگ پیشفرض برای لیست در حالت rtl */
+    padding-right: 0; 
+    margin-bottom: 15px;
 }
 
 #modal-content li {
@@ -299,6 +316,88 @@ body.day-mode #overlay {
     transform: translateY(0);
 }
 
+/* Achievement List Styles */
+#achievements-list-container { /* محفظه اسکرول شونده برای لیست مدال‌ها */
+    max-height: 60vh;
+    overflow-y: auto;
+    padding-right: 10px; /* برای زیبایی اسکرول بار در RTL */
+    margin-top: 20px;
+    margin-bottom: 20px;
+    flex-grow: 1; /* اجازه می‌دهد این بخش در صورت نیاز بزرگ شود */
+    min-height: 0; /* برای flexbox در Firefox */
+}
+#achievements-list {
+    list-style: none;
+    padding: 0;
+    text-align: right;
+}
+.achievement-item {
+    background-color: var(--achievement-item-bg);
+    padding: 15px;
+    margin-bottom: 10px;
+    border-radius: 8px;
+    border-left: 5px solid var(--achievement-locked-border);
+    transition: opacity 0.3s ease, border-left-color 0.3s ease;
+    display: flex; /* برای چیدمان آیکون و متن */
+    align-items: center;
+}
+.achievement-item .icon {
+    font-size: 2.5em; /* آیکون بزرگتر */
+    margin-left: 15px;
+    flex-shrink: 0; /* جلوگیری از کوچک شدن آیکون */
+}
+.achievement-item .details {
+    flex-grow: 1;
+}
+.achievement-item .details h4 {
+    margin: 0 0 5px 0;
+    font-size: 1.2em;
+    color: var(--modal-text-color);
+}
+.achievement-item .details p {
+    margin: 0;
+    font-size: 0.9em;
+    color: var(--modal-secondary-text-color);
+    line-height: 1.4;
+}
+.achievement-item.locked {
+    opacity: 0.6;
+}
+.achievement-item.locked .icon {
+    filter: grayscale(80%);
+}
+.achievement-item.unlocked {
+    opacity: 1;
+    border-left-color: var(--achievement-unlocked-border);
+}
+.achievement-item.unlocked .icon {
+    filter: grayscale(0%);
+}
+
+/* Toast Notification Styles */
+#toast-notification {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--toast-bg-color);
+    color: #fff;
+    padding: 15px 25px;
+    border-radius: 8px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.5s ease, visibility 0.5s ease, bottom 0.5s ease;
+    font-size: 1.1em;
+    text-align: center;
+}
+#toast-notification.show {
+    opacity: 1;
+    visibility: visible;
+    bottom: 40px;
+}
+
 /* Responsive Adjustments */
 @media (max-width: 768px) {
     #logo { font-size: 1.5em; }
@@ -310,8 +409,10 @@ body.day-mode #overlay {
     #modal-content h2 { font-size: 1.8em; }
     #modal-content p { font-size: 1em; }
     #modal-content button { padding: 10px 20px; font-size: 0.9em;}
-    #theme-switcher-container { margin-right: 10px; }
-    #theme-toggle-button { font-size: 1.3em; padding: 4px 6px;}
+    #header-buttons-left { margin-right: 10px; gap: 8px; }
+    #theme-toggle-button, #achievements-button { font-size: 1.3em; padding: 4px 6px;}
+    .achievement-item .icon { font-size: 2em; margin-left: 10px; }
+    .achievement-item .details h4 { font-size: 1.1em; }
 }
 
 @media (max-width: 480px) {
@@ -322,40 +423,46 @@ body.day-mode #overlay {
         padding: 15px;
         margin-bottom: 20px;
     }
-     #theme-switcher-container {
+     #header-buttons-left {
         position: absolute; 
         top: 12px;
         left: 15px; 
         order: 0; 
         margin-right: 0;
+        gap: 8px;
     }
     #logo { 
         width: 100%; 
         text-align: center; 
-        margin-top: 40px; /* ایجاد فضا برای دکمه تم در بالا */
+        margin-top: 40px;
         font-size: 1.6em;
     }
     #game-stats {
          width: 100%;
          justify-content: space-around; 
-         margin-top: 5px; /* کمی فاصله از لوگو */
+         margin-top: 5px;
     }
     #game-board {
         border-spacing: 5px;
     }
-    td { width: calc((100vw - 40px - (5px * (6 - 1))) / 6); height: calc((100vw - 40px - (5px * (6 - 1))) / 6); } /* مثال برای 6 ستون */
-    /* برای اینکه کارت ها خیلی کوچک نشوند یک حداقل هم می‌توان در نظر گرفت */
-    /* td { width: 50px; height: 50px; } */
+    td { width: calc((100vw - 30px - (5px * (var(--cols, 6) - 1))) / var(--cols, 6)); height: calc((100vw - 30px - (5px * (var(--cols, 6) - 1))) / var(--cols, 6)); }
     .card-back p { font-size: 1.6em; }
     #modal-content h2 { font-size: 1.5em; }
     #modal-content p { font-size: 0.9em; }
     #modal-content button { padding: 8px 15px; width: 90px; font-size: 0.8em;}
+    .achievement-item { flex-direction: column; align-items: flex-end; text-align: right; } /* چیدمان بهتر مدال‌ها در موبایل */
+    .achievement-item .icon { float: none; margin-left: 0; margin-bottom: 5px; }
 }
 
-/* محاسبه اندازه کارت‌ها برای حالت‌های مختلف (اختیاری، برای فیت شدن بهتر) */
-/* مثال برای حالت 3x4 */
-/* @media (max-width: 480px) { #game-board[data-cols="4"] td { width: calc((100vw - 40px - (5px * (4 - 1))) / 4); height: calc((100vw - 40px - (5px * (4 - 1))) / 4); } } */
-/* مثال برای حالت 6x6 */
-@media (max-width: 480px) { #game-board[data-cols="6"] td { width: calc((100vw - 40px - (5px * (6 - 1))) / 6); height: calc((100vw - 40px - (5px * (6 - 1))) / 6); } }
-@media (max-width: 380px) { #game-board[data-cols="6"] td { width: calc((100vw - 30px - (4px * (6 - 1))) / 6); height: calc((100vw - 30px - (4px * (6 - 1))) / 6); border-spacing: 4px; } .card-back p {font-size: 1.4em;}}
-
+/* محاسبه اندازه کارت‌ها برای حالت‌های مختلف با استفاده از CSS variable --cols */
+@media (max-width: 480px) {
+    #game-board[data-cols="3"] { --cols: 3; }
+    #game-board[data-cols="4"] { --cols: 4; }
+    #game-board[data-cols="5"] { --cols: 5; }
+    #game-board[data-cols="6"] { --cols: 6; }
+}
+@media (max-width: 380px) { 
+    td { width: calc((100vw - 20px - (4px * (var(--cols, 6) - 1))) / var(--cols, 6)); height: calc((100vw - 20px - (4px * (var(--cols, 6) - 1))) / var(--cols, 6));}
+    #game-board {border-spacing: 4px; }
+    .card-back p {font-size: 1.4em;}
+}
