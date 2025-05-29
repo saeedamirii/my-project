@@ -1,0 +1,233 @@
+/* General Reset and Base Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Vazirmatn', Arial, sans-serif;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden; /* Prevent horizontal scroll */
+}
+
+body {
+    background-color: #2c3e50; /* پس‌زمینه آبی تیره مایل به خاکستری */
+    color: #ecf0f1; /* رنگ متن روشن برای کنتراست */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+}
+
+/* Header Styles */
+#game-header {
+    width: 90%;
+    max-width: 700px;
+    background-color: #34495e; /* کمی روشن‌تر از پس‌زمینه اصلی */
+    padding: 15px 25px;
+    border-radius: 12px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+}
+
+#logo {
+    font-size: 1.8em;
+    font-weight: 700; /* Bold */
+    color: #e74c3c; /* رنگ قرمز مرجانی برای لوگو */
+}
+
+#game-stats {
+    display: flex;
+    gap: 20px;
+    font-size: 1.1em;
+}
+
+#moves-display, #time-display {
+    background-color: #2c3e50;
+    padding: 8px 15px;
+    border-radius: 8px;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Game Board Styles */
+main {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-grow: 1;
+}
+
+#game-board {
+    border-collapse: separate;
+    border-spacing: 8px; /* فاصله بین کارت‌ها */
+}
+
+td {
+    width: 75px;  /* اندازه کارت */
+    height: 75px; /* اندازه کارت */
+    perspective: 1000px; /* برای افکت 3D کارت */
+}
+
+.card-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    text-align: center;
+    transition: transform 0.7s;
+    transform-style: preserve-3d;
+    cursor: pointer;
+    border-radius: 10px;
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.25);
+}
+
+.card-front, .card-back {
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    -webkit-backface-visibility: hidden; /* Safari */
+    backface-visibility: hidden;
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.card-front {
+    background: linear-gradient(135deg, #e74c3c, #c0392b); /* گرادیانت قرمز برای پشت کارت */
+    /* می‌توانید یک آیکون یا طرح هم اینجا اضافه کنید */
+    /* font-size: 3em; color: rgba(255,255,255,0.7); content: '?'; */
+}
+
+.card-back {
+    background-color: #ecf0f1; /* پس‌زمینه روشن برای روی کارت */
+    transform: rotateY(180deg);
+}
+
+.card-back p {
+    font-size: 2.8em; /* اندازه اموجی‌ها */
+    color: #2c3e50; /* رنگ تیره برای اموجی‌ها */
+}
+
+/* Flipped card state (JavaScript will add/remove this class) */
+.card-inner.is-flipped {
+    transform: rotateY(180deg);
+}
+.card-inner.is-matched { /* برای کارت‌هایی که جفت شده‌اند و دیگر فعال نیستند */
+    opacity: 0.6;
+    cursor: default;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1); /* سایه کمتر */
+}
+
+
+/* Overlay and Modal Styles */
+#overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.75); /* پس‌زمینه نیمه‌شفاف تیره‌تر */
+    display: none; /* Initially hidden, controlled by JS */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    padding: 20px;
+}
+
+#modal-content {
+    background-color: #34495e;
+    color: #ecf0f1;
+    padding: 30px 40px;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    width: 90%;
+    max-width: 550px; /* عرض حداکثر مودال */
+}
+
+#modal-content h2 {
+    font-size: 2em;
+    color: #e74c3c; /* رنگ عنوان مودال */
+    margin-bottom: 15px;
+}
+
+#modal-content h3 {
+    font-size: 1.5em;
+    margin-bottom: 20px;
+}
+
+#modal-content p {
+    font-size: 1.1em;
+    line-height: 1.7;
+    margin-bottom: 25px;
+}
+
+#modal-content li {
+    list-style: none; /* حذف نقاط پیش‌فرض لیست */
+    text-align: right; /* یا center بسته به محتوا */
+    padding: 8px 0;
+    font-size: 1em;
+    border-bottom: 1px solid #4a6179;
+}
+#modal-content li:last-child {
+    border-bottom: none;
+}
+
+#modal-content button {
+    background-color: #e74c3c; /* رنگ اصلی دکمه */
+    color: #fff;
+    border: none;
+    border-radius: 25px; /* دکمه‌های گردتر */
+    padding: 12px 25px;
+    font-size: 1em;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    margin: 5px;
+    min-width: 100px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+#modal-content button:hover {
+    background-color: #c0392b; /* رنگ تیره‌تر در هاور */
+    transform: translateY(-2px);
+}
+#modal-content button:active {
+    transform: translateY(0);
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    #logo { font-size: 1.5em; }
+    #game-stats { font-size: 0.9em; gap: 10px; }
+    #game-stats span { padding: 6px 10px; }
+    td { width: 65px; height: 65px; }
+    .card-back p { font-size: 2.2em; }
+    #modal-content { padding: 20px; }
+    #modal-content h2 { font-size: 1.8em; }
+    #modal-content p { font-size: 1em; }
+    #modal-content button { padding: 10px 20px; font-size: 0.9em;}
+}
+
+@media (max-width: 480px) {
+    body { padding-top: 10px; }
+    #game-header {
+        flex-direction: column;
+        gap: 10px;
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    #logo { margin-bottom: 5px; }
+    td { width: 55px; height: 55px; border-spacing: 5px; }
+    .card-back p { font-size: 1.8em; }
+    #modal-content h2 { font-size: 1.5em; }
+    #modal-content p { font-size: 0.9em; }
+    #modal-content button { padding: 8px 15px; width: 90px; font-size: 0.8em;}
+
+}
+  
