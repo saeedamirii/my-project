@@ -29,12 +29,14 @@ $(document).ready(function() {
                     .then(() => {
                         musicToggleButton.text('⏸️');
                         musicToggleButton.attr('title', 'قطع موزیک');
+                        musicToggleButton.addClass('pulsating-music');
                     })
                     .catch(error => console.error("Error playing music:", error));
             } else {
                 backgroundMusic.pause();
                 musicToggleButton.text('🎵');
                 musicToggleButton.attr('title', 'پخش موزیک');
+                musicToggleButton.removeClass('pulsating-music');
             }
         });
     }
@@ -95,21 +97,21 @@ $(document).ready(function() {
             achievements[id].unlocked = true;
             showToast(`مدال "${achievements[id].name}" کسب شد! ${achievements[id].icon}`);
             saveStatsAndAchievements(); 
-            if (overlay.is(':visible') && $('#achievements-list-container').length) { // Check if achievements modal is open
+            if (overlay.is(':visible') && $('#achievements-list-container').length) {
                  displayAchievements();
             }
         }
     }
 
-    function checkAllAchievements(checkTime, param1, param2) {
+    function checkAllAchievements(checkTime, param1, param2) { // param1 is mode, param2 is moves for 'gameEnd'
         for (const id in achievements) {
             if (achievements.hasOwnProperty(id) && !achievements[id].unlocked) {
                 let conditionMet = false;
-                try { // Added try-catch for safety if a check function is malformed
+                try { 
                     if (checkTime === 'gameEnd') { 
-                        conditionMet = achievements[id].check(param1, param2); // param1 is mode, param2 is moves
+                        conditionMet = achievements[id].check(param1, param2); 
                     } else if (checkTime === 'pairFound') { 
-                        conditionMet = achievements[id].check(); // For achievements like combo or total pairs
+                        conditionMet = achievements[id].check(); 
                     }
                 } catch (e) {
                     console.error("Error checking achievement:", id, e, "Check function:", achievements[id].check);
@@ -138,7 +140,7 @@ $(document).ready(function() {
         }
         listHTML += '</ul></div>';
         
-        modalContent.html(`<h2>مدال‌ها و دستاوردها</h2>` + listHTML + '<button id="close-modal-button" style="margin-top:20px; flex-shrink: 0;">بستن</button>');
+        modalContent.html(`<h2>مدال‌ها و دستاوردها</h2>` + listHTML + '<button id="close-modal-button" class="general-modal-button" style="margin-top:20px; flex-shrink: 0;">بستن</button>');
         overlay.fadeIn(300);
     }
     
@@ -186,7 +188,7 @@ $(document).ready(function() {
             themeToggleButton.attr('title', 'تغییر به تم روز');
         }
     }
-    const initialTheme = localStorage.getItem('memoryGameTheme') || 'night'; // Default to night if nothing saved
+    const initialTheme = localStorage.getItem('memoryGameTheme') || 'night'; 
     applyTheme(initialTheme); 
 
     themeToggleButton.on('click', function() {
@@ -216,7 +218,7 @@ $(document).ready(function() {
         modalContent.html(modalHTML); 
         overlay.fadeIn(300);
     }
-    modalContent.on('click', '#mode-selection button', function() { // Event delegation
+    modalContent.on('click', '#mode-selection button', function() { 
         const modeParts = $(this).data('mode').split('x');
         const r = parseInt(modeParts[0]);
         const l = parseInt(modeParts[1]);
@@ -242,19 +244,31 @@ $(document).ready(function() {
     }
 
     function createBoard(rows, cols) {
-        gameBoardElement.html('');
+        gameBoardElement.html(''); 
         gameBoardElement.attr('data-cols', cols); 
         let itemIndex = 0;
+        let cardElements = []; 
+
         for (let i = 0; i < rows; i++) {
             const tr = $('<tr></tr>');
             for (let j = 0; j < cols; j++) {
-                const td = $('<td></td>');
-                td.html(`<div class="card-inner" data-emoji="${currentEmojis[itemIndex]}"><div class="card-front"></div><div class="card-back"><p>${currentEmojis[itemIndex]}</p></div></div>`);
-                tr.append(td); itemIndex++;
+                const cardEmoji = currentEmojis[itemIndex];
+                const cardInner = $(`<div class="card-inner" data-emoji="${cardEmoji}"><div class="card-front"></div><div class="card-back"><p>${cardEmoji}</p></div></div>`);
+                const td = $('<td></td>').append(cardInner);
+                tr.append(td);
+                cardElements.push(cardInner); 
+                itemIndex++;
             }
             gameBoardElement.append(tr);
         }
-        $('.card-inner').on('click', handleCardClick);
+
+        cardElements.forEach((card, index) => {
+            setTimeout(() => {
+                card.addClass('card-visible'); 
+            }, index * 60); 
+        });
+
+        $('.card-inner').on('click', handleCardClick); 
     }
     
     function startGame(r, l) {
@@ -278,7 +292,7 @@ $(document).ready(function() {
             const j = Math.floor(Math.random() * (i + 1));
             [currentEmojis[i], currentEmojis[j]] = [currentEmojis[j], currentEmojis[i]];
         }
-        createBoard(r, l);
+        createBoard(r, l); 
         startTimer();
         overlay.fadeOut(300);
     }
@@ -289,13 +303,30 @@ $(document).ready(function() {
     }
 
     function handleCardClick() {
-        if (lockBoard || $(this).hasClass('is-flipped') || $(this).hasClass('is-matched')) return;
-        $(this).addClass('is-flipped');
+        const clickedCard = $(this); // Store this to avoid issues with 'this' in setTimeout
+        if (lockBoard || clickedCard.hasClass('is-flipped') || clickedCard.hasClass('is-matched')) return;
+        
+        // Add 'is-flipped' for visual flip, actual transform in CSS
+        // The transform style is on .card-inner itself, so the .is-flipped should be there too.
+        // My previous CSS for .card-inner.is-flipped was just transform: rotateY(180deg)
+        // The base .card-inner has the dealing animation (opacity, scale, translate)
+        // Need to ensure .is-flipped correctly overrides or combines with .card-visible
+        // Best to put the flip transform directly on .is-flipped and remove the transition from base .card-inner,
+        // or ensure the flip animation uses its own specific transition.
+        // Let's ensure the flip has its own transition by moving the general 'transition' off the base .card-inner
+        // and onto .card-inner.is-flipped for the 'transform' property,
+        // and keep the opacity/transform transition on the base for the dealing.
+        // The current setup adds 'is-flipped', and CSS has a transition for transform on .card-inner.
+        // Let's simplify: the current CSS on .card-inner for transition includes transform 0.7s.
+        // .card-inner.is-flipped then changes the transform. This should be okay.
+
+        clickedCard.addClass('is-flipped');
+
         if (!firstCard) {
-            firstCard = $(this);
+            firstCard = clickedCard;
             return;
         }
-        secondCard = $(this);
+        secondCard = clickedCard;
         lockBoard = true;
         checkForMatch();
     }
@@ -375,7 +406,7 @@ $(document).ready(function() {
 
     // --- Initial Load ---
     loadStatsAndAchievements();
-    applyTheme(initialTheme); // Apply theme after loading stats in case achievements modal is shown first somehow
+    applyTheme(initialTheme); 
     showInitialModal();
 });
-             
+        
