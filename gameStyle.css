@@ -427,4 +427,3 @@ footer {
 #game-board[data-cols="4"] { --cols: 4; }
 #game-board[data-cols="5"] { --cols: 5; }
 #game-board[data-cols="6"] { --cols: 6; }
-    
