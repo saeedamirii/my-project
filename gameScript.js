@@ -32,8 +32,8 @@ $(document).ready(function() {
     // --- Sound Effects ---
     const soundLosePattern = new Audio('sound/sound2.wav');
     const soundWinPairs = new Audio('sound/sound3.wav');
-    const soundCorrectPatternClick = new Audio('sound/sound4.wav');
-    const soundFindPair = new Audio('sound/sound5.wav');
+    // soundCorrectPatternClick (sound4.wav) will be created on-the-fly.
+    // soundFindPair (sound5.wav) will also be created on-the-fly.
 
     // --- Pattern Challenge Mode Variables ---
     let currentPatternStage = 1;
@@ -308,7 +308,9 @@ $(document).ready(function() {
     }
 
     function disableMemoryCards() {
-        soundFindPair.play().catch(error => console.error("Error playing sound5.wav:", error));
+        const pairFoundSoundInstance = new Audio('sound/sound5.wav'); // *** اصلاح اصلی اینجا اعمال شده ***
+        pairFoundSoundInstance.play().catch(error => console.error("Error playing sound5.wav instance:", error));
+        
         firstCard.addClass('is-matched'); secondCard.addClass('is-matched');
         matchesFound++; consecutiveMatches++; totalPairsEverFound++;
         saveStatsAndAchievements();
@@ -331,7 +333,7 @@ $(document).ready(function() {
     }
 
     function endMemoryGame() {
-        soundWinPairs.play().catch(error => console.error("Error playing sound3.wav:", error));
+        soundWinPairs.play().catch(error => console.error("Error playing soundWinPairs (sound3.wav):", error));
         clearInterval(timerInterval); totalGamesWon++;
         saveStatsAndAchievements();
         const timeTakenDisplayString = formatTime(currentGameTimeInSeconds);
@@ -358,8 +360,8 @@ $(document).ready(function() {
                 <button data-mode="pattern_challenge" class="challenge-button general-modal-button">چالش الگو</button>
             </div>`;
         setTimeout(() => { modalContent.html(modalHTML); overlay.fadeIn(500); }, 700);
-                          }
-        // --- Pattern Challenge Mode Logic ---
+                            }
+                // --- Pattern Challenge Mode Logic ---
     function getPatternChallengeHighScore() {
         const score = localStorage.getItem('patternChallengeHighScore');
         return score ? JSON.parse(score) : { maxStage: 0, maxScore: 0 };
@@ -483,17 +485,23 @@ $(document).ready(function() {
     }
 
     function handlePatternCellClick() {
-        if (patternBoardLock) return;
+        if (patternBoardLock) {
+            return;
+        }
 
         const clickedCellTd = $(this);
         const cellInner = clickedCellTd.find('.card-inner');
 
-        if (cellInner.hasClass('selected-correct') || cellInner.hasClass('selected-wrong')) return;
+        if (cellInner.hasClass('selected-correct') || cellInner.hasClass('selected-wrong')) {
+            return;
+        }
 
         const cellId = parseInt(clickedCellTd.data('cell-id'));
 
         if (currentPatternToGuess.includes(cellId)) {
-            soundCorrectPatternClick.play().catch(error => console.error("Error playing sound4.wav:", error));
+            const clickSoundInstance = new Audio('sound/sound4.wav'); 
+            clickSoundInstance.play().catch(error => console.error("Error playing sound4.wav instance:", error));
+            
             playerPatternGuess.push(cellId);
             cellInner.addClass('selected-correct');
             patternScore++;
@@ -509,13 +517,13 @@ $(document).ready(function() {
         } else {
             cellInner.addClass('selected-wrong');
             mistakesThisPatternAttempt++;
-
+            
             if (mistakesThisPatternAttempt >= 3) {
                 patternLives--;
                 updatePatternHUD();
                 patternBoardLock = true;
                 if (patternLives <= 0) {
-                    gameOverPatternChallenge(); // soundLosePattern will be played inside this function
+                    gameOverPatternChallenge();
                 } else {
                     setTimeout(() => {
                         const stageNumForToast = String(currentPatternStage).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
@@ -528,7 +536,7 @@ $(document).ready(function() {
     }
 
     function gameOverPatternChallenge() {
-        soundLosePattern.play().catch(error => console.error("Error playing sound2.wav:", error));
+        soundLosePattern.play().catch(error => console.error("Error playing soundLosePattern (sound2.wav):", error));
         patternBoardLock = true;
         const completedStage = Math.max(0, currentPatternStage - 1 );
         const newHighScore = savePatternChallengeHighScore(completedStage, patternScore);
@@ -552,7 +560,7 @@ $(document).ready(function() {
                 <hr style="margin: 10px 0; border-color: var(--modal-list-border-color);">
                 <button data-mode="main_menu" class="general-modal-button">منوی اصلی</button>
             </div>`;
-
+        
         modalContent.html(gameOverHTML);
         overlay.fadeIn(500);
     }
@@ -622,4 +630,4 @@ $(document).ready(function() {
     applyTheme(initialTheme);
     showInitialModal();
 });
-                                                   
+            
