@@ -1,4 +1,11 @@
 $(document).ready(function() {
+    const loadingOverlay = $('#loading-overlay');
+
+    // پنهان کردن صفحه لودینگ پس از چند ثانیه
+    setTimeout(function() {
+        loadingOverlay.addClass('hidden');
+    }, 2000); // 2 ثانیه تأخیر
+
     // --- Global Variables & DOM Elements ---
     const em = ["💐","🌹","🌻","🏵️","🌺","🌴","🌈","🍓","🍒","🍎","🍉","🍊","🥭","🍍","🍋","🍏","🍐","🥝","🍇","🥥","🍅","🌶️","🍄","🧅","🥦","🥑","🍔","🍕","🧁","🎂","🍬","🍩","🍫","🎈"];
     let currentEmojis = [];
@@ -32,8 +39,6 @@ $(document).ready(function() {
     // --- Sound Effects ---
     const soundLosePattern = new Audio('sound/sound2.wav');
     const soundWinPairs = new Audio('sound/sound3.wav');
-    // soundCorrectPatternClick (sound4.wav) will be created on-the-fly.
-    // soundFindPair (sound5.wav) will also be created on-the-fly.
 
     // --- Pattern Challenge Mode Variables ---
     let currentPatternStage = 1;
@@ -116,7 +121,7 @@ $(document).ready(function() {
             achievements[id].unlocked = true;
             showToast(`مدال "${achievements[id].name}" کسب شد! ${achievements[id].icon}`);
             saveStatsAndAchievements();
-            if (overlay.is(':visible') && $('#achievements-list-container').length) {
+            if (overlay.hasClass('visible') && $('#achievements-list-container').length) {
                  displayAchievements();
             }
         }
@@ -162,8 +167,8 @@ $(document).ready(function() {
         }
         listHTML += '</ul></div>';
 
-        modalContent.html(`<h2>مدال‌ها و دستاوردها</h2>` + listHTML + '<button id="close-modal-button" class="general-modal-button" style="margin-top:20px; flex-shrink: 0;">بستن</button>');
-        overlay.fadeIn(300);
+        modalContent.html(`<h2>مدال‌ها و دستاوردها</h2>` + listHTML + '<button id="close-modal-button" class="general-modal-button">بستن</button>');
+        overlay.css('display', 'flex').addClass('visible');
     }
 
     achievementsButton.on('click', displayAchievements);
@@ -279,7 +284,7 @@ $(document).ready(function() {
         }
         createMemoryBoard(r, l);
         startTimer();
-        overlay.fadeOut(300);
+        overlay.removeClass('visible').css('display', 'none');
     }
 
     function incrementMemoryMoves(count = 1) {
@@ -308,9 +313,9 @@ $(document).ready(function() {
     }
 
     function disableMemoryCards() {
-        const pairFoundSoundInstance = new Audio('sound/sound5.wav'); // *** اصلاح اصلی اینجا اعمال شده ***
+        const pairFoundSoundInstance = new Audio('sound/sound5.wav');
         pairFoundSoundInstance.play().catch(error => console.error("Error playing sound5.wav instance:", error));
-        
+
         firstCard.addClass('is-matched'); secondCard.addClass('is-matched');
         matchesFound++; consecutiveMatches++; totalPairsEverFound++;
         saveStatsAndAchievements();
@@ -340,26 +345,35 @@ $(document).ready(function() {
         const newRecordMessage = updateHighScore(gameMode, moves, currentGameTimeInSeconds);
         const highScores = getHighScores();
         const bestScoreForMode = highScores[gameMode];
-        let bestScoreDisplayString = "هنوز رکوردی برای این حالت ثبت نشده.";
+        let bestScoreDisplayString = "هنوز رکوردی برای این حالت ثبت نشده است.";
         if (bestScoreForMode) {
             bestScoreDisplayString = `بهترین رکورد: ${String(bestScoreForMode.moves).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d])} حرکت در ${formatTime(bestScoreForMode.timeInSeconds)}`;
         }
         const movesDisplayString = String(moves).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
         checkAllAchievements('gameEnd', gameMode, moves);
+
         const modalHTML = `
             <h2 class="${newRecordMessage ? 'record-message' : ''}">${newRecordMessage ? newRecordMessage : "تبریک! شما برنده شدید!"}</h2>
-            <p>شما حالت ${gameMode.replace('x', ' در ')} را با ${movesDisplayString} حرکت به پایان رساندید.</p>
-            <p>زمان شما: ${timeTakenDisplayString}</p>
+            <p>حالت ${gameMode.replace('x', ' در ')} با ${movesDisplayString} حرکت و در زمان ${timeTakenDisplayString} به پایان رسید.</p>
             <p class="best-score-text">${bestScoreDisplayString}</p>
-            <p style="font-size:1.1em; margin-top: 25px; margin-bottom: 15px;">دوباره بازی می‌کنید؟</p>
+            <hr>
+            <p style="font-size:1.05em; margin-bottom: 15px;">دوباره بازی می‌کنید؟</p>
             <div id="mode-selection">
-                <button data-mode="3x4">حافظه 3x4</button> <button data-mode="4x4">حافظه 4x4</button>
-                <button data-mode="4x5">حافظه 4x5</button> <button data-mode="5x6">حافظه 5x6</button>
-                <button data-mode="6x6">حافظه 6x6</button>
-                <hr style="margin: 10px 0; border-color: var(--modal-list-border-color);">
+                <div class="button-group">
+                    <button data-mode="3x4">3x4</button>
+                    <button data-mode="4x4">4x4</button>
+                    <button data-mode="4x5">4x5</button>
+                </div>
+                <div class="button-group">
+                    <button data-mode="5x6">5x6</button>
+                    <button data-mode="6x6">6x6</button>
+                </div>
                 <button data-mode="pattern_challenge" class="challenge-button general-modal-button">چالش الگو</button>
             </div>`;
-        setTimeout(() => { modalContent.html(modalHTML); overlay.fadeIn(500); }, 700);
+        setTimeout(() => {
+            modalContent.html(modalHTML);
+            overlay.css('display', 'flex').addClass('visible');
+        }, 700);
                             }
                 // --- Pattern Challenge Mode Logic ---
     function getPatternChallengeHighScore() {
@@ -399,7 +413,7 @@ $(document).ready(function() {
         patternLives = 3;
         patternScore = 0;
         setupNextPatternStage();
-        overlay.fadeOut(300);
+        overlay.removeClass('visible').css('display', 'none');
     }
 
     function determinePatternConfig(stage) {
@@ -485,23 +499,19 @@ $(document).ready(function() {
     }
 
     function handlePatternCellClick() {
-        if (patternBoardLock) {
-            return;
-        }
+        if (patternBoardLock) return;
 
         const clickedCellTd = $(this);
         const cellInner = clickedCellTd.find('.card-inner');
 
-        if (cellInner.hasClass('selected-correct') || cellInner.hasClass('selected-wrong')) {
-            return;
-        }
+        if (cellInner.hasClass('selected-correct') || cellInner.hasClass('selected-wrong')) return;
 
         const cellId = parseInt(clickedCellTd.data('cell-id'));
 
         if (currentPatternToGuess.includes(cellId)) {
-            const clickSoundInstance = new Audio('sound/sound4.wav'); 
+            const clickSoundInstance = new Audio('sound/sound4.wav');
             clickSoundInstance.play().catch(error => console.error("Error playing sound4.wav instance:", error));
-            
+
             playerPatternGuess.push(cellId);
             cellInner.addClass('selected-correct');
             patternScore++;
@@ -517,7 +527,7 @@ $(document).ready(function() {
         } else {
             cellInner.addClass('selected-wrong');
             mistakesThisPatternAttempt++;
-            
+
             if (mistakesThisPatternAttempt >= 3) {
                 patternLives--;
                 updatePatternHUD();
@@ -548,24 +558,22 @@ $(document).ready(function() {
         const bestScoreTotalFarsi = String(bestEver.maxScore).replace(/[0-9]/g, d => '۰۱۲۳۴۵۶۷۸۹'[d]);
 
         let gameOverHTML = `
-            <h2>بازی تمام شد! (چالش الگو)</h2>
-            <p>شما تا مرحله ${completedStageFarsi} پیش رفتید.</p>
-            <p>امتیاز نهایی شما: ${patternScoreFarsi}</p>
-            <hr style="margin: 10px 0; border-color: var(--modal-list-border-color);">
-            <p class="best-score-text">بهترین رکورد شما در چالش الگو:<br>مرحله ${bestStageFarsi} با امتیاز ${bestScoreTotalFarsi}</p>
-            ${newHighScore ? '<h2 class="record-message" style="font-size: 1.5em;">🎉 رکورد جدید در چالش الگو! 🎉</h2>' : ''}
-            <p style="font-size:1.1em; margin-top: 25px; margin-bottom: 15px;">دوباره بازی می‌کنید؟</p>
+            <h2 ${newHighScore ? 'class="record-message"' : ''}>${newHighScore ? '🎉 رکورد جدید در چالش الگو! 🎉' : 'بازی تمام شد!'}</h2>
+            <p>شما تا مرحله ${completedStageFarsi} پیش رفتید و امتیاز نهایی شما ${patternScoreFarsi} شد.</p>
+            <p class="best-score-text">بهترین رکورد شما: مرحله ${bestStageFarsi} با امتیاز ${bestScoreTotalFarsi}</p>
+            <hr>
+            <p style="font-size:1.05em; margin-bottom: 15px;">دوباره بازی می‌کنید؟</p>
             <div id="mode-selection">
                 <button data-mode="pattern_challenge" class="challenge-button general-modal-button">چالش الگو (دوباره)</button>
-                <hr style="margin: 10px 0; border-color: var(--modal-list-border-color);">
                 <button data-mode="main_menu" class="general-modal-button">منوی اصلی</button>
             </div>`;
-        
-        modalContent.html(gameOverHTML);
-        overlay.fadeIn(500);
+
+        setTimeout(() => { 
+            modalContent.html(gameOverHTML);
+            overlay.css('display', 'flex').addClass('visible');
+        }, 500);
     }
 
-    // --- Initial Modal Setup & Main Menu Logic ---
     function showInitialModal() {
         activeGameType = null;
         patternChallengeHUD.hide();
@@ -573,56 +581,55 @@ $(document).ready(function() {
         if(timerInterval) clearInterval(timerInterval);
 
         const modalHTML = `
-            <div id="inst">
-                <h3>راهنمای بازی حافظه (جفتی):</h3>
-                <ul>
-                    <li>جفت کارت‌های مشابه را پیدا کنید.</li>
-                    <li>انتخاب درست ۱ حرکت و انتخاب اشتباه ۲ حرکت ثبت می‌شود.</li>
-                </ul>
-                <hr style="margin: 15px 0; border-color: var(--modal-list-border-color);">
-                <h3>راهنمای چالش الگو:</h3>
-                <ul>
-                    <li>خانه‌هایی که برای چند ثانیه رنگی می‌شوند را به خاطر بسپارید.</li>
-                    <li>پس از بازگشت رنگ‌ها، همان خانه‌ها را انتخاب کنید.</li>
-                    <li>با ۳ انتخاب اشتباه در یک الگو، یک جان از دست می‌دهید.</li>
-                </ul>
-                <p style="font-size:1.2em; font-weight: bold; margin-top: 25px; margin-bottom: 15px;">انتخاب کنید:</p>
-            </div>
+            <h2>به بازی ذهن خوش آمدید!</h2>
+            <p>حالت بازی مورد نظر خود را انتخاب کنید:</p>
             <div id="mode-selection">
-                <button data-mode="3x4">حافظه 3x4</button>
-                <button data-mode="4x4">حافظه 4x4</button>
-                <button data-mode="4x5">حافظه 4x5</button>
-                <button data-mode="5x6">حافظه 5x6</button>
-                <button data-mode="6x6">حافظه 6x6</button>
-                <hr style="margin: 10px 0; border-color: var(--modal-list-border-color);">
-                <button data-mode="pattern_challenge" class="challenge-button" style="padding: 12px 20px; font-size:1.1em;">شروع چالش الگو!</button>
+                <div class="button-group">
+                    <button data-mode="3x4">حافظه 3x4</button>
+                    <button data-mode="4x4">حافظه 4x4</button>
+                    <button data-mode="4x5">حافظه 4x5</button>
+                </div>
+                <div class="button-group">
+                    <button data-mode="5x6">حافظه 5x6</button>
+                    <button data-mode="6x6">حافظه 6x6</button>
+                </div>
+                <button data-mode="pattern_challenge" class="challenge-button">شروع چالش الگو!</button>
+            </div>
+            <div id="instructions-container">
+                <h3>راهنما:</h3>
+                <p><strong>بازی حافظه:</strong> جفت کارت‌های مشابه را پیدا کنید.</p>
+                <p><strong>چالش الگو:</strong> خانه‌های رنگی را به خاطر بسپارید و سپس انتخابشان کنید.</p>
             </div>`;
         modalContent.html(modalHTML);
-        overlay.fadeIn(300);
+        overlay.css('display', 'flex').addClass('visible');
     }
 
-    // Centralized event delegation for modal buttons
-    modalContent.off('click', '#mode-selection button').on('click', '#mode-selection button', function() {
+    modalContent.on('click', '#mode-selection button', function() {
         const mode = $(this).data('mode');
-        if (mode === 'pattern_challenge') {
-            startPatternChallengeMode();
-        } else if (mode === 'main_menu') {
-            overlay.fadeOut(300, showInitialModal);
-        } else {
-            const modeParts = mode.split('x');
-            if (modeParts.length === 2 && !isNaN(parseInt(modeParts[0])) && !isNaN(parseInt(modeParts[1]))) {
-                const r = parseInt(modeParts[0]);
-                const l = parseInt(modeParts[1]);
-                gameMode = mode;
-                startMemoryGame(r, l);
-            } else {
-                console.error("Invalid memory game mode selected:", mode);
+        overlay.removeClass('visible');
+
+        setTimeout(() => {
+            if (mode === 'pattern_challenge') {
+                startPatternChallengeMode();
+            } else if (mode === 'main_menu') {
                 showInitialModal();
+            } else {
+                const modeParts = mode.split('x');
+                if (modeParts.length === 2 && !isNaN(parseInt(modeParts[0])) && !isNaN(parseInt(modeParts[1]))) {
+                    const r = parseInt(modeParts[0]);
+                    const l = parseInt(modeParts[1]);
+                    gameMode = mode;
+                    startMemoryGame(r, l);
+                } else {
+                    console.error("Invalid memory game mode selected:", mode);
+                    showInitialModal();
+                }
             }
-        }
+        }, 350);
     });
-    modalContent.off('click', '#close-modal-button').on('click', '#close-modal-button', function() {
-        overlay.fadeOut(300);
+
+    modalContent.on('click', '#close-modal-button', function() {
+        overlay.removeClass('visible').css('display', 'none');
     });
 
     // --- Initial Load ---
@@ -630,4 +637,3 @@ $(document).ready(function() {
     applyTheme(initialTheme);
     showInitialModal();
 });
-            
